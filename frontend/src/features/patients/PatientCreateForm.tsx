@@ -9,6 +9,7 @@ import { Search } from "@/components/search/Search";
 import { ButtonPage } from "@/components/button/ButtonsPage";
 import { createPatientThunk } from "./thunk/createPatientThunk";
 import { PatientsFormFields } from "@/components/formField/PatientFormField";
+import { getAllPatientThunk } from "./thunk/getAllPacientThunk";
 
 type Props = {
   handleAside: () => void;
@@ -42,7 +43,7 @@ export const PatientCreateForm:React.FC<Props> = ({ handleAside }) => {
         userId:selectedUser.id
       })).unwrap();
   
-      // await dispatch(getAllDoctorsThunk(query)).unwrap();
+       await dispatch(getAllPatientThunk()).unwrap();
   
       reset();
   

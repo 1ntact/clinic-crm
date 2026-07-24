@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 export const DoctorsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const { doctors, total, loading, query } = useAppSelector(
-    (state) => state.doctor,
+    (state) => state.doctor
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

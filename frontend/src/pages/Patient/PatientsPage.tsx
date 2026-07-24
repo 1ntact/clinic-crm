@@ -73,11 +73,11 @@ export const PatientsPage = () => {
                   <tr
                     key={patient.userId}
                     onClick={() => {
-                      navigate(`/patients/${patient.userId}`);
+                      navigate(`/patients/${patient.id}`);
                     }}
                     className=" h-[76px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
                   >
-                    <Td>{`#${patient.userId}`}</Td>
+                    <Td>{`#${patient.id}`}</Td>
   
                     <Td>
                       <UserContacts
