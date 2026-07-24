@@ -50,7 +50,8 @@ const patientsSlice = createSlice({
       })
       .addCase(getAllPatientThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.patients = action.payload
+        state.patients = action.payload.items
+        
       })
       .addCase(getAllPatientThunk.rejected, (state) => {
         state.loading = false;
@@ -61,6 +62,7 @@ const patientsSlice = createSlice({
       .addCase(getPatientByIdThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedPatient = action.payload;
+        console.log(action.payload)
       })
       .addCase(getPatientByIdThunk.rejected, (state) => {
   state.loading = false

@@ -31,7 +31,7 @@ export const PatientsPage = () => {
     }
     fetchPatient()
   },[dispatch])
-  console.log(patients)
+  console.log(patients, 'is patients')
   return <>
     {aside && (<AsideMenu
       handleAside={handleAside}
