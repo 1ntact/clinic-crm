@@ -13,12 +13,16 @@ import { useNavigate } from "react-router-dom";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { getAllPatientThunk } from "@/features/patients/thunk/getAllPacientThunk";
 import { Filter } from "@/components/filter/Filter";
-import { Sort } from "@/components/sorter/Sort";
 import { setQuery } from "@/features/patients/patientsSlice";
+import { specializations } from "@/features/doctors/model/specialties";
+import { employmentTypes } from "@/features/doctors/model/employmentTypes";
+import { Sort } from "@/components/sorter/Sort";
+import { sortButtons } from "@/features/patients/model/sortPatientType";
+import { Pagination } from "@/components/pagination/Pagination";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
-  const { loading , patients,query} = useAppSelector(state => state.patient)
+  const { loading , patients,query, total} = useAppSelector(state => state.patient)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
     const handleAside = () =>
@@ -34,7 +38,7 @@ export const PatientsPage = () => {
       }
     }
     fetchPatient()
-  },[dispatch])
+  },[dispatch, query])
   console.log(patients, 'is patients')
   return <>
     {aside && (<AsideMenu
@@ -46,7 +50,7 @@ export const PatientsPage = () => {
     <div className="flex justify-between items-center  mb-[26px] h-[57px]" >
           <PageTitle
           text={`Patient Managment`}
-            description={'12 die'} />
+            description={`${total} die`} />
           <div className="flex  gap-4  ">
          
             <ButtonPage className="pl-[12px] pr-[12px] "
@@ -59,24 +63,23 @@ export const PatientsPage = () => {
      <div className="flex  justify-between">
             <Filter
                      className="mb-[24px]"
-                     search={query.search}
-                     firstSelect={query.specialization}
-                     secondSelect={query.employmentType}
-                     firstSelectOptions={specializations}
-                     secondSelectOptions={employmentTypes}
+        search={query.search}
+        firstSelect={query}
+        secondSelect={query}
+        
+        firstSelectOptions={specializations}
+        secondSelectOptions={employmentTypes}
                      onSearchChange={(value) =>
                        dispatch(setQuery({ search: value, page: 1 }))
                      }
-                     onFirstSelectChange={(value) =>
-                       dispatch(setQuery({ specialization: value, page: 1 }))
-                     }
-                     onSecondSelectChange={(value) =>
-                       dispatch(setQuery({ employmentType: value, page: 1 }))
-                     }
+                  
+                     
                    />
-            <Sort
+      <Sort
+        userCount={patients.length}
               sortBy={query.sortBy}
-              sortOrder={query.sortOrder}
+        sortOrder={query.sortOrder}
+        buttons={sortButtons}
               onChange={(sortBy, sortOrder) =>
                 dispatch(
                   setQuery({
@@ -86,7 +89,7 @@ export const PatientsPage = () => {
                   }),
                 )
               }
-            />
+            /> 
           </div>
    {loading ? (
           <Loader />
@@ -142,6 +145,19 @@ export const PatientsPage = () => {
                     Nothing found
                   </p>
                 )}
-          </div>
-        )}</>
+        </div>
+        
+    )}
+   <Pagination
+          page={query.page}
+          pageSize={query.pageSize}
+          total={total}
+          onPageChange={(page) =>
+            dispatch(
+              setQuery({
+                page,
+              }),
+            )
+          }
+        /></>
 };

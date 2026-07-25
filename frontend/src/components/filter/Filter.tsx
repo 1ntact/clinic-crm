@@ -45,7 +45,7 @@ export const Filter: React.FC<Props> = ({
         name="124"
         type="search"
         value={value}
-        placeholder="Search doctor..."
+        placeholder="Search ..."
         onChange={(e) => setValue(e.target.value)}
         className="w-[250px] h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
       />
@@ -74,7 +74,7 @@ export const Filter: React.FC<Props> = ({
             {item.label}
           </option>
         ))}
-      </select> 
+      </select>  
 
     </div>
   );

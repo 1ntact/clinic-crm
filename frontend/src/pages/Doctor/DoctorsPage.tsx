@@ -88,6 +88,7 @@ export const DoctorsPage = () => {
           }
         />
         <Sort
+          userCount = {doctors.length}
           sortBy={query.sortBy}
           sortOrder={query.sortOrder}
           buttons={sortButtons}
@@ -159,7 +160,7 @@ export const DoctorsPage = () => {
         </div>
       )}
 
-      <Pagination
+   { doctors.length === 0  && <Pagination
         page={query.page}
         pageSize={query.pageSize}
         total={total}
@@ -170,7 +171,7 @@ export const DoctorsPage = () => {
             }),
           )
         }
-      />
+      />}
     </>
   );
 };
