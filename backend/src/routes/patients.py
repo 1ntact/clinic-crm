@@ -7,6 +7,7 @@ from schemas.patients import (
     PaginatedPatientResponse,
     PatientCreate,
     PatientResponse,
+    PatientStatisticsResponse,
     PatientUpdate,
 )
 from security.permissions import DoctorAdminOrSuperAdminDep
@@ -30,11 +31,13 @@ async def create_patient(
 
     try:
         return await service.create_profile(patient_data)
+
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(error),
         ) from error
+
     except DatabaseWriteError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -65,6 +68,19 @@ async def get_patients(
 
 
 @router.get(
+    "/statistics",
+    response_model=PatientStatisticsResponse,
+)
+async def get_patient_statistics(
+    current_user: DoctorAdminOrSuperAdminDep,
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> PatientStatisticsResponse:
+    service = PatientService(db)
+
+    return await service.get_statistics()
+
+
+@router.get(
     "/{patient_id}/",
     response_model=PatientResponse,
 )
@@ -77,6 +93,7 @@ async def get_patient(
 
     try:
         return await service.get_by_id(patient_id)
+
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -101,11 +118,13 @@ async def update_patient(
             patient_id=patient_id,
             patient_data=patient_data,
         )
+
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
+
     except DatabaseWriteError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -126,11 +145,13 @@ async def delete_patient(
 
     try:
         await service.delete_profile(patient_id)
+
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(error),
         ) from error
+
     except DatabaseWriteError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
