@@ -12,9 +12,13 @@ import { Th } from "@/components/table/Th";
 import { useNavigate } from "react-router-dom";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { getAllPatientThunk } from "@/features/patients/thunk/getAllPacientThunk";
+import { Filter } from "@/components/filter/Filter";
+import { Sort } from "@/components/sorter/Sort";
+import { setQuery } from "@/features/patients/patientsSlice";
+
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
-  const { loading , patients} = useAppSelector(state => state.patient)
+  const { loading , patients,query} = useAppSelector(state => state.patient)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
     const handleAside = () =>
@@ -23,7 +27,7 @@ export const PatientsPage = () => {
   useEffect(() => {
     const fetchPatient = async () => {
       try {
-        await dispatch(getAllPatientThunk())
+        await dispatch(getAllPatientThunk(query)).unwrap()
       } 
       catch (e) {
         console.log(e)
@@ -52,6 +56,38 @@ export const PatientsPage = () => {
           </div>
          
     </div>
+     <div className="flex  justify-between">
+            <Filter
+                     className="mb-[24px]"
+                     search={query.search}
+                     firstSelect={query.specialization}
+                     secondSelect={query.employmentType}
+                     firstSelectOptions={specializations}
+                     secondSelectOptions={employmentTypes}
+                     onSearchChange={(value) =>
+                       dispatch(setQuery({ search: value, page: 1 }))
+                     }
+                     onFirstSelectChange={(value) =>
+                       dispatch(setQuery({ specialization: value, page: 1 }))
+                     }
+                     onSecondSelectChange={(value) =>
+                       dispatch(setQuery({ employmentType: value, page: 1 }))
+                     }
+                   />
+            <Sort
+              sortBy={query.sortBy}
+              sortOrder={query.sortOrder}
+              onChange={(sortBy, sortOrder) =>
+                dispatch(
+                  setQuery({
+                    sortBy,
+                    sortOrder,
+                    page: 1,
+                  }),
+                )
+              }
+            />
+          </div>
    {loading ? (
           <Loader />
         ) : (

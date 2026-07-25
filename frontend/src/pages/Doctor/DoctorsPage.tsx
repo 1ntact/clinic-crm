@@ -12,6 +12,8 @@ import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
 import { setQuery } from "@/features/doctors/doctorsSlice";
+import { employmentTypes } from "@/features/doctors/model/employmentTypes";
+import {  sortButtons } from "@/features/doctors/model/sortDoctorTypes";
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
 import { useEffect, useState } from "react";
@@ -71,22 +73,24 @@ export const DoctorsPage = () => {
         <Filter
           className="mb-[24px]"
           search={query.search}
-          specialization={query.specialization}
-          employmentType={query.employmentType}
-          specializations={specializations}
+          firstSelect={query.specialization}
+          secondSelect={query.employmentType}
+          firstSelectOptions={specializations}
+          secondSelectOptions={employmentTypes}
           onSearchChange={(value) =>
             dispatch(setQuery({ search: value, page: 1 }))
           }
-          onSpecializationChange={(value) =>
+          onFirstSelectChange={(value) =>
             dispatch(setQuery({ specialization: value, page: 1 }))
           }
-          onEmploymentTypeChange={(value) =>
+          onSecondSelectChange={(value) =>
             dispatch(setQuery({ employmentType: value, page: 1 }))
           }
         />
         <Sort
           sortBy={query.sortBy}
           sortOrder={query.sortOrder}
+          buttons={sortButtons}
           onChange={(sortBy, sortOrder) =>
             dispatch(
               setQuery({

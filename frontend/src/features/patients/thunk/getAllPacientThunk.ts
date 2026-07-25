@@ -4,9 +4,9 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const getAllPatientThunk = createAsyncThunk(
   "patients",
-  async (_, thunkApi) => {
+  async (query, thunkApi) => {
     try {
-      return await patientsService.getAllPatients()
+      return await patientsService.getAllPatients(query)
     }
     catch (e) {
       return thunkApi.rejectWithValue(getErrorMessage(e))

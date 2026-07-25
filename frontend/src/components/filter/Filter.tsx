@@ -3,27 +3,33 @@ import { Input } from "../input/Input";
 import { useDebounce } from "@/hooks/useDebounce"
 import type { SelectOption } from "@/features/doctors/model/specialties";
 import type { DoctorQuery } from "@/features/doctors/model/DoctorQuery";
+import { ImInsertTemplate } from "react-icons/im";
 type Props = {
    className?: string;
   search: string;
-  specialization: DoctorQuery['specialization'];
-  employmentType: DoctorQuery['employmentType'];
+  firstSelect: DoctorQuery['specialization'];
+  secondSelect: DoctorQuery['employmentType'];
 
-  specializations: SelectOption[];
+  firstSelectOptions: SelectOption[];
+  secondSelectOptions:SelectOption[];
 
   onSearchChange: (value: string) => void;
-  onSpecializationChange: (value: string) => void;
-  onEmploymentTypeChange: (value: string) => void;
+  onFirstSelectChange: (value: string) => void;
+  onSecondSelectChange: (value: string) => void;
 };
 
 
-export const Filter: React.FC<Props> = ({ className, specialization,
-employmentType,
- specializations,
+export const Filter: React.FC<Props> = ({
   search,
+  className,
+  firstSelect,
+  secondSelect,
+  firstSelectOptions,
+  secondSelectOptions,
   onSearchChange,
-  onSpecializationChange,
-onEmploymentTypeChange,
+  onFirstSelectChange,
+  onSecondSelectChange,
+ 
 }) => {
   const [value, setValue] = useState(search);
 
@@ -43,14 +49,14 @@ onEmploymentTypeChange,
         onChange={(e) => setValue(e.target.value)}
         className="w-[250px] h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
       />
-       <select
-        value={specialization.value}
-        onChange={(e) => onSpecializationChange(e.target.value)}
+        <select
+        value={firstSelect.value}
+        onChange={(e) => onFirstSelectChange(e.target.value)}
         className="w-[190px] h-[36px]  rounded-[8px]  bg-white color-[#6B7280] border-1 border-[#E5E7EB]" 
       >
         <option value="">All specializations</option>
 
-        {specializations.map((item) => (
+        {firstSelectOptions.map((item) => (
           <option key={item.label} value={item.value}>
             {item.label}
           </option>
@@ -58,14 +64,17 @@ onEmploymentTypeChange,
       </select>
 
       <select
-        value={employmentType}
-        onChange={(e) => onEmploymentTypeChange(e.target.value)}
+        value={secondSelect}
+        onChange={(e) => onSecondSelectChange(e.target.value)}
       className=  "w-[140px] h-[36px] rounded-[8px] bg-white color-[#6B7280] border-1 border-[#E5E7EB]"
-      >
-        <option value="">All types</option>
-        <option value="full_time">Full time</option>
-        <option value="part_time">Part time</option>
-      </select>
+      > 
+        <option value="">TYPE</option>
+        {secondSelectOptions.map((item)=> (
+          <option key={item.label} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select> 
 
     </div>
   );

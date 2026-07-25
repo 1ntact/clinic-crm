@@ -1,9 +1,6 @@
+import type { SortBy } from "@/types/sortTypes";
 import { RiArrowUpDownLine } from "react-icons/ri";
-type SortBy =
-  | "name"
-  | "specialization"
-  | "years_experience"
-  | "created_at";
+
 
 type SortOrder = "asc" | "desc";
 
@@ -11,32 +8,17 @@ type Props = {
   className?: string;
   sortBy: SortBy;
   sortOrder: SortOrder;
-
+  buttons,
   onChange: (
     sortBy: SortBy,
     sortOrder: SortOrder
   ) => void;
 };
 
-const buttons: {
-  value: SortBy;
-  label: string;
-}[] = [
-  {
-    value: "name",
-    label: "Name",
-  },
-  {
-    value: "specialization",
-    label: "Specialization",
-  },
-  {
-    value: "yearsExperience",
-    label: "Experience",
-  },
-];
 
-export const Sort: React.FC<Props> = ({className,
+
+export const Sort: React.FC<Props> = ({ className,
+  buttons,
   sortBy,
   sortOrder,
   onChange,
