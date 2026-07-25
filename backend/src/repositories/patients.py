@@ -251,16 +251,10 @@ class PatientRepository:
         return patient
 
     async def delete(
-        self,
-        patient: PatientModel,
+            self,
+            patient: PatientModel,
     ) -> None:
-        try:
-            await self.session.delete(patient)
-            await self.session.commit()
-
-        except SQLAlchemyError:
-            await self.session.rollback()
-            raise
+        await self.session.delete(patient)
 
     async def get_statistics(self) -> dict:
         total_patients = await self.count(

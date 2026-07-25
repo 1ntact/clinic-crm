@@ -49,9 +49,13 @@ class PatientService:
                 "Patient profile can be created only for a regular user."
             )
 
-        patient = PatientModel(
-            **patient_data.model_dump(),
+        patient_fields = patient_data.model_dump(
+            exclude={"phone_number"},
         )
+        patient = PatientModel(**patient_fields)
+
+        if patient_data.phone_number is not None:
+            user.phone_number = patient_data.phone_number
 
         try:
             user.role = UserRoleEnum.PATIENT
@@ -171,14 +175,30 @@ class PatientService:
         )
 
     async def delete_profile(
-        self,
-        patient_id: int,
-    ) -> None:
-        patient = await self.patients.get_by_id(
-            patient_id,
-        )
+            self,
+            patient_id: int,
+    ) -> str:
+        patient = await self.patients.get_by_id(patient_id)
 
         if patient is None:
             raise ValueError("Patient profile not found.")
 
-        await self.patients.delete(patient)
+        user = await self.users.get_by_id(patient.user_id)
+
+        if user is None:
+            raise ValueError("User not found.")
+
+        try:
+            user.role = UserRoleEnum.USER
+
+            await self.patients.delete(patient)
+            await self.session.commit()
+
+        except SQLAlchemyError as error:
+            await self.session.rollback()
+            raise DatabaseWriteError(
+                "An error occurred while deleting patient profile."
+            ) from error
+
+        return "Patient profile deleted successfully."
+

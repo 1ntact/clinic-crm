@@ -35,6 +35,7 @@ class PatientBase(BaseModel):
 
 class PatientCreate(PatientBase):
     user_id: int
+    phone_number: str | None = None
 
 
 class PatientUpdate(PatientBase):
