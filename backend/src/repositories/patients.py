@@ -228,16 +228,25 @@ class PatientRepository:
         ]
 
     def update(
-        self,
-        patient: PatientModel,
-        patient_data: PatientUpdate,
+            self,
+            patient: PatientModel,
+            user: UserModel,
+            patient_data: PatientUpdate,
     ) -> PatientModel:
-        update_data = patient_data.model_dump(
-            exclude_unset=True,
-        )
+        update_data = patient_data.model_dump(exclude_unset=True)
+
+        user_fields = {
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+        }
 
         for field, value in update_data.items():
-            setattr(patient, field, value)
+            if field in user_fields:
+                setattr(user, field, value)
+            else:
+                setattr(patient, field, value)
 
         return patient
 
@@ -245,4 +254,13 @@ class PatientRepository:
         self,
         patient: PatientModel,
     ) -> None:
-        await self.session.delete(patient)
+        try:
+            await self.session.delete(patient)
+            await self.session.commit()
+
+        except SQLAlchemyError:
+            await self.session.rollback()
+            raise
+
+
+
