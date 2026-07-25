@@ -11,9 +11,11 @@ import { TfiPencil } from "react-icons/tfi";
 import { useNavigate, useParams } from "react-router-dom";
 import { DoctorsProfile } from "../DoctorDetails/components/DoctorsProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
+import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
+  const [modal, setOpenModal] = useState(false)
   const dispatch = useAppDispatch();
   const {loading, selectedPatient} = useAppSelector(state=>state.patient)
   const {patientId} = useParams();
@@ -43,6 +45,15 @@ export const PatientDetailsPage = () => {
  
    return (
      <>
+       <ConfirmModal
+            loading={loading}
+        isOpen={modal}
+        title="Is the patient healthy?"
+        description="This action cannot be undone."
+        confirmText="Delete"
+        onCancel={() => setOpenModal(false)}
+        onConfirm={handleRemove}
+    />
        {aside && (
          <AsideMenu
            handleAside={handleAside}
@@ -72,7 +83,7 @@ export const PatientDetailsPage = () => {
              
                className="bg-[#EF4444] px-4 hover:bg-black"
                icon={<IoTrash className="mr-2 text-white" />}
-               onClick={ handleRemove}
+               onClick={ ()=>setOpenModal(true)}
              >
                Remove patients
              </ButtonPage>
