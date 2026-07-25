@@ -99,27 +99,51 @@ class PatientService:
         return patient
 
     async def update_profile(
-        self,
-        patient_id: int,
-        patient_data: PatientUpdate,
-    ) -> PatientModel:
+            self,
+            patient_id: int,
+            patient_data: PatientUpdate,
+    ) -> dict:
         patient = await self.patients.get_by_id(patient_id)
 
         if patient is None:
             raise ValueError("Patient profile not found.")
 
+        user = await self.users.get_by_id(patient.user_id)
+
+        if user is None:
+            raise ValueError("User not found.")
+
         self.patients.update(
-            patient,
-            patient_data,
+            patient=patient,
+            user=user,
+            patient_data=patient_data,
         )
 
         try:
             await self.session.commit()
-            await self.session.refresh(patient)
         except SQLAlchemyError as error:
             await self.session.rollback()
             raise DatabaseWriteError(
                 "An error occurred while updating patient profile."
             ) from error
 
-        return patient
+        updated_patient = await self.patients.get_details_by_id(patient_id)
+
+        if updated_patient is None:
+            raise ValueError("Patient profile not found.")
+
+        return updated_patient
+
+    async def delete_profile(
+            self,
+            patient_id: int,
+    ) -> None:
+        patient = await self.patients.get_by_id(patient_id)
+
+        if patient is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found.",
+            )
+
+        await self.patients.delete(patient)
