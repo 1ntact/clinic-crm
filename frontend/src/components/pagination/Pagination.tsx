@@ -12,7 +12,7 @@ export const Pagination: React.FC<Props> = ({
   onPageChange,
 }) => {
   const totalPages = Math.ceil(total / pageSize);
-
+console.log(page);
   return (
     <div className="flex items-center justify-between mt-6">
       <p className="text-sm text-gray-500">
@@ -20,7 +20,7 @@ export const Pagination: React.FC<Props> = ({
         {Math.min(page * pageSize, total)} of {total}
       </p>
 
-      <div className="flex gap-2">
+      {total>pageSize && <div className="flex gap-2">
         <button
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
@@ -31,6 +31,7 @@ export const Pagination: React.FC<Props> = ({
 
         {Array.from({ length: totalPages }).map((_, index) => (
           <button
+            disabled={total === 1}
             key={index}
             onClick={() => onPageChange(index + 1)}
             className={` w-[38px] h-[38px]  rounded -[8px] cursor-pointer ${
@@ -50,7 +51,7 @@ export const Pagination: React.FC<Props> = ({
         >
           {" Next >"}
         </button>
-      </div>
+      </div>}
     </div>
   );
 };

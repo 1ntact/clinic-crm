@@ -8,7 +8,7 @@ export const createPatientThunk = createAsyncThunk<Patient, PatientFormData>(
   "patients/create",
   async (data, thunApi) => {
     try {
-      console.log(data,'its data pacient')
+      console.log(data,'its data pacient from back')
       return await patientsService.createPatient(data);
     } catch (e) {
       return thunApi.rejectWithValue(getErrorMessage(e));

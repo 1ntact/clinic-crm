@@ -1,6 +1,7 @@
 import { httpClient } from "@/http/httpClient";
 import type { PatientFormData } from "@/types/patientFormData";
 import { accessTokenService } from "./accessTokenService";
+import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
 
 export const patientsService = {
   createPatient: async (data: PatientFormData) => {
@@ -64,5 +65,13 @@ export const patientsService = {
     return response.data
     
 
+  },
+  getStatisticPatient: async () => {
+    const response = await httpClient.get('/patients/statistics', {
+        headers: {
+        Authorization: `Bearer ${accessTokenService.get()}`
+      }})
+      return response.data
   }
+  
 };

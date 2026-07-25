@@ -45,20 +45,20 @@ export const Sort: React.FC<Props> = ({ className,
      
       {buttons.map((button) => (
         <button
-          disabled={userCount<2}
+          disabled={userCount<5}
           key={button.value}
           onClick={() => handleClick(button.value)}
           className={` h-[32px]
-  flex
-  items-center
-  rounded-[8px]
-  px-3
-  transition
+          flex
+          items-center
+           rounded-[8px]
+           px-3
+          transition
 
-  disabled:opacity-50
-  disabled:cursor-not-allowed
-  disabled:bg-gray-200
-  disabled:text-gray-400
+         disabled:opacity-50
+         disabled:cursor-not-allowed
+         disabled:bg-gray-200
+         disabled:text-gray-400
             ${
               sortBy === button.value
                 ? "border-blue-600 bg-blue-600 text-white"

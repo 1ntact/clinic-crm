@@ -22,7 +22,8 @@ export const PatientCreateForm:React.FC<Props> = ({ handleAside }) => {
   
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const dispatch = useAppDispatch();
-    const { users, loading } = useAppSelector((state) => state.user);
+  const { users, loading, } = useAppSelector((state) => state.user);
+  const {query} = useAppSelector(state =>state.patient)
    
   
     useEffect(() => {
@@ -42,8 +43,8 @@ export const PatientCreateForm:React.FC<Props> = ({ handleAside }) => {
         ...data,
         userId:selectedUser.id
       })).unwrap();
-  
-       await dispatch(getAllPatientThunk()).unwrap();
+
+       await dispatch(getAllPatientThunk(query)).unwrap();
   
       reset();
   

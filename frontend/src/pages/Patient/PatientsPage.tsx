@@ -19,10 +19,12 @@ import { employmentTypes } from "@/features/doctors/model/employmentTypes";
 import { Sort } from "@/components/sorter/Sort";
 import { sortButtons } from "@/features/patients/model/sortPatientType";
 import { Pagination } from "@/components/pagination/Pagination";
+import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
+import { PatientStatisticCard } from "./components/statisticPacient/StatisticPatient";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
-  const { loading , patients,query, total} = useAppSelector(state => state.patient)
+  const { loading , patients,query, total, statistic} = useAppSelector(state => state.patient)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
     const handleAside = () =>
@@ -31,7 +33,9 @@ export const PatientsPage = () => {
   useEffect(() => {
     const fetchPatient = async () => {
       try {
+        
         await dispatch(getAllPatientThunk(query)).unwrap()
+        await dispatch(getStatisticPatient()).unwrap()
       } 
       catch (e) {
         console.log(e)
@@ -47,10 +51,15 @@ export const PatientsPage = () => {
       title={"ADD NEW PATIENT"}
        description={"Fill in the details below"}
     />)}
-    <div className="flex justify-between items-center  mb-[26px] h-[57px]" >
-          <PageTitle
+    <div className="flex justify-between   mb-[25px] h-[57px]" >
+     
+        <PageTitle
           text={`Patient Managment`}
-            description={`${total} die`} />
+        description={`${total} die`} />
+      
+       
+      
+      
           <div className="flex  gap-4  ">
          
             <ButtonPage className="pl-[12px] pr-[12px] "
@@ -58,8 +67,10 @@ export const PatientsPage = () => {
               
               icon={<BiPlus className="mr-[8px]" />} >Add patients</ButtonPage>
           </div>
-         
+           
     </div>
+    <div className="mb-[25px]">{statistic && <PatientStatisticCard statistic={statistic} />} </div>
+    
      <div className="flex  justify-between">
             <Filter
                      className="mb-[24px]"

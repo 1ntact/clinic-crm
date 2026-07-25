@@ -156,11 +156,8 @@ export const DoctorsPage = () => {
                 <p className="p-3 text-center text-gray-500">
                   Nothing found
                 </p>
-              )}
-        </div>
-      )}
-
-   { doctors.length === 0  && <Pagination
+            )}
+              <Pagination
         page={query.page}
         pageSize={query.pageSize}
         total={total}
@@ -171,7 +168,12 @@ export const DoctorsPage = () => {
             }),
           )
         }
-      />}
+      />
+        </div>
+      )}
+      
+
+   
     </>
   );
 };
