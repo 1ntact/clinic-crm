@@ -1,4 +1,5 @@
 from sqlalchemy import exists, func, or_, select, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.appointments import (
@@ -28,8 +29,8 @@ class PatientRepository:
         )
 
     async def get_details_by_id(
-            self,
-            patient_id: int,
+        self,
+        patient_id: int,
     ) -> dict | None:
         statement = (
             select(
@@ -43,6 +44,7 @@ class PatientRepository:
                 PatientModel.date_of_birth,
                 PatientModel.address,
                 PatientModel.source,
+                UserModel.registration_date.label("created_at"),
             )
             .join(
                 UserModel,
@@ -73,7 +75,6 @@ class PatientRepository:
 
     @staticmethod
     def _get_last_visit_subquery():
-
         return (
             select(
                 AppointmentModel.patient_id,
@@ -98,7 +99,6 @@ class PatientRepository:
         category: str,
         search: str | None,
     ):
-
         if category == "new":
             statement = statement.where(
                 UserModel.registration_date
@@ -145,7 +145,6 @@ class PatientRepository:
         category: str = "all",
         search: str | None = None,
     ) -> int:
-
         last_visit_subquery = self._get_last_visit_subquery()
 
         statement = (
@@ -180,7 +179,6 @@ class PatientRepository:
         offset: int = 0,
         limit: int = 20,
     ) -> list[dict]:
-
         last_visit_subquery = self._get_last_visit_subquery()
 
         statement = (
@@ -228,12 +226,14 @@ class PatientRepository:
         ]
 
     def update(
-            self,
-            patient: PatientModel,
-            user: UserModel,
-            patient_data: PatientUpdate,
+        self,
+        patient: PatientModel,
+        user: UserModel,
+        patient_data: PatientUpdate,
     ) -> PatientModel:
-        update_data = patient_data.model_dump(exclude_unset=True)
+        update_data = patient_data.model_dump(
+            exclude_unset=True,
+        )
 
         user_fields = {
             "first_name",
@@ -262,5 +262,23 @@ class PatientRepository:
             await self.session.rollback()
             raise
 
+    async def get_statistics(self) -> dict:
+        total_patients = await self.count(
+            category="all",
+        )
+        new_patients = await self.count(
+            category="new",
+        )
+        patients_today = await self.count(
+            category="today",
+        )
+        inactive_patients = await self.count(
+            category="inactive",
+        )
 
-
+        return {
+            "total_patients": total_patients,
+            "new_patients": new_patients,
+            "patients_today": patients_today,
+            "inactive_patients": inactive_patients,
+        }

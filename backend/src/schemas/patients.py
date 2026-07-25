@@ -74,3 +74,11 @@ class PaginatedPatientResponse(BaseModel):
     page: int
     page_size: int
     pages: int
+
+
+class PatientStatisticsResponse(BaseModel):
+    total_patients: int
+    new_patients: int
+    patients_today: int
+    inactive_patients: int
+

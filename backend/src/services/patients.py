@@ -8,7 +8,11 @@ from database.models.users import UserRoleEnum
 from exceptions import DatabaseWriteError
 from repositories.patients import PatientRepository
 from repositories.users import UserRepository
-from schemas.patients import PatientCreate, PatientUpdate
+from schemas.patients import (
+    PatientCreate,
+    PatientStatisticsResponse,
+    PatientUpdate,
+)
 
 
 class PatientService:
@@ -20,41 +24,61 @@ class PatientService:
     async def create_profile(
         self,
         patient_data: PatientCreate,
-    ) -> PatientModel:
+    ) -> dict:
         user = await self.users.get_by_id(patient_data.user_id)
 
         if user is None:
             raise ValueError("User not found.")
 
         if not user.is_active:
-            raise ValueError("Patient profile can be created only for an active user.")
+            raise ValueError(
+                "Patient profile can be created only for an active user."
+            )
 
-        existing_patient = await self.patients.get_by_user_id(patient_data.user_id)
+        existing_patient = await self.patients.get_by_user_id(
+            patient_data.user_id,
+        )
 
         if existing_patient is not None:
-            raise ValueError("Patient profile already exists for this user.")
+            raise ValueError(
+                "Patient profile already exists for this user."
+            )
 
         if user.role != UserRoleEnum.USER:
-            raise ValueError("Patient profile can be created only for a regular user.")
+            raise ValueError(
+                "Patient profile can be created only for a regular user."
+            )
 
-        patient = PatientModel(**patient_data.model_dump())
+        patient = PatientModel(
+            **patient_data.model_dump(),
+        )
 
         try:
             user.role = UserRoleEnum.PATIENT
             self.patients.add(patient)
             await self.session.commit()
+
         except SQLAlchemyError as error:
             await self.session.rollback()
             raise DatabaseWriteError(
                 "An error occurred while creating patient profile."
             ) from error
 
-        created_patient = await self.patients.get_by_user_id(patient_data.user_id)
+        created_patient = await self.patients.get_by_user_id(
+            patient_data.user_id,
+        )
 
         if created_patient is None:
             raise ValueError("Patient profile was not created.")
 
-        return created_patient
+        patient_details = await self.patients.get_details_by_id(
+            created_patient.id,
+        )
+
+        if patient_details is None:
+            raise ValueError("Patient profile was not created.")
+
+        return patient_details
 
     async def get_all(
         self,
@@ -86,8 +110,8 @@ class PatientService:
         }
 
     async def get_by_id(
-            self,
-            patient_id: int,
+        self,
+        patient_id: int,
     ) -> dict:
         patient = await self.patients.get_details_by_id(
             patient_id,
@@ -99,9 +123,9 @@ class PatientService:
         return patient
 
     async def update_profile(
-            self,
-            patient_id: int,
-            patient_data: PatientUpdate,
+        self,
+        patient_id: int,
+        patient_data: PatientUpdate,
     ) -> dict:
         patient = await self.patients.get_by_id(patient_id)
 
@@ -121,29 +145,40 @@ class PatientService:
 
         try:
             await self.session.commit()
+
         except SQLAlchemyError as error:
             await self.session.rollback()
             raise DatabaseWriteError(
                 "An error occurred while updating patient profile."
             ) from error
 
-        updated_patient = await self.patients.get_details_by_id(patient_id)
+        updated_patient = await self.patients.get_details_by_id(
+            patient_id,
+        )
 
         if updated_patient is None:
             raise ValueError("Patient profile not found.")
 
         return updated_patient
 
+    async def get_statistics(
+        self,
+    ) -> PatientStatisticsResponse:
+        statistics = await self.patients.get_statistics()
+
+        return PatientStatisticsResponse(
+            **statistics,
+        )
+
     async def delete_profile(
-            self,
-            patient_id: int,
+        self,
+        patient_id: int,
     ) -> None:
-        patient = await self.patients.get_by_id(patient_id)
+        patient = await self.patients.get_by_id(
+            patient_id,
+        )
 
         if patient is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Patient not found.",
-            )
+            raise ValueError("Patient profile not found.")
 
         await self.patients.delete(patient)
