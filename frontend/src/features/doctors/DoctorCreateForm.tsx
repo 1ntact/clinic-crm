@@ -1,5 +1,4 @@
 import { FormProvider, useForm } from "react-hook-form";
-import { ButtonPage } from "@/components/button/ButtonsPage";
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 
 import { useEffect, useState } from "react";
@@ -17,7 +16,7 @@ type Props = {
   handleAside: () => void;
 };
 
-export const DoctorCreteForm: React.FC<Props> = ({ handleAside }) => {
+export const DoctorCreteForm: React.FC<Props> = () => {
  
   const methods = useForm<DoctorFormData>();
   const { reset, setValue, handleSubmit } = methods;
@@ -126,21 +125,13 @@ if (data.phoneNumber) {
           </section>
          
             <FormProvider {...methods}>
-            <form
+            <form id="doctor-create"
               className="flex flex-col gap-6"
               onSubmit={handleSubmit(onSubmit)}
             >
               <DoctorFormFields type={'create'}/>
 
-              <div className="flex w-full gap-4 border-t border-[#D1D5DB]">
-                <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
-                    <span className="text-[#172554]">Cancel</span>
-                </ButtonPage>
-
-                <ButtonPage type="submit" className="flex-1">
-                  Send an invitation
-                </ButtonPage>
-              </div>
+           
             </form>
           </FormProvider>
         </div>

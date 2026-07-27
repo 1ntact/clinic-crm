@@ -11,11 +11,9 @@ import { updatePatientThunk } from "./thunk/updatePatientThunk";
 
 
 
-type Props = {
-  handleAside: () => void;
-};
 
-export const PatientEditForm: React.FC<Props> = ({ handleAside }) => {
+
+export const PatientEditForm: React.FC = () => {
   const methods = useForm<PatientFormData>();
   const { reset, handleSubmit } = methods;
 
@@ -51,7 +49,6 @@ export const PatientEditForm: React.FC<Props> = ({ handleAside }) => {
         
       })).unwrap();
       reset();
-      handleAside()
       successToast(
         <>
           Patient updates successfully
@@ -72,22 +69,15 @@ export const PatientEditForm: React.FC<Props> = ({ handleAside }) => {
       ) : (
         <div className="w-full">
           <FormProvider {...methods}>
-            <form
+            <form id="patient-edit"
               className="flex flex-col gap-6"
               onSubmit={handleSubmit(onSubmit)}
             >
               <PatientsFormFields/>
 
-              <div className="flex w-full gap-4  border-t border-[#D1D5DB]">
-                <ButtonPage className="flex-1  bg-[#FFFFFF] " onClick={handleAside}>
-                 <span className=" text-[#172554]">Cancel</span>
-                </ButtonPage>
-
-                <ButtonPage type="submit" className="flex-1 ">
-                  Update patient
-                </ButtonPage>
-              </div>
-            </form>
+              
+              </form>
+             
           </FormProvider>
         </div>
       )}{" "}

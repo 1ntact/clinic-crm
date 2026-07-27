@@ -1,3 +1,4 @@
+import type { SortButton } from "@/features/doctors/model/sortDoctorTypes";
 import type { SortBy } from "@/types/sortTypes";
 import { RiArrowUpDownLine } from "react-icons/ri";
 
@@ -9,7 +10,7 @@ type Props = {
   className?: string;
   sortBy: SortBy;
   sortOrder: SortOrder;
-  buttons,
+   buttons: SortButton[];
   onChange: (
     sortBy: SortBy,
     sortOrder: SortOrder

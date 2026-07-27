@@ -12,11 +12,9 @@ import { useEffect } from "react";
 import { updateDoctorThunk } from "./thunk/updateDoctorThunk";
 
 
-type Props = {
-  handleAside: () => void;
-};
 
-export const DoctorEditForm: React.FC<Props> = ({ handleAside }) => {
+
+export const DoctorEditForm: React.FC = () => {
   const methods = useForm<DoctorFormData>();
   const { reset, handleSubmit } = methods;
 
@@ -104,21 +102,13 @@ if (data.phoneNumber) {
       ) : (
         <div className="w-full">
           <FormProvider {...methods}>
-            <form
+            <form id="doctor-edit"
               className="flex flex-col gap-6"
               onSubmit={handleSubmit(onSubmit)}
             >
               <DoctorFormFields/>
 
-              <div className="flex w-full gap-4  border-t border-[#D1D5DB]">
-                <ButtonPage className="flex-1  bg-[#FFFFFF] " onClick={handleAside}>
-                 <span className=" text-[#172554]">Cancel</span>
-                </ButtonPage>
-
-                <ButtonPage type="submit" className="flex-1 ">
-                  Send an invitation
-                </ButtonPage>
-              </div>
+              
             </form>
           </FormProvider>
         </div>

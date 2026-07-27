@@ -5,10 +5,15 @@ type Props = {
   title: string;
   description: string;
   handleAside: () => void;
-  forms:React.JSX.Element
+  content: React.ReactNode;
+  footer: React.ReactNode;
 }
 
-export const AsideMenu: React.FC<Props> = ({ forms, handleAside, title, description }) => {
+export const AsideMenu: React.FC<Props> = ({  title,
+  description,
+  handleAside,
+  content,
+  footer, }) => {
   
   return (
     <>
@@ -25,7 +30,7 @@ export const AsideMenu: React.FC<Props> = ({ forms, handleAside, title, descript
           w-[633px]
           h-screen
           bg-[#ffff]
-          p-[40px] 
+          p-[35px] 
           z-10
         "
       >
@@ -36,10 +41,13 @@ export const AsideMenu: React.FC<Props> = ({ forms, handleAside, title, descript
           </div>
           <button className="w-[32px] h-[32px] flex justify-center items-center cursor-pointer " onClick={handleAside}>{<TfiClose />}</button>
         </div>
-        <div className="flex-1   overflow-y-auto" >
-          {forms}
-          
-  </div>
+         <div className="flex-1 overflow-y-auto">
+          {content}
+        </div>
+
+        <div className="sticky bottom-0 flex w-full pt-[24px] gap-4  border-t border-[#D1D5DB] bg-[#ffff]">
+               {footer}
+              </div>
         
        
         

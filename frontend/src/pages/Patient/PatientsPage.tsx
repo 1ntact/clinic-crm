@@ -47,7 +47,16 @@ export const PatientsPage = () => {
   return <>
     {aside && (<AsideMenu
       handleAside={handleAside}
-      forms={<PatientCreateForm handleAside={handleAside}/>}
+      content={<PatientCreateForm />}
+      footer = { <>
+               <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
+                      <span className="text-[#172554]">Cancel</span>
+                  </ButtonPage>
+  
+                  <ButtonPage type="submit" form="patient-create" className="flex-1">
+                    Send an invitation
+                  </ButtonPage>
+             </> }
       title={"ADD NEW PATIENT"}
        description={"Fill in the details below"}
     />)}
@@ -73,15 +82,15 @@ export const PatientsPage = () => {
     
      <div className="flex  justify-between">
             <Filter
-                     className="mb-[24px]"
+        className="mb-[24px]"
         search={query.search}
         firstSelect={query}
         secondSelect={query}
         
         firstSelectOptions={specializations}
         secondSelectOptions={employmentTypes}
-                     onSearchChange={(value) =>
-                       dispatch(setQuery({ search: value, page: 1 }))
+      onSearchChange={(value) =>
+      dispatch(setQuery({ search: value, page: 1 }))
                      }
                   
                      

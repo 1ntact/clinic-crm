@@ -6,16 +6,13 @@ import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { searchUsersThunk } from "../users/searchUserThunk";
 import { Search } from "@/components/search/Search";
-import { ButtonPage } from "@/components/button/ButtonsPage";
+
 import { createPatientThunk } from "./thunk/createPatientThunk";
 import { PatientsFormFields } from "@/components/formField/PatientFormField";
 import { getAllPatientThunk } from "./thunk/getAllPacientThunk";
 
-type Props = {
-  handleAside: () => void;
-};
 
-export const PatientCreateForm:React.FC<Props> = ({ handleAside }) => {
+export const PatientCreateForm:React.FC = () => {
   
   const methods = useForm<PatientFormData>();
     const { reset, setValue, handleSubmit } = methods;
@@ -92,22 +89,18 @@ export const PatientCreateForm:React.FC<Props> = ({ handleAside }) => {
             </section>
            
               <FormProvider {...methods}>
-              <form
+            <form
+              id="patient-create"
                 className="flex flex-col gap-6"
                 onSubmit={handleSubmit(onSubmit)}
               >
                 {<PatientsFormFields type={'create'}/>}
-  
-                <div className="flex w-full gap-4 border-t border-[#D1D5DB]">
-                  <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
-                      <span className="text-[#172554]">Cancel</span>
-                  </ButtonPage>
-  
-                  <ButtonPage type="submit" className="flex-1">
-                    Send an invitation
-                  </ButtonPage>
-                </div>
-              </form>
+   
+             
+             
+            </form>
+             
+              
             </FormProvider>
           </div>
         {/* )}{" "} */}

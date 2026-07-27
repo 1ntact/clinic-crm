@@ -47,7 +47,16 @@ export const DoctorsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          forms={<DoctorCreteForm handleAside={handleAside} />}
+          content={<DoctorCreteForm handleAside={handleAside} />}
+          footer={   <>
+                <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
+                    <span className="text-[#172554]">Cancel</span>
+                </ButtonPage>
+
+                <ButtonPage type="submit" form="doctor-create" className="flex-1">
+                  Send an invitation
+                </ButtonPage>
+              </>}
           title={"ADD NEW DOCTOR"}
           description={"Fill in the details below"}
         />

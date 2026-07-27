@@ -121,13 +121,9 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
         </div>
       </section>
 
-      <section>
-        
-      </section>
+      
 
-      <section>
-        
-      </section>
+     
     </>
   );
 };
