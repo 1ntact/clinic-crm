@@ -3,7 +3,6 @@ import { Input } from "../input/Input";
 import { useDebounce } from "@/hooks/useDebounce"
 import type { SelectOption } from "@/features/doctors/model/specialties";
 import type { DoctorQuery } from "@/features/doctors/model/DoctorQuery";
-import { ImInsertTemplate } from "react-icons/im";
 type Props = {
    className?: string;
   search: string;

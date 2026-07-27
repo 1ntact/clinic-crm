@@ -75,8 +75,8 @@ export const DoctorDetailsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="rounded-xl bg-white p-6 shadow-sm">
-          <section className="mb-8 flex items-center justify-between">
+        <div className="rounded-xl bg-white p-[16px] shadow-sm">
+          <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span
                 className="cursor-pointer hover:text-blue-600"
@@ -111,9 +111,9 @@ export const DoctorDetailsPage = () => {
             </div>
           </section>
 
-          <section className="flex items-center justify-between rounded-xl border border-gray-200 p-6">
+          <section className="flex items-center justify-between rounded-[8px] border border-gray-200 ">
             {!loading && selectedDoctor && (
-              <UserProfile selectedDoctor={selectedDoctor} />
+              <UserProfile type='doctor' selectedUser={selectedDoctor} />
             )}
           </section>
         </div>

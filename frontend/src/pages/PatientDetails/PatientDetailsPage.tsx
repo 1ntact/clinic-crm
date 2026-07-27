@@ -71,7 +71,7 @@ export const PatientDetailsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="rounded-xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-white p-[16px] shadow-sm">
           <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span

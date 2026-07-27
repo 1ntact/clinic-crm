@@ -1,18 +1,14 @@
 import { Input } from "@/components";
 import { formValidation } from "../auth/model/form.validation";
 import { useForm } from "react-hook-form";
-import { ButtonPage } from "@/components/button/ButtonsPage";
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { createUserThunk } from "./createUserThunk";
 import { Loader } from "@/components/loader/Loader";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import type { UserData } from "@/types/userFormData";
 
-type Props = {
-  handleAside: () => void;
-};
 
-export const UserForm: React.FC<Props> = ({ handleAside }) => {
+export const UserForm: React.FC = () => {
   const {
     reset,
     register,
@@ -41,7 +37,7 @@ export const UserForm: React.FC<Props> = ({ handleAside }) => {
       ) : (
         <div className="w-full h-full">
           <form
-            id="user-form"
+            id="user-create"
             className="flex flex-col gap-6"
             onSubmit={handleSubmit(onSubmit)}
           >
@@ -106,14 +102,7 @@ export const UserForm: React.FC<Props> = ({ handleAside }) => {
                 error={errors.password?.message}
               />
             </section>
-            <div className="flex w-full   gap-[16px] border-t border-[#D1D5DB] ">
-              <ButtonPage className="flex-1" onClick={handleAside}>
-                Cancel
-              </ButtonPage>
-              <ButtonPage disabled={loading} type="submit" className="flex-1">
-                Send an invitation
-              </ButtonPage>
-            </div>
+          
           </form>
         </div>
       )}

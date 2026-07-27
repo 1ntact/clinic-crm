@@ -8,5 +8,6 @@ export type Patient = {
   userId: number,
   phoneNumber: string,
   email: string,
-  id:number,
+  id: number,
+  avatarUrl?: string;
 }
