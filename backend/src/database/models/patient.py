@@ -4,7 +4,7 @@ import enum
 from datetime import date
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, ForeignKey, Integer, String
+from sqlalchemy import Date, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.models.base import Base
@@ -19,12 +19,15 @@ class PatientGenderEnum(str, enum.Enum):
 
 
 class PatientSourceEnum(str, enum.Enum):
-    GOOGLE_SEARCH = "google_search"
-    SOCIAL_MEDIA = "social_media"
-    RECOMMENDATION = "recommendation"
-    OUTDOOR_AD = "outdoor_ad"
-    WEBSITE = "website"
+    ORGANIC_SEARCH = "organic_search"
+    PAID_SEARCH = "paid_search"
+    ORGANIC_SOCIAL = "organic_social"
+    PAID_SOCIAL = "paid_social"
+    REFERRAL = "referral"
+    DIRECT = "direct"
+    OFFLINE_AD = "offline_ad"
     OTHER = "other"
+    UNKNOWN = "unknown"
 
 
 class PatientModel(Base):
@@ -39,9 +42,16 @@ class PatientModel(Base):
     gender: Mapped[PatientGenderEnum | None] = mapped_column(String(20))
     date_of_birth: Mapped[date | None] = mapped_column(Date)
     address: Mapped[str | None] = mapped_column(String(255))
-    source: Mapped[PatientSourceEnum | None] = mapped_column(
-        String(30),
-        nullable=True,
+    source: Mapped[PatientSourceEnum] = mapped_column(
+        Enum(
+            PatientSourceEnum,
+            name="patient_source_enum",
+            values_callable=lambda enum_class: [
+                item.value for item in enum_class
+            ],
+        ),
+        nullable=False,
+        default=PatientSourceEnum.UNKNOWN,
     )
 
     user: Mapped[UserModel] = relationship(back_populates="patient")

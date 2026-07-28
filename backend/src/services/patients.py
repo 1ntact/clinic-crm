@@ -54,8 +54,7 @@ class PatientService:
         )
         patient = PatientModel(**patient_fields)
 
-        if patient_data.phone_number is not None:
-            user.phone_number = patient_data.phone_number
+        user.phone_number = patient_data.phone_number
 
         try:
             user.role = UserRoleEnum.PATIENT
@@ -141,6 +140,12 @@ class PatientService:
         if user is None:
             raise ValueError("User not found.")
 
+        if (
+            "phone_number" in patient_data.model_fields_set
+            and patient_data.phone_number is None
+        ):
+            raise ValueError("Phone number cannot be null.")
+
         self.patients.update(
             patient=patient,
             user=user,
@@ -175,8 +180,8 @@ class PatientService:
         )
 
     async def delete_profile(
-            self,
-            patient_id: int,
+        self,
+        patient_id: int,
     ) -> str:
         patient = await self.patients.get_by_id(patient_id)
 

@@ -1,11 +1,8 @@
-from datetime import datetime
+from datetime import date, datetime, time
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from database.models.appointments import (
-    AppointmentChannelEnum,
-    AppointmentStatusEnum,
-)
+from database.models.appointments import AppointmentStatusEnum
 
 
 class AppointmentBase(BaseModel):
@@ -13,13 +10,18 @@ class AppointmentBase(BaseModel):
     doctor_id: int
     date_time: datetime
     duration: int = Field(default=30, ge=1)
-    reason_for_visit: str | None = None
+    type_visit: str | None = None
     status: AppointmentStatusEnum = AppointmentStatusEnum.SCHEDULED
-    channel: AppointmentChannelEnum | None = None
+    notes: str | None = None
 
 
-class AppointmentCreate(AppointmentBase):
-    pass
+class AppointmentCreate(BaseModel):
+    patient_id: int
+    doctor_id: int
+    appointment_date: date
+    appointment_time: time
+    type_visit: str
+    notes: str | None = None
 
 
 class AppointmentUpdate(BaseModel):
@@ -27,9 +29,9 @@ class AppointmentUpdate(BaseModel):
     doctor_id: int | None = None
     date_time: datetime | None = None
     duration: int | None = Field(default=None, ge=1)
-    reason_for_visit: str | None = None
+    type_visit: str | None = None
     status: AppointmentStatusEnum | None = None
-    channel: AppointmentChannelEnum | None = None
+    notes: str | None = None
 
 
 class AppointmentResponse(AppointmentBase):
@@ -37,6 +39,13 @@ class AppointmentResponse(AppointmentBase):
 
     id: int
     created_at: datetime
+
+    patient_first_name: str | None = None
+    patient_last_name: str | None = None
+    patient_phone_number: str | None = None
+
+    doctor_first_name: str | None = None
+    doctor_last_name: str | None = None
 
 
 class AppointmentStatusUpdate(BaseModel):

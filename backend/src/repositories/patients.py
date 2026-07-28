@@ -1,5 +1,4 @@
 from sqlalchemy import exists, func, or_, select, text
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.appointments import (
@@ -251,8 +250,8 @@ class PatientRepository:
         return patient
 
     async def delete(
-            self,
-            patient: PatientModel,
+        self,
+        patient: PatientModel,
     ) -> None:
         await self.session.delete(patient)
 
