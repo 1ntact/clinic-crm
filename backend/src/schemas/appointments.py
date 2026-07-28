@@ -30,7 +30,6 @@ class AppointmentUpdate(BaseModel):
     date_time: datetime | None = None
     duration: int | None = Field(default=None, ge=1)
     type_visit: str | None = None
-    status: AppointmentStatusEnum | None = None
     notes: str | None = None
 
 

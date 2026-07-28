@@ -182,6 +182,16 @@ class AppointmentService:
             appointment_id,
         )
 
+        if appointment.status in {
+            AppointmentStatusEnum.CANCELLED,
+            AppointmentStatusEnum.COMPLETED,
+            AppointmentStatusEnum.NO_SHOW,
+        }:
+            raise ValueError(
+                "Cancelled, completed or no-show appointment "
+                "cannot be updated."
+            )
+
         update_data = appointment_data.model_dump(
             exclude_unset=True,
         )
@@ -267,24 +277,9 @@ class AppointmentService:
                 "Past appointment cannot be confirmed."
             )
 
-        if appointment.status == AppointmentStatusEnum.CANCELLED:
+        if appointment.status != AppointmentStatusEnum.SCHEDULED:
             raise ValueError(
-                "Cancelled appointment cannot be confirmed."
-            )
-
-        if appointment.status == AppointmentStatusEnum.CONFIRMED:
-            raise ValueError(
-                "Appointment is already confirmed."
-            )
-
-        if appointment.status == AppointmentStatusEnum.COMPLETED:
-            raise ValueError(
-                "Completed appointment cannot be confirmed."
-            )
-
-        if appointment.status == AppointmentStatusEnum.NO_SHOW:
-            raise ValueError(
-                "No-show appointment cannot be confirmed."
+                "Only scheduled appointment can be confirmed."
             )
 
         try:
@@ -312,19 +307,17 @@ class AppointmentService:
             appointment_id,
         )
 
-        if appointment.status == AppointmentStatusEnum.CANCELLED:
+        if appointment.date_time <= datetime.now(timezone.utc):
             raise ValueError(
-                "Appointment is already cancelled."
+                "A past appointment cannot be cancelled."
             )
 
-        if appointment.status == AppointmentStatusEnum.COMPLETED:
+        if appointment.status not in {
+            AppointmentStatusEnum.SCHEDULED,
+            AppointmentStatusEnum.CONFIRMED,
+        }:
             raise ValueError(
-                "Completed appointment cannot be cancelled."
-            )
-
-        if appointment.status == AppointmentStatusEnum.NO_SHOW:
-            raise ValueError(
-                "No-show appointment cannot be cancelled."
+                "Only scheduled or confirmed appointment can be cancelled."
             )
 
         try:
@@ -345,24 +338,25 @@ class AppointmentService:
         )
 
     async def complete(
-            self,
-            appointment_id: int,
+        self,
+        appointment_id: int,
     ) -> dict[str, Any]:
         appointment = await self._get_model_by_id(
             appointment_id,
         )
-
-        if appointment.status == AppointmentStatusEnum.COMPLETED:
-            raise ValueError(
-                "Appointment is already completed."
-            )
 
         if appointment.status not in {
             AppointmentStatusEnum.SCHEDULED,
             AppointmentStatusEnum.CONFIRMED,
         }:
             raise ValueError(
-                "Only scheduled or confirmed appointment can be completed."
+                "Only scheduled or confirmed appointment "
+                "can be completed."
+            )
+
+        if appointment.date_time > datetime.now(timezone.utc):
+            raise ValueError(
+                "A future appointment cannot be completed."
             )
 
         try:
@@ -383,24 +377,25 @@ class AppointmentService:
         )
 
     async def mark_no_show(
-            self,
-            appointment_id: int,
+        self,
+        appointment_id: int,
     ) -> dict[str, Any]:
         appointment = await self._get_model_by_id(
             appointment_id,
         )
-
-        if appointment.status == AppointmentStatusEnum.NO_SHOW:
-            raise ValueError(
-                "Appointment is already marked as no-show."
-            )
 
         if appointment.status not in {
             AppointmentStatusEnum.SCHEDULED,
             AppointmentStatusEnum.CONFIRMED,
         }:
             raise ValueError(
-                "Only scheduled or confirmed appointment can be marked as no-show."
+                "Only scheduled or confirmed appointment "
+                "can be marked as no-show."
+            )
+
+        if appointment.date_time > datetime.now(timezone.utc):
+            raise ValueError(
+                "A future appointment cannot be marked as no-show."
             )
 
         try:
