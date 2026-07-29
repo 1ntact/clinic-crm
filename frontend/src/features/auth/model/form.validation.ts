@@ -35,8 +35,8 @@ export const formValidation = {
   experience: {
     required: "Experience is required",
     min: {
-      value: 0,
-      message: "Experience cannot be negative",
+      value: 1,
+      message: "Experience cannot be zero",
     },
     max: {
       value: 60,
