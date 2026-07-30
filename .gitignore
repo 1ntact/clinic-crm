@@ -55,3 +55,4 @@ logs/
 # Local AI tooling
 .ai/
 CLAUDE.md
+.claude/settings.local.json
