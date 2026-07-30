@@ -323,3 +323,36 @@ class AppointmentRepository:
         appointment: AppointmentModel,
     ) -> None:
         await self.session.delete(appointment)
+
+    async def get_doctor_appointments_by_date(
+            self,
+            doctor_id: int,
+            selected_date: date,
+    ) -> list[AppointmentModel]:
+        day_start = datetime.combine(
+            selected_date,
+            time.min,
+            tzinfo=timezone.utc,
+        )
+
+        day_end = day_start + timedelta(days=1)
+
+        statement = (
+            select(AppointmentModel)
+            .where(
+                AppointmentModel.doctor_id == doctor_id,
+                AppointmentModel.date_time >= day_start,
+                AppointmentModel.date_time < day_end,
+                AppointmentModel.status.in_(
+                    ACTIVE_APPOINTMENT_STATUSES,
+                ),
+            )
+            .order_by(
+                AppointmentModel.date_time,
+                AppointmentModel.id,
+            )
+        )
+
+        result = await self.session.execute(statement)
+
+        return list(result.scalars().all())

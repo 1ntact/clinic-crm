@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,10 +14,9 @@ from repositories.patients import PatientRepository
 from schemas.appointments import (
     AppointmentCreate,
     AppointmentUpdate,
+    AvailableSlotResponse,
+    AvailableSlotsResponse,
 )
-
-
-DEFAULT_APPOINTMENT_DURATION = 30
 
 
 class AppointmentService:
@@ -60,7 +59,7 @@ class AppointmentService:
         doctor_busy = await self.appointments.is_doctor_busy(
             doctor_id=appointment_data.doctor_id,
             date_time=appointment_date_time,
-            duration=DEFAULT_APPOINTMENT_DURATION,
+            duration=appointment_data.duration,
         )
 
         if doctor_busy:
@@ -72,7 +71,7 @@ class AppointmentService:
             appointment = self.appointments.add(
                 appointment_data=appointment_data,
                 date_time=appointment_date_time,
-                duration=DEFAULT_APPOINTMENT_DURATION,
+                duration=appointment_data.duration,
             )
 
             await self.session.commit()
@@ -413,4 +412,102 @@ class AppointmentService:
 
         return await self._get_details_after_change(
             appointment.id,
+        )
+
+    async def get_available_slots(
+        self,
+        selected_date: date,
+        doctor_id: int,
+        duration: int,
+    ) -> AvailableSlotsResponse:
+        doctor = await self.doctors.get_by_id(
+            doctor_id,
+        )
+
+        if doctor is None:
+            raise ValueError("Doctor not found.")
+
+        if duration < 30:
+            raise ValueError(
+                "Appointment duration must be at least 30 minutes."
+            )
+
+        if duration > 180:
+            raise ValueError(
+                "Appointment duration cannot exceed 180 minutes."
+            )
+
+        appointments = (
+            await self.appointments.get_doctor_appointments_by_date(
+                doctor_id=doctor_id,
+                selected_date=selected_date,
+            )
+        )
+
+        workday_start = datetime.combine(
+            selected_date,
+            time(hour=8, minute=0),
+            tzinfo=timezone.utc,
+        )
+
+        workday_end = datetime.combine(
+            selected_date,
+            time(hour=18, minute=0),
+            tzinfo=timezone.utc,
+        )
+
+        slot_step = timedelta(minutes=30)
+        requested_duration = timedelta(minutes=duration)
+
+        slots: list[AvailableSlotResponse] = []
+
+        current_slot_start = workday_start
+
+        while current_slot_start + requested_duration <= workday_end:
+            current_slot_end = (
+                current_slot_start + requested_duration
+            )
+
+            is_booked = False
+
+            for appointment in appointments:
+                appointment_start = appointment.date_time
+
+                appointment_end = (
+                    appointment_start
+                    + timedelta(minutes=appointment.duration)
+                )
+
+                has_overlap = (
+                    current_slot_start < appointment_end
+                    and current_slot_end > appointment_start
+                )
+
+                if has_overlap:
+                    is_booked = True
+                    break
+
+            slots.append(
+                AvailableSlotResponse(
+                    time=current_slot_start.time().replace(
+                        tzinfo=None,
+                    ),
+                    status="booked" if is_booked else "free",
+                )
+            )
+
+            current_slot_start += slot_step
+
+        available_count = sum(
+            slot.status == "free"
+            for slot in slots
+        )
+
+        return AvailableSlotsResponse(
+            date=selected_date,
+            doctor_id=doctor_id,
+            duration=duration,
+            available_count=available_count,
+            booked_count=len(appointments),
+            slots=slots,
         )

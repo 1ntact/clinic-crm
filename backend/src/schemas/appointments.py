@@ -1,4 +1,5 @@
 from datetime import date, datetime, time
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -9,7 +10,11 @@ class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
     date_time: datetime
-    duration: int = Field(default=30, ge=1)
+    duration: int = Field(
+        default=30,
+        ge=30,
+        le=180,
+    )
     type_visit: str | None = None
     status: AppointmentStatusEnum = AppointmentStatusEnum.SCHEDULED
     notes: str | None = None
@@ -20,6 +25,12 @@ class AppointmentCreate(BaseModel):
     doctor_id: int
     appointment_date: date
     appointment_time: time
+    duration: int = Field(
+        default=30,
+        ge=30,
+        le=180,
+        description="Appointment duration in minutes",
+    )
     type_visit: str
     notes: str | None = None
 
@@ -28,7 +39,11 @@ class AppointmentUpdate(BaseModel):
     patient_id: int | None = None
     doctor_id: int | None = None
     date_time: datetime | None = None
-    duration: int | None = Field(default=None, ge=1)
+    duration: int | None = Field(
+        default=None,
+        ge=30,
+        le=180,
+    )
     type_visit: str | None = None
     notes: str | None = None
 
@@ -49,3 +64,17 @@ class AppointmentResponse(AppointmentBase):
 
 class AppointmentStatusUpdate(BaseModel):
     status: AppointmentStatusEnum
+
+
+class AvailableSlotResponse(BaseModel):
+    time: time
+    status: Literal["free", "booked"]
+
+
+class AvailableSlotsResponse(BaseModel):
+    date: date
+    doctor_id: int
+    duration: int
+    available_count: int
+    booked_count: int
+    slots: list[AvailableSlotResponse]

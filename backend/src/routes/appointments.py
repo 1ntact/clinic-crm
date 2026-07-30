@@ -1,9 +1,11 @@
 from datetime import date
+from typing import NoReturn
 
 from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Path,
     Query,
     status,
 )
@@ -15,6 +17,7 @@ from schemas.appointments import (
     AppointmentCreate,
     AppointmentResponse,
     AppointmentUpdate,
+    AvailableSlotsResponse,
 )
 from services.appointments import AppointmentService
 
@@ -24,7 +27,7 @@ router = APIRouter(
 )
 
 
-def raise_http_error(error: ValueError) -> None:
+def raise_http_error(error: ValueError) -> NoReturn:
     message = str(error)
 
     not_found_messages = {
@@ -53,7 +56,7 @@ def raise_http_error(error: ValueError) -> None:
 async def create_appointment(
     appointment_data: AppointmentCreate,
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -69,12 +72,26 @@ async def create_appointment(
     response_model=list[AppointmentResponse],
 )
 async def get_appointments(
-    doctor_id: int | None = None,
-    patient_id: int | None = None,
-    appointment_date: date | None = None,
-    date_from: date | None = None,
-    date_to: date | None = None,
-    appointment_status: AppointmentStatusEnum | None = None,
+    doctor_id: int | None = Query(
+        default=None,
+        gt=0,
+    ),
+    patient_id: int | None = Query(
+        default=None,
+        gt=0,
+    ),
+    appointment_date: date | None = Query(
+        default=None,
+    ),
+    date_from: date | None = Query(
+        default=None,
+    ),
+    date_to: date | None = Query(
+        default=None,
+    ),
+    appointment_status: AppointmentStatusEnum | None = Query(
+        default=None,
+    ),
     limit: int = Query(
         default=100,
         ge=1,
@@ -85,7 +102,7 @@ async def get_appointments(
         ge=0,
     ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> list[AppointmentResponse]:
     service = AppointmentService(db)
 
     try:
@@ -103,14 +120,47 @@ async def get_appointments(
         raise_http_error(error)
 
 
+# Статичний маршрут має бути перед /{appointment_id}/
+@router.get(
+    "/available-slots/",
+    response_model=AvailableSlotsResponse,
+)
+async def get_available_slots(
+    selected_date: date = Query(
+        alias="date",
+    ),
+    doctor_id: int = Query(
+        gt=0,
+    ),
+    duration: int = Query(
+        default=30,
+        ge=30,
+        le=180,
+    ),
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> AvailableSlotsResponse:
+    service = AppointmentService(db)
+
+    try:
+        return await service.get_available_slots(
+            selected_date=selected_date,
+            doctor_id=doctor_id,
+            duration=duration,
+        )
+    except ValueError as error:
+        raise_http_error(error)
+
+
 @router.get(
     "/{appointment_id}/",
     response_model=AppointmentResponse,
 )
 async def get_appointment(
-    appointment_id: int,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -126,10 +176,12 @@ async def get_appointment(
     response_model=AppointmentResponse,
 )
 async def update_appointment(
-    appointment_id: int,
     appointment_data: AppointmentUpdate,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -146,9 +198,11 @@ async def update_appointment(
     response_model=AppointmentResponse,
 )
 async def confirm_appointment(
-    appointment_id: int,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -164,9 +218,11 @@ async def confirm_appointment(
     response_model=AppointmentResponse,
 )
 async def cancel_appointment(
-    appointment_id: int,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -182,9 +238,11 @@ async def cancel_appointment(
     response_model=AppointmentResponse,
 )
 async def complete_appointment(
-    appointment_id: int,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -200,9 +258,11 @@ async def complete_appointment(
     response_model=AppointmentResponse,
 )
 async def mark_appointment_no_show(
-    appointment_id: int,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
+) -> AppointmentResponse:
     service = AppointmentService(db)
 
     try:
@@ -211,5 +271,3 @@ async def mark_appointment_no_show(
         )
     except ValueError as error:
         raise_http_error(error)
-
-
