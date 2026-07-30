@@ -1,6 +1,7 @@
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
-
+from calendar import monthrange
+from collections import defaultdict
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,10 +13,25 @@ from repositories.appointments import AppointmentRepository
 from repositories.doctors import DoctorRepository
 from repositories.patients import PatientRepository
 from schemas.appointments import (
+    AppointmentCalendarResponse,
     AppointmentCreate,
+    AppointmentDashboardResponse,
+    AppointmentStatisticsResponse,
     AppointmentUpdate,
     AvailableSlotResponse,
     AvailableSlotsResponse,
+)
+
+
+WORKDAY_START = time(hour=8, minute=0)
+WORKDAY_END = time(hour=18, minute=0)
+
+SLOT_STEP_MINUTES = 30
+DASHBOARD_SLOT_DURATION_MINUTES = 30
+
+DASHBOARD_BLOCKING_STATUSES = (
+    AppointmentStatusEnum.SCHEDULED,
+    AppointmentStatusEnum.CONFIRMED,
 )
 
 
@@ -336,6 +352,123 @@ class AppointmentService:
             appointment.id,
         )
 
+    async def get_dashboard(
+        self,
+        year: int,
+        month: int,
+    ) -> AppointmentDashboardResponse:
+        if month < 1 or month > 12:
+            raise ValueError(
+                "Month must be between 1 and 12."
+            )
+
+        days_in_month = monthrange(
+            year,
+            month,
+        )[1]
+
+        doctor_ids = await self.doctors.get_active_ids()
+
+        month_appointments = (
+            await self.appointments.get_for_month(
+                year=year,
+                month=month,
+            )
+        )
+
+        appointments_by_doctor_and_date: dict[
+            tuple[int, date],
+            list[AppointmentModel],
+        ] = defaultdict(list)
+
+        for appointment in month_appointments:
+            appointment_date = appointment.date_time.date()
+
+            appointments_by_doctor_and_date[
+                (
+                    appointment.doctor_id,
+                    appointment_date,
+                )
+            ].append(appointment)
+
+        available_days: list[int] = []
+        fully_booked_days: list[int] = []
+
+        if doctor_ids:
+            for day_number in range(
+                1,
+                days_in_month + 1,
+            ):
+                selected_date = date(
+                    year,
+                    month,
+                    day_number,
+                )
+
+                if selected_date.weekday() >= 5:
+                    continue
+
+                day_has_free_slot = False
+
+                for doctor_id in doctor_ids:
+                    doctor_appointments = (
+                        appointments_by_doctor_and_date.get(
+                            (
+                                doctor_id,
+                                selected_date,
+                            ),
+                            [],
+                        )
+                    )
+
+                    doctor_has_free_slot = (
+                        self._doctor_has_free_slot(
+                            selected_date=selected_date,
+                            appointments=doctor_appointments,
+                        )
+                    )
+
+                    if doctor_has_free_slot:
+                        day_has_free_slot = True
+                        break
+
+                if day_has_free_slot:
+                    available_days.append(day_number)
+                else:
+                    fully_booked_days.append(day_number)
+
+        now = datetime.now(timezone.utc)
+
+        statistics = (
+            await self.appointments.get_dashboard_statistics(
+                now=now,
+            )
+        )
+
+        return AppointmentDashboardResponse(
+            calendar=AppointmentCalendarResponse(
+                year=year,
+                month=month,
+                days_in_month=days_in_month,
+                available_days=available_days,
+                fully_booked_days=fully_booked_days,
+            ),
+            statistics=AppointmentStatisticsResponse(
+                today_appointments=statistics[
+                    "today_appointments"
+                ],
+                upcoming_appointments=statistics[
+                    "upcoming_appointments"
+                ],
+                completed_today=statistics[
+                    "completed_today"
+                ],
+                cancelled_today=statistics[
+                    "cancelled_today"
+                ],
+            ),
+        )
+
     async def complete(
         self,
         appointment_id: int,
@@ -413,6 +546,65 @@ class AppointmentService:
         return await self._get_details_after_change(
             appointment.id,
         )
+
+    @staticmethod
+    def _doctor_has_free_slot(
+        selected_date: date,
+        appointments: list[AppointmentModel],
+    ) -> bool:
+        workday_start = datetime.combine(
+            selected_date,
+            WORKDAY_START,
+            tzinfo=timezone.utc,
+        )
+
+        workday_end = datetime.combine(
+            selected_date,
+            WORKDAY_END,
+            tzinfo=timezone.utc,
+        )
+
+        slot_step = timedelta(
+            minutes=SLOT_STEP_MINUTES,
+        )
+
+        slot_duration = timedelta(
+            minutes=DASHBOARD_SLOT_DURATION_MINUTES,
+        )
+
+        current_slot_start = workday_start
+
+        while current_slot_start + slot_duration <= workday_end:
+            current_slot_end = current_slot_start + slot_duration
+
+            slot_is_booked = False
+
+            for appointment in appointments:
+                if appointment.status not in DASHBOARD_BLOCKING_STATUSES:
+                    continue
+
+                appointment_start = appointment.date_time
+
+                appointment_end = (
+                    appointment_start
+                    + timedelta(minutes=appointment.duration)
+                )
+
+                has_overlap = (
+                    current_slot_start < appointment_end
+                    and current_slot_end > appointment_start
+                )
+
+                if has_overlap:
+                    slot_is_booked = True
+                    break
+
+            if not slot_is_booked:
+                return True
+
+            current_slot_start += slot_step
+
+        return False
 
     async def get_available_slots(
         self,

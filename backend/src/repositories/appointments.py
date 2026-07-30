@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
@@ -356,3 +356,113 @@ class AppointmentRepository:
         result = await self.session.execute(statement)
 
         return list(result.scalars().all())
+
+    async def get_for_month(
+        self,
+        year: int,
+        month: int,
+    ) -> list[AppointmentModel]:
+        month_start = datetime(
+            year=year,
+            month=month,
+            day=1,
+            tzinfo=timezone.utc,
+        )
+
+        if month == 12:
+            next_month_start = datetime(
+                year=year + 1,
+                month=1,
+                day=1,
+                tzinfo=timezone.utc,
+            )
+        else:
+            next_month_start = datetime(
+                year=year,
+                month=month + 1,
+                day=1,
+                tzinfo=timezone.utc,
+            )
+
+        statement = (
+            select(AppointmentModel)
+            .where(
+                AppointmentModel.date_time >= month_start,
+                AppointmentModel.date_time < next_month_start,
+            )
+            .order_by(
+                AppointmentModel.date_time,
+                AppointmentModel.id,
+            )
+        )
+
+        result = await self.session.scalars(statement)
+
+        return list(result.all())
+
+    async def get_dashboard_statistics(
+        self,
+        now: datetime,
+    ) -> dict[str, int]:
+        today_start = datetime.combine(
+            now.date(),
+            time.min,
+            tzinfo=timezone.utc,
+        )
+
+        tomorrow_start = today_start + timedelta(days=1)
+
+        statement = select(
+            func.count(AppointmentModel.id)
+            .filter(
+                AppointmentModel.date_time >= today_start,
+                AppointmentModel.date_time < tomorrow_start,
+            )
+            .label("today_appointments"),
+
+            func.count(AppointmentModel.id)
+            .filter(
+                AppointmentModel.date_time > now,
+                AppointmentModel.status.in_(
+                    ACTIVE_APPOINTMENT_STATUSES,
+                ),
+            )
+            .label("upcoming_appointments"),
+
+            func.count(AppointmentModel.id)
+            .filter(
+                AppointmentModel.date_time >= today_start,
+                AppointmentModel.date_time < tomorrow_start,
+                AppointmentModel.status
+                == AppointmentStatusEnum.COMPLETED,
+            )
+            .label("completed_today"),
+
+            func.count(AppointmentModel.id)
+            .filter(
+                AppointmentModel.date_time >= today_start,
+                AppointmentModel.date_time < tomorrow_start,
+                AppointmentModel.status
+                == AppointmentStatusEnum.CANCELLED,
+            )
+            .label("cancelled_today"),
+        )
+
+        result = await self.session.execute(statement)
+        row = result.one()
+
+        return {
+            "today_appointments": int(
+                row.today_appointments or 0
+            ),
+            "upcoming_appointments": int(
+                row.upcoming_appointments or 0
+            ),
+            "completed_today": int(
+                row.completed_today or 0
+            ),
+            "cancelled_today": int(
+                row.cancelled_today or 0
+            ),
+        }
+

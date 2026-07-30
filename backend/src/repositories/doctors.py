@@ -23,6 +23,18 @@ class DoctorRepository:
             .where(DoctorModel.user_id == user_id)
         )
 
+    async def get_active_ids(self) -> list[int]:
+        statement = (
+            select(DoctorModel.id)
+            .join(DoctorModel.user)
+            .where(UserModel.is_active.is_(True))
+            .order_by(DoctorModel.id)
+        )
+
+        result = await self.session.scalars(statement)
+
+        return list(result.all())
+
     def add(self, doctor: DoctorModel) -> None:
         self.session.add(doctor)
 

@@ -78,3 +78,23 @@ class AvailableSlotsResponse(BaseModel):
     available_count: int
     booked_count: int
     slots: list[AvailableSlotResponse]
+
+
+class AppointmentCalendarResponse(BaseModel):
+    year: int
+    month: int
+    days_in_month: int
+    available_days: list[int]
+    fully_booked_days: list[int]
+
+
+class AppointmentStatisticsResponse(BaseModel):
+    today_appointments: int
+    upcoming_appointments: int
+    completed_today: int
+    cancelled_today: int
+
+
+class AppointmentDashboardResponse(BaseModel):
+    calendar: AppointmentCalendarResponse
+    statistics: AppointmentStatisticsResponse

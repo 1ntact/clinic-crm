@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import NoReturn
 
 from fastapi import (
@@ -15,6 +15,7 @@ from database.models.appointments import AppointmentStatusEnum
 from database.session_postgresql import get_postgresql_db
 from schemas.appointments import (
     AppointmentCreate,
+    AppointmentDashboardResponse,
     AppointmentResponse,
     AppointmentUpdate,
     AvailableSlotsResponse,
@@ -120,7 +121,7 @@ async def get_appointments(
         raise_http_error(error)
 
 
-# Статичний маршрут має бути перед /{appointment_id}/
+# Статичні маршрути мають бути перед /{appointment_id}/
 @router.get(
     "/available-slots/",
     response_model=AvailableSlotsResponse,
@@ -146,6 +147,40 @@ async def get_available_slots(
             selected_date=selected_date,
             doctor_id=doctor_id,
             duration=duration,
+        )
+    except ValueError as error:
+        raise_http_error(error)
+
+
+@router.get(
+    "/dashboard/",
+    response_model=AppointmentDashboardResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_appointments_dashboard(
+    year: int | None = Query(
+        default=None,
+        ge=2000,
+        le=2100,
+    ),
+    month: int | None = Query(
+        default=None,
+        ge=1,
+        le=12,
+    ),
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> AppointmentDashboardResponse:
+    now = datetime.now(timezone.utc)
+
+    selected_year = year if year is not None else now.year
+    selected_month = month if month is not None else now.month
+
+    service = AppointmentService(db)
+
+    try:
+        return await service.get_dashboard(
+            year=selected_year,
+            month=selected_month,
         )
     except ValueError as error:
         raise_http_error(error)
