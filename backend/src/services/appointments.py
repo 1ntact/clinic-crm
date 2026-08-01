@@ -1,3 +1,4 @@
+
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 from calendar import monthrange
@@ -393,6 +394,7 @@ class AppointmentService:
 
         available_days: list[int] = []
         fully_booked_days: list[int] = []
+        today = datetime.now(timezone.utc).date()
 
         if doctor_ids:
             for day_number in range(
@@ -404,6 +406,8 @@ class AppointmentService:
                     month,
                     day_number,
                 )
+                if selected_date < today:
+                    continue
 
                 if selected_date.weekday() >= 5:
                     continue
