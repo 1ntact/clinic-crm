@@ -62,6 +62,14 @@ class AppointmentModel(Base):
         nullable=False,
     )
 
+    treatment_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "treatments.id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+    )
+
     date_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -72,11 +80,6 @@ class AppointmentModel(Base):
         nullable=False,
         default=30,
         server_default="30",
-    )
-
-    type_visit: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
     )
 
     status: Mapped[AppointmentStatusEnum] = mapped_column(
@@ -91,5 +94,22 @@ class AppointmentModel(Base):
         nullable=True,
     )
 
-    patient = relationship("PatientModel")
-    doctor = relationship("DoctorModel")
+    patient = relationship(
+        "PatientModel",
+    )
+
+    doctor = relationship(
+        "DoctorModel",
+    )
+
+    treatment = relationship(
+        "TreatmentModel",
+        back_populates="appointments",
+    )
+
+    visit = relationship(
+        "VisitModel",
+        back_populates="appointment",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta, timezone
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import func, select, text
@@ -11,6 +12,7 @@ from database.models.appointments import (
 )
 from database.models.doctors import DoctorModel
 from database.models.patient import PatientModel
+from database.models.treatments import TreatmentModel
 from database.models.users import UserModel
 from schemas.appointments import (
     AppointmentCreate,
@@ -36,14 +38,16 @@ class AppointmentRepository:
         patient_phone_number: str | None,
         doctor_first_name: str | None,
         doctor_last_name: str | None,
+        treatment_name: str | None,
+        treatment_price: Decimal | None,
     ) -> dict[str, Any]:
         return {
             "id": appointment.id,
             "patient_id": appointment.patient_id,
             "doctor_id": appointment.doctor_id,
+            "treatment_id": appointment.treatment_id,
             "date_time": appointment.date_time,
             "duration": appointment.duration,
-            "type_visit": appointment.type_visit,
             "status": appointment.status,
             "notes": appointment.notes,
             "created_at": appointment.created_at,
@@ -52,6 +56,12 @@ class AppointmentRepository:
             "patient_phone_number": patient_phone_number,
             "doctor_first_name": doctor_first_name,
             "doctor_last_name": doctor_last_name,
+            "treatment": treatment_name,
+            "treatment_price": (
+                float(treatment_price)
+                if treatment_price is not None
+                else None
+            ),
         }
 
     def add(
@@ -63,9 +73,9 @@ class AppointmentRepository:
         appointment = AppointmentModel(
             patient_id=appointment_data.patient_id,
             doctor_id=appointment_data.doctor_id,
+            treatment_id=appointment_data.treatment_id,
             date_time=date_time,
             duration=duration,
-            type_visit=appointment_data.type_visit,
             notes=appointment_data.notes,
             status=AppointmentStatusEnum.SCHEDULED,
         )
@@ -101,6 +111,8 @@ class AppointmentRepository:
                 patient_user.phone_number,
                 doctor_user.first_name,
                 doctor_user.last_name,
+                TreatmentModel.treatment,
+                TreatmentModel.price,
             )
             .join(
                 PatientModel,
@@ -117,6 +129,10 @@ class AppointmentRepository:
             .join(
                 doctor_user,
                 DoctorModel.user_id == doctor_user.id,
+            )
+            .join(
+                TreatmentModel,
+                AppointmentModel.treatment_id == TreatmentModel.id,
             )
             .where(
                 AppointmentModel.id == appointment_id,
@@ -136,6 +152,8 @@ class AppointmentRepository:
             patient_phone_number=row[3],
             doctor_first_name=row[4],
             doctor_last_name=row[5],
+            treatment_name=row[6],
+            treatment_price=row[7],
         )
 
     async def get_all(
@@ -160,6 +178,8 @@ class AppointmentRepository:
                 patient_user.phone_number,
                 doctor_user.first_name,
                 doctor_user.last_name,
+                TreatmentModel.treatment,
+                TreatmentModel.price,
             )
             .join(
                 PatientModel,
@@ -176,6 +196,10 @@ class AppointmentRepository:
             .join(
                 doctor_user,
                 DoctorModel.user_id == doctor_user.id,
+            )
+            .join(
+                TreatmentModel,
+                AppointmentModel.treatment_id == TreatmentModel.id,
             )
         )
 
@@ -195,6 +219,7 @@ class AppointmentRepository:
                 time.min,
                 tzinfo=timezone.utc,
             )
+
             day_end = day_start + timedelta(days=1)
 
             statement = statement.where(
@@ -251,6 +276,8 @@ class AppointmentRepository:
                     patient_phone_number=row[3],
                     doctor_first_name=row[4],
                     doctor_last_name=row[5],
+                    treatment_name=row[6],
+                    treatment_price=row[7],
                 )
             )
 
@@ -325,9 +352,9 @@ class AppointmentRepository:
         await self.session.delete(appointment)
 
     async def get_doctor_appointments_by_date(
-            self,
-            doctor_id: int,
-            selected_date: date,
+        self,
+        doctor_id: int,
+        selected_date: date,
     ) -> list[AppointmentModel]:
         day_start = datetime.combine(
             selected_date,
@@ -419,7 +446,6 @@ class AppointmentRepository:
                 AppointmentModel.date_time < tomorrow_start,
             )
             .label("today_appointments"),
-
             func.count(AppointmentModel.id)
             .filter(
                 AppointmentModel.date_time > now,
@@ -428,7 +454,6 @@ class AppointmentRepository:
                 ),
             )
             .label("upcoming_appointments"),
-
             func.count(AppointmentModel.id)
             .filter(
                 AppointmentModel.date_time >= today_start,
@@ -437,7 +462,6 @@ class AppointmentRepository:
                 == AppointmentStatusEnum.COMPLETED,
             )
             .label("completed_today"),
-
             func.count(AppointmentModel.id)
             .filter(
                 AppointmentModel.date_time >= today_start,
@@ -465,4 +489,3 @@ class AppointmentRepository:
                 row.cancelled_today or 0
             ),
         }
-

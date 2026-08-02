@@ -1,8 +1,8 @@
 
-from datetime import date, datetime, time, timedelta, timezone
-from typing import Any
 from calendar import monthrange
 from collections import defaultdict
+from datetime import date, datetime, time, timedelta, timezone
+from typing import Any
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ from database.models.appointments import (
 from repositories.appointments import AppointmentRepository
 from repositories.doctors import DoctorRepository
 from repositories.patients import PatientRepository
+from repositories.treatments import TreatmentRepository
 from schemas.appointments import (
     AppointmentCalendarResponse,
     AppointmentCreate,
@@ -43,6 +44,7 @@ class AppointmentService:
         self.appointments = AppointmentRepository(session)
         self.patients = PatientRepository(session)
         self.doctors = DoctorRepository(session)
+        self.treatments = TreatmentRepository(session)
 
     async def create(
         self,
@@ -61,6 +63,10 @@ class AppointmentService:
 
         if doctor is None:
             raise ValueError("Doctor not found.")
+
+        await self._get_main_treatment(
+            appointment_data.treatment_id,
+        )
 
         appointment_date_time = datetime.combine(
             appointment_data.appointment_date,
@@ -189,6 +195,84 @@ class AppointmentService:
 
         return appointment_details
 
+    async def _get_main_treatment(
+        self,
+        treatment_id: int,
+    ):
+        treatment = await self.treatments.get_by_id(
+            treatment_id,
+        )
+
+        if treatment is None:
+            raise ValueError("Treatment not found.")
+
+        if not treatment.is_main:
+            raise ValueError(
+                "Only a main treatment can be selected "
+                "for an appointment."
+            )
+
+        return treatment
+
+    @staticmethod
+    def _validate_status_transition(
+        current_status: AppointmentStatusEnum,
+        new_status: AppointmentStatusEnum,
+        appointment_date_time: datetime,
+        now: datetime,
+    ) -> None:
+        if new_status == current_status:
+            return
+
+        allowed_transitions = {
+            AppointmentStatusEnum.SCHEDULED: {
+                AppointmentStatusEnum.CONFIRMED,
+                AppointmentStatusEnum.CANCELLED,
+                AppointmentStatusEnum.COMPLETED,
+                AppointmentStatusEnum.NO_SHOW,
+            },
+            AppointmentStatusEnum.CONFIRMED: {
+                AppointmentStatusEnum.CANCELLED,
+                AppointmentStatusEnum.COMPLETED,
+                AppointmentStatusEnum.NO_SHOW,
+            },
+        }
+
+        allowed_statuses = allowed_transitions.get(
+            current_status,
+            set(),
+        )
+
+        if new_status not in allowed_statuses:
+            raise ValueError(
+                f"Appointment status cannot be changed from "
+                f"'{current_status.value}' to '{new_status.value}'."
+            )
+
+        if new_status == AppointmentStatusEnum.CONFIRMED:
+            if appointment_date_time <= now:
+                raise ValueError(
+                    "Past appointment cannot be confirmed."
+                )
+
+        if new_status == AppointmentStatusEnum.CANCELLED:
+            if appointment_date_time <= now:
+                raise ValueError(
+                    "A past appointment cannot be cancelled."
+                )
+
+        if new_status == AppointmentStatusEnum.COMPLETED:
+            if appointment_date_time > now:
+                raise ValueError(
+                    "A future appointment cannot be completed."
+                )
+
+        if new_status == AppointmentStatusEnum.NO_SHOW:
+            if appointment_date_time > now:
+                raise ValueError(
+                    "A future appointment cannot be marked as no-show."
+                )
+
     async def update(
         self,
         appointment_id: int,
@@ -212,6 +296,29 @@ class AppointmentService:
             exclude_unset=True,
         )
 
+        if not update_data:
+            return await self._get_details_after_change(
+                appointment.id,
+            )
+
+        required_fields = {
+            "patient_id",
+            "doctor_id",
+            "treatment_id",
+            "date_time",
+            "duration",
+            "status",
+        }
+
+        for field_name in required_fields:
+            if (
+                field_name in update_data
+                and update_data[field_name] is None
+            ):
+                raise ValueError(
+                    f"{field_name} cannot be null."
+                )
+
         new_patient_id = update_data.get(
             "patient_id",
             appointment.patient_id,
@@ -222,46 +329,86 @@ class AppointmentService:
             appointment.doctor_id,
         )
 
+        new_treatment_id = update_data.get(
+            "treatment_id",
+            appointment.treatment_id,
+        )
+
         new_date_time = update_data.get(
             "date_time",
             appointment.date_time,
         )
-
-        if new_date_time <= datetime.now(timezone.utc):
-            raise ValueError(
-                "Appointment date and time must be in the future."
-            )
 
         new_duration = update_data.get(
             "duration",
             appointment.duration,
         )
 
-        patient = await self.patients.get_by_id(
-            new_patient_id,
+        new_status = update_data.get(
+            "status",
+            appointment.status,
         )
 
-        if patient is None:
-            raise ValueError("Patient not found.")
+        now = datetime.now(timezone.utc)
 
-        doctor = await self.doctors.get_by_id(
-            new_doctor_id,
+        self._validate_status_transition(
+            current_status=appointment.status,
+            new_status=new_status,
+            appointment_date_time=new_date_time,
+            now=now,
         )
 
-        if doctor is None:
-            raise ValueError("Doctor not found.")
+        schedule_fields = {
+            "patient_id",
+            "doctor_id",
+            "treatment_id",
+            "date_time",
+            "duration",
+        }
 
-        doctor_busy = await self.appointments.is_doctor_busy(
-            doctor_id=new_doctor_id,
-            date_time=new_date_time,
-            duration=new_duration,
-            exclude_appointment_id=appointment.id,
+        schedule_changed = bool(
+            schedule_fields.intersection(update_data)
         )
 
-        if doctor_busy:
+        if schedule_changed and new_date_time <= now:
             raise ValueError(
-                "Doctor already has an appointment during this time."
+                "Past appointment scheduling data cannot be updated."
             )
+
+        if schedule_changed:
+            patient = await self.patients.get_by_id(
+                new_patient_id,
+            )
+
+            if patient is None:
+                raise ValueError("Patient not found.")
+
+            doctor = await self.doctors.get_by_id(
+                new_doctor_id,
+            )
+
+            if doctor is None:
+                raise ValueError("Doctor not found.")
+
+            await self._get_main_treatment(
+                new_treatment_id,
+            )
+
+            if new_status in DASHBOARD_BLOCKING_STATUSES:
+                doctor_busy = (
+                    await self.appointments.is_doctor_busy(
+                        doctor_id=new_doctor_id,
+                        date_time=new_date_time,
+                        duration=new_duration,
+                        exclude_appointment_id=appointment.id,
+                    )
+                )
+
+                if doctor_busy:
+                    raise ValueError(
+                        "Doctor already has an appointment "
+                        "during this time."
+                    )
 
         try:
             self.appointments.update(

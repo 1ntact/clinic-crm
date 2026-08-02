@@ -9,13 +9,13 @@ from database.models.appointments import AppointmentStatusEnum
 class AppointmentBase(BaseModel):
     patient_id: int
     doctor_id: int
+    treatment_id: int
     date_time: datetime
     duration: int = Field(
         default=30,
         ge=30,
         le=180,
     )
-    type_visit: str | None = None
     status: AppointmentStatusEnum = AppointmentStatusEnum.SCHEDULED
     notes: str | None = None
 
@@ -23,6 +23,7 @@ class AppointmentBase(BaseModel):
 class AppointmentCreate(BaseModel):
     patient_id: int
     doctor_id: int
+    treatment_id: int
     appointment_date: date
     appointment_time: time
     duration: int = Field(
@@ -31,20 +32,20 @@ class AppointmentCreate(BaseModel):
         le=180,
         description="Appointment duration in minutes",
     )
-    type_visit: str
     notes: str | None = None
 
 
 class AppointmentUpdate(BaseModel):
     patient_id: int | None = None
     doctor_id: int | None = None
+    treatment_id: int | None = None
     date_time: datetime | None = None
     duration: int | None = Field(
         default=None,
         ge=30,
         le=180,
     )
-    type_visit: str | None = None
+    status: AppointmentStatusEnum | None = None
     notes: str | None = None
 
 
@@ -60,6 +61,9 @@ class AppointmentResponse(AppointmentBase):
 
     doctor_first_name: str | None = None
     doctor_last_name: str | None = None
+
+    treatment: str | None = None
+    treatment_price: float | None = None
 
 
 class AppointmentStatusUpdate(BaseModel):
