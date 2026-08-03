@@ -6,9 +6,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers";
 import { PickerDay } from "@mui/x-date-pickers/PickerDay";
 
+import { setDate, setQuery } from "@/features/appointments/appointmentsSlice";
+import { useAppDispatch, useAppSelector } from "@/app/store/hook";
+
 type CalendarProps = {
-  availableDays: number[];
-  bookedDays: number[];
+  availableDays: string[];
+  bookedDays: string[];
 };
 
 type ServerDayProps = React.ComponentProps<typeof PickerDay> & {
@@ -23,11 +26,12 @@ function ServerDay({
   sx,
   ...other
 }: ServerDayProps) {
+ 
   const date = day.date();
 
   const available = availableDays.includes(date);
   const booked = bookedDays.includes(date);
-
+ 
   return (
     <PickerDay
       {...other}
@@ -61,15 +65,29 @@ export default function Calendar({
   availableDays,
   bookedDays,
 }: CalendarProps) {
-  const [value, setValue] = useState<Dayjs | null>(dayjs());
-
+  
+  const value = useAppSelector(state=>state.appointment.calendar.selectedDate)
+const dispatch = useAppDispatch();
   return (
     <div className="rounded-2xl border bg-white p-4 shadow-sm">
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DateCalendar
-        
-          value={value}
-          onChange={setValue}
+          disablePast
+          minDate={dayjs()}
+         onMonthChange={(value: Dayjs) => {
+    dispatch(
+      setQuery({
+        month: value.month() + 1,
+        year: value.year(),
+      })
+    );
+  }}
+          value={value? dayjs(value) : null}
+          onChange={value => {
+            if (!value) { return }
+            dispatch(setDate(value.format("YYYY-MM-DD")));
+          }
+          }
           shouldDisableDate={(day) => {
     return !availableDays.includes(day.date());
   }}

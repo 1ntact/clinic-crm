@@ -1,10 +1,35 @@
+import type { CalendarQuery } from "@/features/appointments/model/calendarQuery";
 import { httpClient } from "@/http/httpClient"
 
 
 export const appointmentsService = {
-  getAppointmentsDashboard: async () => {
-    const response = await httpClient.get('appointments/dashboard')
+  getAppointmentsDashboard: async (query:CalendarQuery) => {
+    const params = {
+      month: query.month,
+      year: query.year,
+    }
+    if (query.month) {
+      params.month = query.month;
+    }
+    if (query.year) {
+      params.year = query.year
+    }
+    const response = await httpClient.get(`appointments/dashboard/`, {params})
     return response.data
+  },
+  getAvailableAppointmentsTime: async (query) => {
+    const params = {
+      date: query.date,
+      doctor_id:query.doctorId
+    }
+      if (query.date) {
+      params.date = query.date;
+    }
+    if (query.doctorId) {
+      params.doctor_id = query.doctorId
+    }
+    const response = await httpClient.get('appointments/available-slots/',{params})
+return response.data
   },
   getAppointments: async () => {
     const respoonse = await httpClient.get('/appointments/')
