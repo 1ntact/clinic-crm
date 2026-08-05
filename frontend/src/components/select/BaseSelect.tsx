@@ -4,8 +4,9 @@ type Option = {
 };
 
 type Props = {
+  name: string;
   classNames?: string;
-  label: string;
+  label?: string;
   options: Option[];
   value: string[];
   placeholder?: string;
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export const BaseSelect = ({
+  name,
   classNames,
   label,
   options,
@@ -23,11 +25,13 @@ export const BaseSelect = ({
   <>
     <label>{label}</label>
 
-    <select className={`${classNames ?? ''}`}
+    <select className={`h-[44px] rounded-[8px] border border-gray-300 px-[16px] py-[8px] ${classNames ?? ''}`}
+     id={name}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+     
     >
-      <option value="">
+      <option value="" disabled>
         {placeholder}
       </option>
 

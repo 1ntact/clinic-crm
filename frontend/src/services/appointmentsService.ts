@@ -20,7 +20,7 @@ export const appointmentsService = {
   getAvailableAppointmentsTime: async (query) => {
     const params = {
       date: query.date,
-      doctor_id:query.doctorId
+      doctor_id:query.id
     }
       if (query.date) {
       params.date = query.date;
@@ -41,5 +41,13 @@ return response.data
   },
   createAppointments: async (data) => {
     const response = await httpClient.post('/appointments', data,)
-  return response.data}
+    return response.data
+  },
+  getTreatments: async (query:boolean) => {
+    const params = {
+    is_main:query
+    }
+    const response = await httpClient.get('/treatments/', { params })
+    return response.data
+  }
 }

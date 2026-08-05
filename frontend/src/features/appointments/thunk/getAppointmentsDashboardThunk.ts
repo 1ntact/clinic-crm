@@ -7,6 +7,7 @@ export const getAppointmentsDashboardThunk = createAsyncThunk(
   "dashboards",
   async (query:CalendarQuery, thunkApi) => {
     try {
+      console.log(query, 'what a ttttt')
       return await appointmentsService.getAppointmentsDashboard(query);
     } catch (e) {
       return thunkApi.rejectWithValue(getErrorMessage(e));

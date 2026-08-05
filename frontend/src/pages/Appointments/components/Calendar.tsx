@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import dayjs, { Dayjs } from "dayjs";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -66,7 +66,8 @@ export default function Calendar({
   bookedDays,
 }: CalendarProps) {
   
-  const value = useAppSelector(state=>state.appointment.calendar.selectedDate)
+  const value = useAppSelector(state => state.appointment.calendar.selectedDate)
+  
 const dispatch = useAppDispatch();
   return (
     <div className="rounded-2xl border bg-white p-4 shadow-sm">
@@ -74,7 +75,9 @@ const dispatch = useAppDispatch();
         <DateCalendar
           disablePast
           minDate={dayjs()}
-         onMonthChange={(value: Dayjs) => {
+          onMonthChange={(value: Dayjs) => {
+            dispatch(setDate(null));
+           
     dispatch(
       setQuery({
         month: value.month() + 1,

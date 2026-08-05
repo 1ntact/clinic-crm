@@ -6,7 +6,7 @@ export const getAvailableTimeSlotsThunk = createAsyncThunk(
   'dashboards/available',
   async (query, thunkApi) => {
     try {
-      console.log(query)
+    
       return await appointmentsService.getAvailableAppointmentsTime(query)
     }
     catch (e){

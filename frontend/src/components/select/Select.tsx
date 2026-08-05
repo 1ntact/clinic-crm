@@ -16,7 +16,7 @@ type Props<T extends FieldValues> = {
   option: SelectOption[];
   placeholder: string;
   className?: string;
-
+onChange?: (value: string) => void;
   register: UseFormRegister<T>;
   rules?: RegisterOptions<T>;
   error?: string;
@@ -29,9 +29,11 @@ export const Select = <T extends FieldValues>({
   placeholder,
   className,
   register,
+  onChange,
   rules,
   error,
 }: Props<T>) => {
+  const registerProps = register(name, rules);
   return (
     <div className={`flex flex-col ${className ?? ""}`}>
       <label htmlFor={name} className="mb-[10px] text-[14px] font-medium">
@@ -41,7 +43,11 @@ export const Select = <T extends FieldValues>({
       <select
         id={name}
         defaultValue=""
-        {...register(name, rules)}
+        {...registerProps}
+  onChange={(e) => {
+    registerProps.onChange(e);      
+    onChange?.(e.target.value);     
+  }}
         className="h-[44px] rounded-[5px] border border-gray-300 px-3"
       >
         <option value="" disabled>
