@@ -1,5 +1,7 @@
+import type { AppointmentsQuery } from "@/features/appointments/model/appointmentQuery";
 import type { CalendarQuery } from "@/features/appointments/model/calendarQuery";
 import { httpClient } from "@/http/httpClient"
+import type { AppointmentFormData } from "@/types/appointmentFormData";
 
 
 export const appointmentsService = {
@@ -31,15 +33,45 @@ export const appointmentsService = {
     const response = await httpClient.get('appointments/available-slots/',{params})
 return response.data
   },
-  getAppointments: async () => {
-    const respoonse = await httpClient.get('/appointments/')
-    return respoonse.data
-  },
+getAppointments: async (query: AppointmentsQuery) => {
+  const params: Record<string, unknown> = {
+   
+  };
+
+
+  if (query.doctorId) {
+    params.doctor_id = query.doctorId;
+  }
+
+  if (query.patientId) {
+    params.patient_id = query.patientId;
+  }
+
+  if (query.dateFrom) {
+    params.date_from = query.dateFrom;
+  }
+
+  if (query.dateTo) {
+    params.date_to = query.dateTo;
+  }
+
+  if (query.appointmentStatus) {
+    params.appointment_status = query.appointmentStatus;
+  }
+
+  if (query.appointmentDate) {
+    params.appointment_date = query.appointmentDate;
+  }
+
+  const response = await httpClient.get("/appointments/", { params });
+
+  return response.data;
+},
   getAppointmentsByID: async (id:string) => {
     const response = await httpClient.get(`/appointments/${id}`)
     return response.data
   },
-  createAppointments: async (data) => {
+  createAppointments: async (data:AppointmentFormData) => {
     const response = await httpClient.post('/appointments', data,)
     return response.data
   },

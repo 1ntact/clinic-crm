@@ -29,6 +29,7 @@ export const ButtonPage: React.FC<Props> = ({
     disabled:text-gray-500
     disabled:cursor-not-allowed
     disabled:opacity-70
+    disabled:line-through
         ${className ?? ""}
       `}
       {...props}

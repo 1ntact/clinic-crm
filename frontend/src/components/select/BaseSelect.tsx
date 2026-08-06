@@ -8,7 +8,7 @@ type Props = {
   classNames?: string;
   label?: string;
   options: Option[];
-  value: string[];
+  value?: string[];
   placeholder?: string;
   onChange: (value: string) => void;
 };

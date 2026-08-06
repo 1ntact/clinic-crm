@@ -56,68 +56,85 @@ export const formValidation = {
     required: "Please select a gender"
   },
 
-birthDate: {
-  required: "Date of birth is required",
-  validate: {
-    notInFuture: (value: string | number) => {
-      const birth = new Date(String(value));
+  birthDate: {
+    required: "Date of birth is required",
+    validate: {
+      notInFuture: (value: string | number) => {
+        const birth = new Date(String(value));
 
-      return (
-        birth <= new Date() ||
-        "Date of birth cannot be in the future"
-      );
+        return (
+          birth <= new Date() ||
+          "Date of birth cannot be in the future"
+        );
+      },
+
+      validAge: (value: string | number) => {
+        const birth = new Date(String(value));
+        const today = new Date();
+
+        let age = today.getFullYear() - birth.getFullYear();
+
+        const monthDiff = today.getMonth() - birth.getMonth();
+
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birth.getDate())
+        ) {
+          age--;
+        }
+
+        return age >= 6 || "Patient must be at least 6 years old";
+      },
+
+      maxAge: (value: string | number) => {
+        const birth = new Date(String(value));
+        const today = new Date();
+
+        let age = today.getFullYear() - birth.getFullYear();
+
+        const monthDiff = today.getMonth() - birth.getMonth();
+
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birth.getDate())
+        ) {
+          age--;
+        }
+
+        return age <= 120 || "Invalid date of birth";
+      },
     },
-
-    validAge: (value: string | number) => {
-      const birth = new Date(String(value));
-      const today = new Date();
-
-      let age = today.getFullYear() - birth.getFullYear();
-
-      const monthDiff = today.getMonth() - birth.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birth.getDate())
-      ) {
-        age--;
-      }
-
-      return age >= 6 || "Patient must be at least 6 years old";
+  },
+  address: {
+    required: "Address is required",
+    minLength: {
+      value: 5,
+      message: "Address must be at least 5 characters",
     },
-
-    maxAge: (value: string | number) => {
-      const birth = new Date(String(value));
-      const today = new Date();
-
-      let age = today.getFullYear() - birth.getFullYear();
-
-      const monthDiff = today.getMonth() - birth.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birth.getDate())
-      ) {
-        age--;
-      }
-
-      return age <= 120 || "Invalid date of birth";
+    maxLength: {
+      value: 255,
+      message: "Address cannot exceed 255 characters",
     },
+    pattern: {
+      value: /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s.,'’"\/\-№]+$/,
+      message: "Address contains invalid characters",
+    },
+ 
   },
+  doctor: {
+    required: "Select a doctor",
   },
-address: {
-  required: "Address is required",
-  minLength: {
-    value: 5,
-    message: "Address must be at least 5 characters",
+  treatments: {
+    required: "Treatments is required",
+    
   },
-  maxLength: {
-    value: 255,
-    message: "Address cannot exceed 255 characters",
+  date: {
+    required: "Select a time",
   },
-  pattern: {
-    value: /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s.,'’"\/\-№]+$/,
-    message: "Address contains invalid characters",
-  },
-},
+  notes: {
+    maxLength: {
+      value: 255,
+      message: "Notes cannot exceed 255 characters",
+    }
+  }
 }

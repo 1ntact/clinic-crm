@@ -8,6 +8,7 @@ import type {
 type SelectOption = {
   label: string;
   value: string;
+   disabled?: boolean;
 };
 
 type Props<T extends FieldValues> = {
@@ -55,7 +56,8 @@ export const Select = <T extends FieldValues>({
         </option>
 
         {option.map((item) => (
-          <option key={item.value} value={item.value}>
+          <option key={item.value} value={item.value}
+          disabled={item.disabled}>
             {item.label}
           </option>
         ))}

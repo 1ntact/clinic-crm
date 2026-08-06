@@ -7,6 +7,8 @@ import { Search } from "@/components/search/Search";
 import type { AppointmentFormData } from "@/types/appointmentFormData";
 import { getAllPatientThunk } from "@/features/patients/thunk/getAllPacientThunk";
 import { AppointmentFormFields } from "@/components/formField/AppointmentFormFields";
+import { createAppointmentThunk } from "./thunk/createAppointmentThunk";
+import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
 
 export const AppointmentCreateForm: React.FC = () => {
   const methods = useForm<AppointmentFormData>();
@@ -14,7 +16,8 @@ export const AppointmentCreateForm: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const dispatch = useAppDispatch();
   const { patients, loading } = useAppSelector((state) => state.patient);
-const {selectedDoctor,selectedDate,selectedSlotsTime} = useAppSelector(
+  const {appointmentsQuery} = useAppSelector((state)=>state.appointment)
+const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useAppSelector(
     (state) => state.appointment.calendar
   );
  
@@ -33,26 +36,35 @@ const {selectedDoctor,selectedDate,selectedSlotsTime} = useAppSelector(
     
 }, [selectedUser, selectedDoctor, setValue]);
 
-   const onSubmit = async (data: AppointmentFormData) => {
+   const onSubmit = async () => {
     if (!selectedUser) {
       return;
     }
 
     try {
-      await dispatch(createPatientThunk({
-        ...data,
-        userId:selectedUser.id
+      await dispatch(createAppointmentThunk({
+        patientId: selectedUser.id,
+        doctorId: selectedDoctor.id,
+        treatmentId: selectedTreatment,
+        appointmentDate: selectedDate,
+        appointmentTime: selectedSlotsTime,
+        notes:'',
+        duration: 30,
+        
+        
+        
+      
       })).unwrap();
 
-       await dispatch(getAllPatientThunk(query)).unwrap();
+      await dispatch( getAppointmentsThunk(appointmentsQuery)).unwrap()
 
       reset();
 
       successToast(
         <>
-          Patient created successfully
+          Appointments created successfully
           <br />
-          Mr. {selectedUser.firstName} {selectedUser.lastName}
+          For{selectedUser.firstName} {selectedUser.lastName}
         </>,
       );
     } catch (e) {
@@ -95,7 +107,7 @@ const {selectedDoctor,selectedDate,selectedSlotsTime} = useAppSelector(
           <form
             id="appointment-create"
             className="flex flex-col gap-6"
-            // onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onSubmit)}
           >
             {<AppointmentFormFields type={"create"} />}
           </form>

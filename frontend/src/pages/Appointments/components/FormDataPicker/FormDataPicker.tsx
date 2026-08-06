@@ -3,6 +3,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
+import { setDate, setTime } from "@/features/appointments/appointmentsSlice";
+import { useAppDispatch } from "@/app/store/hook";
 
 type Props<T extends FieldValues> = {
   name: Path<T>;
@@ -14,14 +16,15 @@ type Props<T extends FieldValues> = {
 };
 
 export const FormDatePicker = <T extends FieldValues>({
+  setValue,
   name,
   label,
   control,
   error,
   availableDays,
 }: Props<T>) => {
-  console.log(availableDays);
-console.log(typeof availableDays[0]);
+const dispatch = useAppDispatch()
+
   return (
     <div className="flex flex-col">
       <label className="mb-[10px] text-[14px] font-medium">
@@ -36,11 +39,15 @@ console.log(typeof availableDays[0]);
             <DatePicker
               value={field.value ? dayjs(field.value) : null}
               disablePast
-              onChange={(value) => {
-                field.onChange(
-                  value ? value.format("YYYY-MM-DD") : ""
-                );
-              }}
+            onChange={(value) => {
+  const date = value ? value.format("YYYY-MM-DD") : "";
+
+  field.onChange(date);
+  dispatch(setDate(date));
+              dispatch(setTime(null));
+              setValue("appointmentTime", "")
+              
+}}
       shouldDisableDate={(day) => !availableDays.includes(day.date())}
               slotProps={{
                 textField: {

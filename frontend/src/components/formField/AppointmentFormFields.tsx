@@ -14,9 +14,10 @@ export const AppointmentFormFields = ({ type }) => {
   const { treatments } = useAppSelector(state => state.appointment)
   const {availableDays, availableTime} = useAppSelector(state =>state.appointment.calendar)
   const dispatch = useAppDispatch() 
-  console.log(availableTime)
+
   const {
     control,
+    setValue,
       register,
       formState: { errors },
     } = useFormContext<AppointmentFormData>();
@@ -45,7 +46,7 @@ export const AppointmentFormFields = ({ type }) => {
               readOnly={type === "create"}
             />
   </div>
-   <section>
+   
         <Input
           name="phoneNumber"
           label="Phone *"
@@ -55,8 +56,8 @@ export const AppointmentFormFields = ({ type }) => {
           rules={formValidation.phone}
           error={errors.phoneNumber?.message}
       />
-       <div className="flex gap-4">
-                {<Select
+       <div className="flex gap-4 mb-[24px]">
+                <Select
                   className="flex-1"
                   name="doctor"
                   label="Doctor *"
@@ -73,12 +74,12 @@ export const AppointmentFormFields = ({ type }) => {
     }
   }}
                   register={register}
-                  rules={formValidation.specialization}
-                  error={errors.specialization?.message}
+                  rules={formValidation.doctor}
+                  error={errors.doctor?.message}
         />
           
-        }
-           {<Select
+        
+           <Select
                   className="flex-1"
                   name="treatments"
                   label="Treatments *"
@@ -92,16 +93,14 @@ export const AppointmentFormFields = ({ type }) => {
                     
                }}
                   register={register}
-                  rules={formValidation.specialization}
-                  error={errors.specialization?.message}
-        />
-          
-        }
-       
-                
+                  rules={formValidation.treatments}
+                  error={errors.treatments?.message}
+        />       
+            
       </div>
         <div className="flex gap-4">
-       <FormDatePicker
+      <FormDatePicker
+        setValue = {setValue}
   name="appointmentDate"
   label="Appointment date"
   control={control}
@@ -114,7 +113,7 @@ export const AppointmentFormFields = ({ type }) => {
                   label="Time *"
                   placeholder="Choose Time"
         option={availableTime.map((time) => ({
-          
+           disabled: time.status === "booked",
              value: String(time.time),
              label: `${time.time.slice(0,-3)}  `,
            }))}
@@ -123,17 +122,18 @@ export const AppointmentFormFields = ({ type }) => {
                     
                }}
                   register={register}
-                  rules={formValidation.specialization}
-                  error={errors.specialization?.message}
+                  rules={formValidation.date}
+                  error={errors.appointmentTime?.message}
         />
       </div>
      <TextArea
   name="notes"
         label="Notes"
         placeholder="Any additional notes for this appointment"
-  register={register}
-  error={errors.description?.message}
+      register={register}
+      rules={formValidation.notes}
+  error={errors.notes?.message}
 />
-    </section>
+    
   </>)
 }

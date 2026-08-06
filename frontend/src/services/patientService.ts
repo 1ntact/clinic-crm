@@ -2,6 +2,7 @@ import { httpClient } from "@/http/httpClient";
 import type { PatientFormData } from "@/types/patientFormData";
 import { accessTokenService } from "./accessTokenService";
 import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
+import type { PatientQuery } from "@/features/patients/model/patientsQuery";
 
 export const patientsService = {
   createPatient: async (data: PatientFormData) => {
@@ -12,7 +13,7 @@ export const patientsService = {
     });
     return response.data;
   },
-  getAllPatients: async (query) => {
+  getAllPatients: async (query:PatientQuery) => {
      const params: Record<string, string | number> = {
       page: query.page,
       page_size: query.pageSize,
