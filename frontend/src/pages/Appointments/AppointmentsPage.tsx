@@ -19,9 +19,12 @@ import { HiOutlineEllipsisVertical } from "react-icons/hi2";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { ActionModal } from "./components/ActionModal/ActionModal";
-import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
+import { setAppointmentsQuery, setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
 import { ChangeStatusModal } from "./components/ChangeStatusModal/ChangeStatusModal";
 import { statusOptions } from "@/features/appointments/model/statusAppointments";
+import { Pagination } from "@/components/pagination/Pagination";
+import { Filter } from "@/components/filter/Filter";
+
 
 
 
@@ -36,7 +39,7 @@ export const AppointmentsPage = () => {
     availableDays, fullyBookedDays, availableTime, availableTimeCount,
     fullyBookedTimeCount, loading
   } = useAppSelector((state) => state.appointment.calendar);
-  const {loading:appointmentLoading, appointmentsQuery} = useAppSelector((state) => state.appointment);
+  const {loading:appointmentLoading, appointmentsQuery,total} = useAppSelector((state) => state.appointment);
   const { doctors } = useAppSelector((state) => state.doctor);
 
   
@@ -52,6 +55,7 @@ export const AppointmentsPage = () => {
         ).unwrap();
         await dispatch(getTreatmentsThunk(true))
         await dispatch(getAppointmentsThunk(appointmentsQuery))
+        
        
       } catch (error) {
         console.log(error);
@@ -72,15 +76,18 @@ export const AppointmentsPage = () => {
   }, [selectedDoctor, selectedDate, selectedSpecialization, dispatch]);
   const handleAside = () => setOpenAside((prev) => !prev);
   dayjs.extend(utc);
-  
+  const doctorOptions = doctors.map((doctor) => ({
+  value: String(doctor.id),
+  label: `${doctor.firstName} ${doctor.lastName}`,
+}));
   return (
     <>
       <PageTitle
         text="Reception Desk"
-        description={`Todays appointments ${appointments.length}`}
+        description={`Todays appointments ${total}`}
       />
 
-      <section className="flex gap-[16px]">
+      <section className="flex gap-[16px] mb-[24px]">
         <div className="h-[348px] w-[348px]">
           {availableDays && (
             <Calendar
@@ -109,7 +116,10 @@ export const AppointmentsPage = () => {
         status={statusOptions}
        appointment = {selectedAppointment}
         title={'UpdateStatus'}
-        onCancel = {()=>{setOpenChangeStatus(false)}}
+        onCancel={() => {
+          setOpenChangeStatus(false)
+          dispatch(setSelectedAppointment(null))
+        }}
         isOpen={status}
       />
       }
@@ -139,12 +149,41 @@ export const AppointmentsPage = () => {
             description={"Fill in the details below"}
           />
       )}
-      
+
+     <Filter className="mb-[16px]"
+  search={appointmentsQuery.search}
+  firstSelect={String(appointmentsQuery.doctorId ?? "")}
+  secondSelect={appointmentsQuery.appointmentStatus ?? ""}
+  firstPlaceholder="All doctors"
+  secondPlaceholder="All statuses"
+  firstSelectOptions={doctorOptions}
+  secondSelectOptions={statusOptions}
+  onSearchChange={(value) =>
+    dispatch(setAppointmentsQuery({ search: value, page: 1 }))
+  }
+  onFirstSelectChange={(value) =>
+    dispatch(
+      setAppointmentsQuery({
+        doctorId: value ? Number(value) : null,
+        page: 1,
+      })
+    )
+  }
+  onSecondSelectChange={(value) =>
+    dispatch(
+      setAppointmentsQuery({
+        appointmentStatus: value || null,
+        page: 1,
+      })
+    )
+  }
+/>
+     
     
        {appointmentLoading ? (
               <Loader />
             ) : (
-              <div className="w-full h-full p-[24px]">
+              <div className="w-full h-full ">
                 <Table>
                   <thead>
                     <tr>
@@ -216,18 +255,18 @@ export const AppointmentsPage = () => {
                       </p>
                   )}
                 
-            {/* <Pagination
-  page={appointmentsQuery.offset / appointmentsQuery.limit + 1}
-  pageSize={appointmentsQuery.limit}
-  total={appointments.length}
+            { <Pagination
+  page={appointmentsQuery.page}
+  pageSize={appointmentsQuery.pageSize}
+  total={total}
   onPageChange={(page) =>
     dispatch(
       setAppointmentsQuery({
-        offset: (page - 1) * appointmentsQuery.limit,
+       page
       })
     )
   }
-/> */}
+/> }
               </div>
             )}
             

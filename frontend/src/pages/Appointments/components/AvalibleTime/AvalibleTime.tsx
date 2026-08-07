@@ -96,7 +96,7 @@ useEffect(() => {
       {loading ? <Loader /> : (<div className="grid grid-cols-7 gap-2 mb-[45px]">
         {availableTime && availableTime.map((slot) => (
           <ButtonPage
-      disabled={!selectedDate || slot.status ==='booked'}
+      disabled={!selectedDate || slot.status ==='booked' || slot.status === 'expired'}
             key={slot.time}
             className="h-[36px] text-[#2563EB]"
             onClick={() => {

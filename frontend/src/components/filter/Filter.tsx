@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
 import { Input } from "../input/Input";
 import { useDebounce } from "@/hooks/useDebounce"
-import type { SelectOption } from "@/features/doctors/model/specialties";
-import type { DoctorQuery } from "@/features/doctors/model/DoctorQuery";
-type Props = {
-   className?: string;
-  search: string;
-  firstSelect: DoctorQuery['specialization'];
-  secondSelect: DoctorQuery['employmentType'];
 
-  firstSelectOptions: SelectOption[];
-  secondSelectOptions:SelectOption[];
-
-  onSearchChange: (value: string) => void;
-  onFirstSelectChange: (value: string) => void;
-  onSecondSelectChange: (value: string) => void;
+export type FilterOption = {
+  label: string;
+  value: string;
 };
 
+type Props = {
+  className?: string;
+
+  search?: string;
+
+  firstSelect?: string;
+  secondSelect?: string;
+
+  firstPlaceholder?: string;
+  secondPlaceholder?: string;
+
+  firstSelectOptions?: FilterOption[];
+  secondSelectOptions?: FilterOption[];
+
+  onSearchChange: (value: string) => void;
+  onFirstSelectChange?: (value: string) => void;
+  onSecondSelectChange?: (value: string) => void;
+};
 
 export const Filter: React.FC<Props> = ({
+  firstPlaceholder,
+  secondPlaceholder,
   search,
   className,
   firstSelect,
@@ -46,34 +56,43 @@ export const Filter: React.FC<Props> = ({
         value={value}
         placeholder="Search ..."
         onChange={(e) => setValue(e.target.value)}
-        className="w-[250px] h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
+        className="w-full h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
       />
-        <select
-        value={firstSelect.value}
-        onChange={(e) => onFirstSelectChange(e.target.value)}
-        className="w-[190px] h-[36px]  rounded-[8px]  bg-white color-[#6B7280] border-1 border-[#E5E7EB]" 
-      >
-        <option value="">All specializations</option>
+       {firstSelectOptions && (
+  <select
+    value={firstSelect ?? ""}
+    onChange={(e) => onFirstSelectChange?.(e.target.value)}
+    className="w-[190px] h-[36px] rounded-[8px] border border-[#E5E7EB]"
+  >
+    <option value="">
+      {firstPlaceholder ?? "Select"}
+    </option>
 
-        {firstSelectOptions.map((item) => (
-          <option key={item.label} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
+    {firstSelectOptions.map((item) => (
+      <option key={item.value} value={item.value}>
+        {item.label}
+      </option>
+    ))}
+  </select>
+)}
 
-      <select
-        value={secondSelect}
-        onChange={(e) => onSecondSelectChange(e.target.value)}
-      className=  "w-[140px] h-[36px] rounded-[8px] bg-white color-[#6B7280] border-1 border-[#E5E7EB]"
-      > 
-        <option value="">TYPE</option>
-        {secondSelectOptions.map((item)=> (
-          <option key={item.label} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>  
+    {secondSelectOptions && (
+  <select
+    value={secondSelect ?? ""}
+    onChange={(e) => onSecondSelectChange?.(e.target.value)}
+    className="w-[190px] h-[36px] rounded-[8px] border border-[#E5E7EB]"
+  >
+    <option value="">
+      {secondPlaceholder ?? "Select"}
+    </option>
+
+    {secondSelectOptions.map((item) => (
+      <option key={item.value} value={item.value}>
+        {item.label}
+      </option>
+    ))}
+  </select>
+)}  
 
     </div>
   );

@@ -81,11 +81,15 @@ export const DoctorsPage = () => {
       <div className="flex  justify-between">
         <Filter
           className="mb-[24px]"
-          search={query.search}
-          firstSelect={query.specialization}
-          secondSelect={query.employmentType}
-          firstSelectOptions={specializations}
-          secondSelectOptions={employmentTypes}
+           search={query.search}
+  firstSelect={query.specialization}
+  secondSelect={query.employmentType}
+
+  firstPlaceholder="All specializations"
+  secondPlaceholder="Employment"
+
+  firstSelectOptions={specializations}
+  secondSelectOptions={employmentTypes}
           onSearchChange={(value) =>
             dispatch(setQuery({ search: value, page: 1 }))
           }

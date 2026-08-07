@@ -31,12 +31,12 @@ console.log(page);
 
         {Array.from({ length: totalPages }).map((_, index) => (
           <button
-            disabled={total === 1}
+            disabled={total === 1 || page ===index+1}
             key={index}
             onClick={() => onPageChange(index + 1)}
             className={` w-[38px] h-[38px]  rounded -[8px] cursor-pointer ${
               page === index + 1
-                ? "bg-[#DBEAFE] text-[blue]"
+                ? "bg-[#DBEAFE] text-[blue] "
                 : ""
             }`}
           >

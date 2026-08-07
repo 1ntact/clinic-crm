@@ -4,6 +4,13 @@ import type { Appointment } from "@/types/appointment";
 import { useEffect, useState } from "react";
 import { AppointmentStatusSelector } from "../AppointmentsStatusSelector/AppointmentStatusSelector";
 import { TfiAlert } from "react-icons/tfi";
+import {  changeStatusAppointmentThunk } from "@/features/appointments/thunk/changeStatusAppointmentThunk";
+import { useAppDispatch, useAppSelector } from "@/app/store/hook";
+import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
+import { getAppointmentsThunk } from "@/features/appointments/thunk/getAppointmentsThunk";
+import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
+import { getAvailableTimeSlotsThunk } from "@/features/appointments/thunk/getAvailableSlots";
+
 
 
 type Props = {
@@ -29,6 +36,7 @@ status:string[],
 
 export const ChangeStatusModal: React.FC<Props> = ({
   isOpen,
+  
   loading,
   title,
   status,
@@ -38,7 +46,10 @@ export const ChangeStatusModal: React.FC<Props> = ({
   closeOnBackdrop = true,
   onCancel,
 }) => {
-  const [selectedStatus, setSelectedStatus]= useState(null)
+  const [selectedStatus, setSelectedStatus] = useState(null)
+  const { appointmentsQuery } = useAppSelector(state => state.appointment)
+  const {selectedDoctor,selectedDate}= useAppSelector(state=>state.appointment.calendar)
+  const dispatch = useAppDispatch();
   useEffect(() => {
     if (!isOpen) return;
 
@@ -62,23 +73,38 @@ export const ChangeStatusModal: React.FC<Props> = ({
     return null;
   }
 
-  const handleSaveStatus = () => {
-    switch (selectedStatus) {
-      case 'confirmed':
-        dispatch()
-        break;
-      
-      case 'completed':
-        dispatch()
-        break;
-      case 'cancelled':
-        dispatch()
-        break;
-      case 'no-show':
-        dispatch()
-        break;
-       
+  const handleSaveStatus = async () => {
+    if (!selectedStatus || !appointment) {
+      return
     }
+    try {
+      await dispatch(changeStatusAppointmentThunk(
+        {
+          status: selectedStatus,
+          id: appointment.id
+        }
+      )).unwrap();
+    dispatch(setSelectedAppointment(null))
+     
+      onCancel()
+      await dispatch(getAppointmentsThunk(appointmentsQuery))
+      await dispatch(getAvailableTimeSlotsThunk({
+        doctorId: selectedDoctor.id,
+        date: selectedDate,
+      }))
+       successToast(
+              <>
+                Appointment refresh  status  successfully!!!
+                <br />
+
+              </>,
+            );
+    } catch (e) {
+      dispatch(setSelectedAppointment(null))
+      onCancel()
+      errorToast(e as string)
+    }
+  
   }
   return (<div
       className=" fixed inset-0 z-50 flex items-center justify-center bg-black/40"

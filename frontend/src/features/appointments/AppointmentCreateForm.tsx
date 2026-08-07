@@ -9,6 +9,7 @@ import { getAllPatientThunk } from "@/features/patients/thunk/getAllPacientThunk
 import { AppointmentFormFields } from "@/components/formField/AppointmentFormFields";
 import { createAppointmentThunk } from "./thunk/createAppointmentThunk";
 import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
+import { getAvailableTimeSlotsThunk } from "./thunk/getAvailableSlots";
 
 export const AppointmentCreateForm: React.FC = () => {
   const methods = useForm<AppointmentFormData>();
@@ -56,7 +57,11 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
       
       })).unwrap();
 
-      await dispatch( getAppointmentsThunk(appointmentsQuery)).unwrap()
+      await dispatch(getAppointmentsThunk(appointmentsQuery)).unwrap()
+      await dispatch(getAvailableTimeSlotsThunk({
+        doctorId: selectedDoctor.id,
+        date: selectedDate,
+      }))
 
       reset();
 

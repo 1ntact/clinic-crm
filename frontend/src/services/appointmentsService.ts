@@ -3,6 +3,7 @@ import type { AvailableTimeSlotsQuery } from "@/features/appointments/model/avai
 import type { CalendarQuery } from "@/features/appointments/model/calendarQuery";
 import { httpClient } from "@/http/httpClient"
 import type { AppointmentFormData } from "@/types/appointmentFormData";
+import { accessTokenService } from "./accessTokenService";
 
 
 export const appointmentsService = {
@@ -34,11 +35,16 @@ export const appointmentsService = {
     const response = await httpClient.get('appointments/available-slots/',{params})
 return response.data
   },
+
 getAppointments: async (query: AppointmentsQuery) => {
   const params: Record<string, unknown> = {
-   
+    page: query.page,
+    page_size: query.pageSize,
   };
 
+  if (query.search) {
+    params.search = query.search;
+  }
 
   if (query.doctorId) {
     params.doctor_id = query.doctorId;
@@ -60,22 +66,30 @@ getAppointments: async (query: AppointmentsQuery) => {
     params.appointment_status = query.appointmentStatus;
   }
 
-  if (query.appointmentDate) {
-    params.appointment_date = query.appointmentDate;
-  }
-
-  const response = await httpClient.get("/appointments/", { params });
+  const response = await httpClient.get("/appointments", { params });
 
   return response.data;
-},
+  },
+
   getAppointmentsByID: async (id:string) => {
     const response = await httpClient.get(`/appointments/${id}`)
     return response.data
   },
+
   createAppointments: async (data:AppointmentFormData) => {
     const response = await httpClient.post('/appointments', data,)
     return response.data
   },
+  changeStatus: async (status, id: number) => {
+  const response = await httpClient.patch(`appointments/${id}/status`, {status},
+      {
+        headers: {
+          Authorization: `Bearer ${accessTokenService.get()}`
+        }
+      })
+    return response.data
+  },
+
   getTreatments: async (query:boolean) => {
     const params = {
     is_main:query

@@ -43,7 +43,7 @@ export const PatientsPage = () => {
     }
     fetchPatient()
   },[dispatch, query])
-  console.log(patients, 'is patients')
+
   return <>
     {aside && (<AsideMenu
       handleAside={handleAside}
@@ -84,8 +84,7 @@ export const PatientsPage = () => {
             <Filter
         className="mb-[24px]"
         search={query.search}
-        firstSelect={query}
-        secondSelect={query}
+       
         
         firstSelectOptions={specializations}
         secondSelectOptions={employmentTypes}

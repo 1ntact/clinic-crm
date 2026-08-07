@@ -21,7 +21,7 @@ export const PatientEditForm: React.FC = () => {
   const { selectedPatient, loading } = useAppSelector((state) => state.patient);
   
 
-  console.log(selectedPatient,'wt dsy')
+  
   useEffect(() => {
     if (!selectedPatient) return;
 

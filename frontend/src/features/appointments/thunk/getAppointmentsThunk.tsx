@@ -7,6 +7,7 @@ export const getAppointmentsThunk = createAsyncThunk(
   "get/appointments",
   async (query:AppointmentsQuery, thunkApi) => {
     try {
+      console.log("QUERYYYYYYY",query)
       return await appointmentsService.getAppointments(query)
     }
     catch (e) {

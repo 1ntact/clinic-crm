@@ -1,7 +1,6 @@
 import { httpClient } from "@/http/httpClient";
 import type { PatientFormData } from "@/types/patientFormData";
 import { accessTokenService } from "./accessTokenService";
-import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
 import type { PatientQuery } from "@/features/patients/model/patientsQuery";
 
 export const patientsService = {
@@ -26,13 +25,7 @@ export const patientsService = {
       params.search = query.search;
     }
   
-    if (query.doctors) {
-      params.doctors = query.doctors;
-    }
-  
-    if (query.date) {
-      params.date = query.date;
-    }
+    
   
     const response = await httpClient.get("/patients/", {params});
     return response.data;

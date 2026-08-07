@@ -25,41 +25,62 @@ interface CalendarState {
 }
 
 interface AppointmentsState {
-   appointmentsQuery: AppointmentsQuery;
-  treatments: [];
+  appointmentsQuery: AppointmentsQuery;
+
   appointments: Appointment[];
   selectedAppointment: Appointment | null;
+
+  page: number;
+  pageSize: number;
+  pages: number;
+  total: number;
+
+  treatments: string[];
+  statistic: string[];
+
   calendar: CalendarState;
-  statistic: [];
+
   loading: boolean;
 }
 
 const initialState: AppointmentsState = {
   appointmentsQuery: {
-  doctorId: null,
-  patientId: null,
-  appointmentStatus: null,
-  dateFrom: null,
-  dateTo: null,
-  
-  
-},
-  selectedAppointment: null,
+    search: "",
+    doctorId: null,
+    patientId: null,
+    appointmentStatus: null,
+    dateFrom: null,
+    dateTo: null,
+    page: 1,
+    pageSize: 5,
+  },
+
   appointments: [],
+  selectedAppointment: null,
+
+  page: 1,
+  pageSize:4,
+  pages: 0,
+  total: 0,
+
   treatments: [],
   statistic: [],
+
   loading: false,
+
   calendar: {
     availableDays: [],
     fullyBookedDays: [],
     availableTime: [],
     fullyBookedTimeCount: 0,
-    availableTimeCount:0,
+    availableTimeCount: 0,
+
     selectedDate: null,
     selectedDoctor: null,
     selectedSpecialization: null,
     selectedSlotsTime: null,
     selectedTreatment: null,
+
     query: {
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
@@ -68,6 +89,7 @@ const initialState: AppointmentsState = {
     loading: false,
   },
 };
+
 const appointmentsSlice = createSlice({
   name: "appointment",
   initialState,
@@ -165,8 +187,13 @@ const appointmentsSlice = createSlice({
       })
       .addCase(getAppointmentsThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.appointments = action.payload;
-        console.log(action.payload);
+        state.appointments = action.payload.items;
+        state.page = action.payload.page;
+        state.pageSize = action.payload.pageSize;
+        state.pages = action.payload.pages;
+        state.total = action.payload.total;
+        
+        console.log("current information",action.payload);
       })
       .addCase(getAppointmentsThunk.rejected, (state) => {
         state.loading = false;
