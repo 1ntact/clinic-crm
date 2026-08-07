@@ -72,7 +72,7 @@ class AppointmentStatusUpdate(BaseModel):
 
 class AvailableSlotResponse(BaseModel):
     time: time
-    status: Literal["free", "booked"]
+    status: Literal["free", "booked", "expired"]
 
 
 class AvailableSlotsResponse(BaseModel):
@@ -102,3 +102,11 @@ class AppointmentStatisticsResponse(BaseModel):
 class AppointmentDashboardResponse(BaseModel):
     calendar: AppointmentCalendarResponse
     statistics: AppointmentStatisticsResponse
+
+
+class PaginatedAppointmentResponse(BaseModel):
+    items: list[AppointmentResponse]
+    total: int
+    page: int
+    page_size: int
+    pages: int

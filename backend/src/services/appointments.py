@@ -1,8 +1,9 @@
-
 from calendar import monthrange
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta, timezone
+from math import ceil
 from typing import Any
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -119,13 +120,14 @@ class AppointmentService:
         self,
         doctor_id: int | None = None,
         patient_id: int | None = None,
+        search: str | None = None,
         appointment_date: date | None = None,
         date_from: date | None = None,
         date_to: date | None = None,
         appointment_status: AppointmentStatusEnum | None = None,
-        limit: int = 100,
-        offset: int = 0,
-    ) -> list[dict[str, Any]]:
+        page: int = 1,
+        page_size: int = 20,
+    ) -> dict[str, Any]:
         if (
             date_from is not None
             and date_to is not None
@@ -143,16 +145,37 @@ class AppointmentService:
                 "Use either appointment_date or date_from/date_to, not both."
             )
 
-        return await self.appointments.get_all(
+        offset = (page - 1) * page_size
+
+        total = await self.appointments.get_total(
             doctor_id=doctor_id,
             patient_id=patient_id,
+            search=search,
             appointment_date=appointment_date,
             date_from=date_from,
             date_to=date_to,
             appointment_status=appointment_status,
-            limit=limit,
+        )
+
+        items = await self.appointments.get_all(
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            search=search,
+            appointment_date=appointment_date,
+            date_from=date_from,
+            date_to=date_to,
+            appointment_status=appointment_status,
+            limit=page_size,
             offset=offset,
         )
+
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "pages": ceil(total / page_size) if total else 0,
+        }
 
     async def get_by_id(
         self,
@@ -249,29 +272,37 @@ class AppointmentService:
                 f"'{current_status.value}' to '{new_status.value}'."
             )
 
-        if new_status == AppointmentStatusEnum.CONFIRMED:
-            if appointment_date_time <= now:
-                raise ValueError(
-                    "Past appointment cannot be confirmed."
-                )
+        if (
+            new_status == AppointmentStatusEnum.CONFIRMED
+            and appointment_date_time <= now
+        ):
+            raise ValueError(
+                "Past appointment cannot be confirmed."
+            )
 
-        if new_status == AppointmentStatusEnum.CANCELLED:
-            if appointment_date_time <= now:
-                raise ValueError(
-                    "A past appointment cannot be cancelled."
-                )
+        if (
+            new_status == AppointmentStatusEnum.CANCELLED
+            and appointment_date_time <= now
+        ):
+            raise ValueError(
+                "A past appointment cannot be cancelled."
+            )
 
-        if new_status == AppointmentStatusEnum.COMPLETED:
-            if appointment_date_time > now:
-                raise ValueError(
-                    "A future appointment cannot be completed."
-                )
+        if (
+            new_status == AppointmentStatusEnum.COMPLETED
+            and appointment_date_time > now
+        ):
+            raise ValueError(
+                "A future appointment cannot be completed."
+            )
 
-        if new_status == AppointmentStatusEnum.NO_SHOW:
-            if appointment_date_time > now:
-                raise ValueError(
-                    "A future appointment cannot be marked as no-show."
-                )
+        if (
+            new_status == AppointmentStatusEnum.NO_SHOW
+            and appointment_date_time > now
+        ):
+            raise ValueError(
+                "A future appointment cannot be marked as no-show."
+            )
 
     async def update(
         self,
@@ -427,79 +458,6 @@ class AppointmentService:
             appointment.id,
         )
 
-    async def confirm(
-        self,
-        appointment_id: int,
-    ) -> dict[str, Any]:
-        appointment = await self._get_model_by_id(
-            appointment_id,
-        )
-
-        if appointment.date_time <= datetime.now(timezone.utc):
-            raise ValueError(
-                "Past appointment cannot be confirmed."
-            )
-
-        if appointment.status != AppointmentStatusEnum.SCHEDULED:
-            raise ValueError(
-                "Only scheduled appointment can be confirmed."
-            )
-
-        try:
-            self.appointments.set_status(
-                appointment=appointment,
-                new_status=AppointmentStatusEnum.CONFIRMED,
-            )
-
-            await self.session.commit()
-            await self.session.refresh(appointment)
-
-        except SQLAlchemyError:
-            await self.session.rollback()
-            raise
-
-        return await self._get_details_after_change(
-            appointment.id,
-        )
-
-    async def cancel(
-        self,
-        appointment_id: int,
-    ) -> dict[str, Any]:
-        appointment = await self._get_model_by_id(
-            appointment_id,
-        )
-
-        if appointment.date_time <= datetime.now(timezone.utc):
-            raise ValueError(
-                "A past appointment cannot be cancelled."
-            )
-
-        if appointment.status not in {
-            AppointmentStatusEnum.SCHEDULED,
-            AppointmentStatusEnum.CONFIRMED,
-        }:
-            raise ValueError(
-                "Only scheduled or confirmed appointment can be cancelled."
-            )
-
-        try:
-            self.appointments.set_status(
-                appointment=appointment,
-                new_status=AppointmentStatusEnum.CANCELLED,
-            )
-
-            await self.session.commit()
-            await self.session.refresh(appointment)
-
-        except SQLAlchemyError:
-            await self.session.rollback()
-            raise
-
-        return await self._get_details_after_change(
-            appointment.id,
-        )
-
     async def get_dashboard(
         self,
         year: int,
@@ -541,6 +499,7 @@ class AppointmentService:
 
         available_days: list[int] = []
         fully_booked_days: list[int] = []
+
         today = datetime.now(timezone.utc).date()
 
         if doctor_ids:
@@ -553,6 +512,7 @@ class AppointmentService:
                     month,
                     day_number,
                 )
+
                 if selected_date < today:
                     continue
 
@@ -620,84 +580,6 @@ class AppointmentService:
             ),
         )
 
-    async def complete(
-        self,
-        appointment_id: int,
-    ) -> dict[str, Any]:
-        appointment = await self._get_model_by_id(
-            appointment_id,
-        )
-
-        if appointment.status not in {
-            AppointmentStatusEnum.SCHEDULED,
-            AppointmentStatusEnum.CONFIRMED,
-        }:
-            raise ValueError(
-                "Only scheduled or confirmed appointment "
-                "can be completed."
-            )
-
-        if appointment.date_time > datetime.now(timezone.utc):
-            raise ValueError(
-                "A future appointment cannot be completed."
-            )
-
-        try:
-            self.appointments.set_status(
-                appointment=appointment,
-                new_status=AppointmentStatusEnum.COMPLETED,
-            )
-
-            await self.session.commit()
-            await self.session.refresh(appointment)
-
-        except SQLAlchemyError:
-            await self.session.rollback()
-            raise
-
-        return await self._get_details_after_change(
-            appointment.id,
-        )
-
-    async def mark_no_show(
-        self,
-        appointment_id: int,
-    ) -> dict[str, Any]:
-        appointment = await self._get_model_by_id(
-            appointment_id,
-        )
-
-        if appointment.status not in {
-            AppointmentStatusEnum.SCHEDULED,
-            AppointmentStatusEnum.CONFIRMED,
-        }:
-            raise ValueError(
-                "Only scheduled or confirmed appointment "
-                "can be marked as no-show."
-            )
-
-        if appointment.date_time > datetime.now(timezone.utc):
-            raise ValueError(
-                "A future appointment cannot be marked as no-show."
-            )
-
-        try:
-            self.appointments.set_status(
-                appointment=appointment,
-                new_status=AppointmentStatusEnum.NO_SHOW,
-            )
-
-            await self.session.commit()
-            await self.session.refresh(appointment)
-
-        except SQLAlchemyError:
-            await self.session.rollback()
-            raise
-
-        return await self._get_details_after_change(
-            appointment.id,
-        )
-
     @staticmethod
     def _doctor_has_free_slot(
         selected_date: date,
@@ -726,12 +608,17 @@ class AppointmentService:
         current_slot_start = workday_start
 
         while current_slot_start + slot_duration <= workday_end:
-            current_slot_end = current_slot_start + slot_duration
+            current_slot_end = (
+                current_slot_start + slot_duration
+            )
 
             slot_is_booked = False
 
             for appointment in appointments:
-                if appointment.status not in DASHBOARD_BLOCKING_STATUSES:
+                if (
+                    appointment.status
+                    not in DASHBOARD_BLOCKING_STATUSES
+                ):
                     continue
 
                 appointment_start = appointment.date_time
@@ -789,18 +676,24 @@ class AppointmentService:
 
         workday_start = datetime.combine(
             selected_date,
-            time(hour=8, minute=0),
+            WORKDAY_START,
             tzinfo=timezone.utc,
         )
 
         workday_end = datetime.combine(
             selected_date,
-            time(hour=18, minute=0),
+            WORKDAY_END,
             tzinfo=timezone.utc,
         )
 
-        slot_step = timedelta(minutes=30)
-        requested_duration = timedelta(minutes=duration)
+        now = datetime.now(timezone.utc)
+
+        slot_step = timedelta(
+            minutes=SLOT_STEP_MINUTES,
+        )
+        requested_duration = timedelta(
+            minutes=duration,
+        )
 
         slots: list[AvailableSlotResponse] = []
 
@@ -830,12 +723,24 @@ class AppointmentService:
                     is_booked = True
                     break
 
+            is_expired = (
+                selected_date == now.date()
+                and current_slot_start < now
+            )
+
+            if is_booked:
+                slot_status = "booked"
+            elif is_expired:
+                slot_status = "expired"
+            else:
+                slot_status = "free"
+
             slots.append(
                 AvailableSlotResponse(
                     time=current_slot_start.time().replace(
                         tzinfo=None,
                     ),
-                    status="booked" if is_booked else "free",
+                    status=slot_status,
                 )
             )
 
