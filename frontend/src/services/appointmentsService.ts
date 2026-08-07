@@ -1,4 +1,5 @@
 import type { AppointmentsQuery } from "@/features/appointments/model/appointmentQuery";
+import type { AvailableTimeSlotsQuery } from "@/features/appointments/model/availableTimeSlotsQuery";
 import type { CalendarQuery } from "@/features/appointments/model/calendarQuery";
 import { httpClient } from "@/http/httpClient"
 import type { AppointmentFormData } from "@/types/appointmentFormData";
@@ -19,10 +20,10 @@ export const appointmentsService = {
     const response = await httpClient.get(`appointments/dashboard/`, {params})
     return response.data
   },
-  getAvailableAppointmentsTime: async (query) => {
+  getAvailableAppointmentsTime: async (query:AvailableTimeSlotsQuery) => {
     const params = {
       date: query.date,
-      doctor_id:query.id
+      doctor_id:query.doctorId
     }
       if (query.date) {
       params.date = query.date;

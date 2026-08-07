@@ -7,8 +7,6 @@ import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { getAvailableTimeSlotsThunk } from "@/features/appointments/thunk/getAvailableSlots";
 import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { ButtonPage } from "@/components/button/ButtonsPage";
-
-
 import { getTreatmentsThunk } from "@/features/appointments/thunk/getTreatments";
 import { AppointmentCreateForm } from "@/features/appointments/AppointmentCreateForm";
 import { getAppointmentsThunk } from "@/features/appointments/thunk/getAppointmentsThunk";
@@ -17,21 +15,27 @@ import { Table } from "@/components/table/Table";
 import { Th } from "@/components/table/Th";
 import { Td } from "@/components/table/Td";
 import { UserContacts } from "@/components/userContacts/UserContacts";
+import { HiOutlineEllipsisVertical } from "react-icons/hi2";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-
+import { ActionModal } from "./components/ActionModal/ActionModal";
+import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
+import { ChangeStatusModal } from "./components/ChangeStatusModal/ChangeStatusModal";
+import { statusOptions } from "@/features/appointments/model/statusAppointments";
 
 
 
 export const AppointmentsPage = () => {
   const [aside, setOpenAside] = useState(false);
+  const [status, setOpenChangeStatus] = useState(false)
+ 
   const dispatch = useAppDispatch();
-  const {appointments} = useAppSelector(state=>state.appointment)
+  const {appointments, selectedAppointment} = useAppSelector(state=>state.appointment)
   const {
     query, selectedSpecialization, selectedDoctor, selectedDate,
     availableDays, fullyBookedDays, availableTime, availableTimeCount,
     fullyBookedTimeCount, loading
-  } = useAppSelector((state) => state.appointment.calendar,);
+  } = useAppSelector((state) => state.appointment.calendar);
   const {loading:appointmentLoading, appointmentsQuery} = useAppSelector((state) => state.appointment);
   const { doctors } = useAppSelector((state) => state.doctor);
 
@@ -68,6 +72,7 @@ export const AppointmentsPage = () => {
   }, [selectedDoctor, selectedDate, selectedSpecialization, dispatch]);
   const handleAside = () => setOpenAside((prev) => !prev);
   dayjs.extend(utc);
+  
   return (
     <>
       <PageTitle
@@ -98,6 +103,16 @@ export const AppointmentsPage = () => {
           />
           
         } </section>
+      
+      {selectedAppointment && status &&
+        <ChangeStatusModal
+        status={statusOptions}
+       appointment = {selectedAppointment}
+        title={'UpdateStatus'}
+        onCancel = {()=>{setOpenChangeStatus(false)}}
+        isOpen={status}
+      />
+      }
         {aside && (
           <AsideMenu
             handleAside={handleAside}
@@ -149,7 +164,7 @@ export const AppointmentsPage = () => {
                         // onClick={() => {
                         //   navigate(`/doctors/${doctor.id}`);
                         // }}
-                        className=" h-[76px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
+                        className=" h-[76px]  hover:bg-[#DCFCE7] transition-colors"
                       >
                         <Td>{`#${appointment.id}`}</Td>
       
@@ -171,7 +186,24 @@ export const AppointmentsPage = () => {
                         <Td>{appointment.treatment}</Td>
       
                         <Td>{appointment.status}</Td>
-                        <Td>{'actionStatus'}</Td>
+                        <Td className="relative  "  >{<>
+                          <HiOutlineEllipsisVertical className="cursor-pointer" onClick={() => {
+                            dispatch(setSelectedAppointment(appointment))
+                           
+                          }
+                           } />
+                          {selectedAppointment && !status && selectedAppointment.id === appointment.id &&
+                            
+                            <ActionModal
+                             onClose={() => {
+   
+    dispatch(setSelectedAppointment(null));
+  }}
+                              onEditStatus={()=>setOpenChangeStatus(true) }
+                            onReschedule={()=>{}}/>} </>
+                        }
+                          
+                        </Td>
                       </tr>
                     ))}
                    

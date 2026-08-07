@@ -17,7 +17,7 @@ export const ButtonPage: React.FC<Props> = ({
     <button
       className={`
         
-        h-[36px]
+       
         flex
         justify-center
         items-center

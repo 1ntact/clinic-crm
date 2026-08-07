@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "@/app/store/hook"
+import { useAppDispatch } from "@/app/store/hook"
 import { ButtonPage } from "@/components/button/ButtonsPage"
 import { Loader } from "@/components/loader/Loader"
 import { BaseSelect } from "@/components/select/BaseSelect"

@@ -7,6 +7,7 @@ import { createAppointmentThunk } from "./thunk/createAppointmentThunk";
 import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
 import type { Appointment } from "@/types/appointment";
 import type { AppointmentsQuery } from "./model/appointmentQuery";
+import type { Doctor } from "@/types/doctor";
 
 interface CalendarState {
   fullyBookedTimeCount: number;
@@ -16,7 +17,7 @@ interface CalendarState {
   availableTime: string[];
   selectedDate: string | null;
   selectedSpecialization: string | null;
-  selectedDoctor: string | null;
+  selectedDoctor: Doctor | null;
   selectedSlotsTime: null | string;
   selectedTreatment: null | string;
   query: CalendarQuery;
