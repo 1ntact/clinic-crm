@@ -2,7 +2,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import func, select, text
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
@@ -29,6 +29,69 @@ ACTIVE_APPOINTMENT_STATUSES = (
 class AppointmentRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+
+    @staticmethod
+    def _apply_filters(
+        statement,
+        doctor_id: int | None = None,
+        patient_id: int | None = None,
+        appointment_date: date | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        appointment_status: AppointmentStatusEnum | None = None,
+    ):
+        if doctor_id is not None:
+            statement = statement.where(
+                AppointmentModel.doctor_id == doctor_id,
+            )
+
+        if patient_id is not None:
+            statement = statement.where(
+                AppointmentModel.patient_id == patient_id,
+            )
+
+        if appointment_date is not None:
+            day_start = datetime.combine(
+                appointment_date,
+                time.min,
+                tzinfo=timezone.utc,
+            )
+
+            day_end = day_start + timedelta(days=1)
+
+            statement = statement.where(
+                AppointmentModel.date_time >= day_start,
+                AppointmentModel.date_time < day_end,
+            )
+
+        if date_from is not None:
+            start_datetime = datetime.combine(
+                date_from,
+                time.min,
+                tzinfo=timezone.utc,
+            )
+
+            statement = statement.where(
+                AppointmentModel.date_time >= start_datetime,
+            )
+
+        if date_to is not None:
+            end_datetime = datetime.combine(
+                date_to + timedelta(days=1),
+                time.min,
+                tzinfo=timezone.utc,
+            )
+
+            statement = statement.where(
+                AppointmentModel.date_time < end_datetime,
+            )
+
+        if appointment_status is not None:
+            statement = statement.where(
+                AppointmentModel.status == appointment_status,
+            )
+
+        return statement
 
     @staticmethod
     def _serialize_appointment(
@@ -96,6 +159,50 @@ class AppointmentRepository:
 
         return result.scalar_one_or_none()
 
+    async def is_doctor_busy(
+            self,
+            doctor_id: int,
+            date_time: datetime,
+            duration: int,
+            exclude_appointment_id: int | None = None,
+    ) -> bool:
+        new_appointment_end = (
+                date_time + timedelta(minutes=duration)
+        )
+
+        statement = select(AppointmentModel).where(
+            AppointmentModel.doctor_id == doctor_id,
+            AppointmentModel.status.in_(
+                ACTIVE_APPOINTMENT_STATUSES,
+            ),
+        )
+
+        if exclude_appointment_id is not None:
+            statement = statement.where(
+                AppointmentModel.id != exclude_appointment_id,
+            )
+
+        result = await self.session.execute(statement)
+
+        appointments = result.scalars().all()
+
+        for appointment in appointments:
+            appointment_start = appointment.date_time
+            appointment_end = (
+                    appointment_start
+                    + timedelta(minutes=appointment.duration)
+            )
+
+            has_overlap = (
+                    date_time < appointment_end
+                    and new_appointment_end > appointment_start
+            )
+
+            if has_overlap:
+                return True
+
+        return False
+
     async def get_details_by_id(
         self,
         appointment_id: int,
@@ -160,6 +267,7 @@ class AppointmentRepository:
         self,
         doctor_id: int | None = None,
         patient_id: int | None = None,
+        search: str | None = None,
         appointment_date: date | None = None,
         date_from: date | None = None,
         date_to: date | None = None,
@@ -203,55 +311,24 @@ class AppointmentRepository:
             )
         )
 
-        if doctor_id is not None:
-            statement = statement.where(
-                AppointmentModel.doctor_id == doctor_id,
-            )
+        statement = self._apply_filters(
+            statement=statement,
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            appointment_date=appointment_date,
+            date_from=date_from,
+            date_to=date_to,
+            appointment_status=appointment_status,
+        )
 
-        if patient_id is not None:
-            statement = statement.where(
-                AppointmentModel.patient_id == patient_id,
-            )
-
-        if appointment_date is not None:
-            day_start = datetime.combine(
-                appointment_date,
-                time.min,
-                tzinfo=timezone.utc,
-            )
-
-            day_end = day_start + timedelta(days=1)
+        if search:
+            search_value = f"%{search.strip()}%"
 
             statement = statement.where(
-                AppointmentModel.date_time >= day_start,
-                AppointmentModel.date_time < day_end,
-            )
-
-        if date_from is not None:
-            start_datetime = datetime.combine(
-                date_from,
-                time.min,
-                tzinfo=timezone.utc,
-            )
-
-            statement = statement.where(
-                AppointmentModel.date_time >= start_datetime,
-            )
-
-        if date_to is not None:
-            end_datetime = datetime.combine(
-                date_to + timedelta(days=1),
-                time.min,
-                tzinfo=timezone.utc,
-            )
-
-            statement = statement.where(
-                AppointmentModel.date_time < end_datetime,
-            )
-
-        if appointment_status is not None:
-            statement = statement.where(
-                AppointmentModel.status == appointment_status,
+                or_(
+                    patient_user.first_name.ilike(search_value),
+                    patient_user.last_name.ilike(search_value),
+                )
             )
 
         statement = (
@@ -283,40 +360,55 @@ class AppointmentRepository:
 
         return appointments
 
-    async def is_doctor_busy(
+    async def get_total(
         self,
-        doctor_id: int,
-        date_time: datetime,
-        duration: int = 30,
-        exclude_appointment_id: int | None = None,
-    ) -> bool:
-        new_appointment_end = (
-            date_time + timedelta(minutes=duration)
+        doctor_id: int | None = None,
+        patient_id: int | None = None,
+        search: str | None = None,
+        appointment_date: date | None = None,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        appointment_status: AppointmentStatusEnum | None = None,
+    ) -> int:
+        patient_user = aliased(UserModel)
+
+        statement = (
+            select(
+                func.count(AppointmentModel.id)
+            )
+            .join(
+                PatientModel,
+                AppointmentModel.patient_id == PatientModel.id,
+            )
+            .join(
+                patient_user,
+                PatientModel.user_id == patient_user.id,
+            )
         )
 
-        existing_appointment_end = (
-            AppointmentModel.date_time
-            + AppointmentModel.duration
-            * text("INTERVAL '1 minute'")
+        statement = self._apply_filters(
+            statement=statement,
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            appointment_date=appointment_date,
+            date_from=date_from,
+            date_to=date_to,
+            appointment_status=appointment_status,
         )
 
-        statement = select(AppointmentModel.id).where(
-            AppointmentModel.doctor_id == doctor_id,
-            AppointmentModel.status.in_(
-                ACTIVE_APPOINTMENT_STATUSES,
-            ),
-            AppointmentModel.date_time < new_appointment_end,
-            existing_appointment_end > date_time,
-        )
+        if search:
+            search_value = f"%{search.strip()}%"
 
-        if exclude_appointment_id is not None:
             statement = statement.where(
-                AppointmentModel.id != exclude_appointment_id,
+                or_(
+                    patient_user.first_name.ilike(search_value),
+                    patient_user.last_name.ilike(search_value),
+                )
             )
 
-        appointment_id = await self.session.scalar(statement)
+        result = await self.session.scalar(statement)
 
-        return appointment_id is not None
+        return int(result or 0)
 
     def update(
         self,
@@ -333,15 +425,6 @@ class AppointmentRepository:
                 field,
                 value,
             )
-
-        return appointment
-
-    def set_status(
-        self,
-        appointment: AppointmentModel,
-        new_status: AppointmentStatusEnum,
-    ) -> AppointmentModel:
-        appointment.status = new_status
 
         return appointment
 

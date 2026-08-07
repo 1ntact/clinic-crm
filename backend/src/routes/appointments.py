@@ -17,8 +17,10 @@ from schemas.appointments import (
     AppointmentCreate,
     AppointmentDashboardResponse,
     AppointmentResponse,
+    AppointmentStatusUpdate,
     AppointmentUpdate,
     AvailableSlotsResponse,
+    PaginatedAppointmentResponse,
 )
 from services.appointments import AppointmentService
 
@@ -70,7 +72,7 @@ async def create_appointment(
 
 @router.get(
     "/",
-    response_model=list[AppointmentResponse],
+    response_model=PaginatedAppointmentResponse,
 )
 async def get_appointments(
     doctor_id: int | None = Query(
@@ -80,6 +82,9 @@ async def get_appointments(
     patient_id: int | None = Query(
         default=None,
         gt=0,
+    ),
+    search: str | None = Query(
+        default=None,
     ),
     appointment_date: date | None = Query(
         default=None,
@@ -93,35 +98,35 @@ async def get_appointments(
     appointment_status: AppointmentStatusEnum | None = Query(
         default=None,
     ),
-    limit: int = Query(
-        default=100,
+    page: int = Query(
+        default=1,
+        ge=1,
+    ),
+    page_size: int = Query(
+        default=20,
         ge=1,
         le=100,
     ),
-    offset: int = Query(
-        default=0,
-        ge=0,
-    ),
     db: AsyncSession = Depends(get_postgresql_db),
-) -> list[AppointmentResponse]:
+) -> PaginatedAppointmentResponse:
     service = AppointmentService(db)
 
     try:
         return await service.get_all(
             doctor_id=doctor_id,
             patient_id=patient_id,
+            search=search,
             appointment_date=appointment_date,
             date_from=date_from,
             date_to=date_to,
             appointment_status=appointment_status,
-            limit=limit,
-            offset=offset,
+            page=page,
+            page_size=page_size,
         )
     except ValueError as error:
         raise_http_error(error)
 
 
-# Статичні маршрути мають бути перед /{appointment_id}/
 @router.get(
     "/available-slots/",
     response_model=AvailableSlotsResponse,
@@ -229,10 +234,11 @@ async def update_appointment(
 
 
 @router.patch(
-    "/{appointment_id}/confirm/",
+    "/{appointment_id}/status/",
     response_model=AppointmentResponse,
 )
-async def confirm_appointment(
+async def update_appointment_status(
+    status_data: AppointmentStatusUpdate,
     appointment_id: int = Path(
         gt=0,
     ),
@@ -241,68 +247,11 @@ async def confirm_appointment(
     service = AppointmentService(db)
 
     try:
-        return await service.confirm(
+        return await service.update(
             appointment_id=appointment_id,
-        )
-    except ValueError as error:
-        raise_http_error(error)
-
-
-@router.patch(
-    "/{appointment_id}/cancel/",
-    response_model=AppointmentResponse,
-)
-async def cancel_appointment(
-    appointment_id: int = Path(
-        gt=0,
-    ),
-    db: AsyncSession = Depends(get_postgresql_db),
-) -> AppointmentResponse:
-    service = AppointmentService(db)
-
-    try:
-        return await service.cancel(
-            appointment_id=appointment_id,
-        )
-    except ValueError as error:
-        raise_http_error(error)
-
-
-@router.patch(
-    "/{appointment_id}/complete/",
-    response_model=AppointmentResponse,
-)
-async def complete_appointment(
-    appointment_id: int = Path(
-        gt=0,
-    ),
-    db: AsyncSession = Depends(get_postgresql_db),
-) -> AppointmentResponse:
-    service = AppointmentService(db)
-
-    try:
-        return await service.complete(
-            appointment_id=appointment_id,
-        )
-    except ValueError as error:
-        raise_http_error(error)
-
-
-@router.patch(
-    "/{appointment_id}/no-show/",
-    response_model=AppointmentResponse,
-)
-async def mark_appointment_no_show(
-    appointment_id: int = Path(
-        gt=0,
-    ),
-    db: AsyncSession = Depends(get_postgresql_db),
-) -> AppointmentResponse:
-    service = AppointmentService(db)
-
-    try:
-        return await service.mark_no_show(
-            appointment_id=appointment_id,
+            appointment_data=AppointmentUpdate(
+                status=status_data.status,
+            ),
         )
     except ValueError as error:
         raise_http_error(error)
