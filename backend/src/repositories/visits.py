@@ -77,13 +77,3 @@ class VisitRepository:
         visit.amount = amount
 
         return visit
-
-    async def get_by_appointment_id(
-            self,
-            appointment_id: int,
-    ) -> VisitModel | None:
-        statement = select(VisitModel).where(
-            VisitModel.appointment_id == appointment_id,
-        )
-
-        return await self.session.scalar(statement)

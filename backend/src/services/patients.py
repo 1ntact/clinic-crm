@@ -31,23 +31,17 @@ class PatientService:
             raise ValueError("User not found.")
 
         if not user.is_active:
-            raise ValueError(
-                "Patient profile can be created only for an active user."
-            )
+            raise ValueError("Patient profile can be created only for an active user.")
 
         existing_patient = await self.patients.get_by_user_id(
             patient_data.user_id,
         )
 
         if existing_patient is not None:
-            raise ValueError(
-                "Patient profile already exists for this user."
-            )
+            raise ValueError("Patient profile already exists for this user.")
 
         if user.role != UserRoleEnum.USER:
-            raise ValueError(
-                "Patient profile can be created only for a regular user."
-            )
+            raise ValueError("Patient profile can be created only for a regular user.")
 
         patient_fields = patient_data.model_dump(
             exclude={"phone_number"},
@@ -206,4 +200,3 @@ class PatientService:
             ) from error
 
         return "Patient profile deleted successfully."
-

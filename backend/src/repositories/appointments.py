@@ -1,6 +1,7 @@
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +25,8 @@ ACTIVE_APPOINTMENT_STATUSES = (
     AppointmentStatusEnum.SCHEDULED,
     AppointmentStatusEnum.CONFIRMED,
 )
+
+CLINIC_TIMEZONE = ZoneInfo("Europe/Kyiv")
 
 
 class AppointmentRepository:
@@ -54,10 +57,14 @@ class AppointmentRepository:
             day_start = datetime.combine(
                 appointment_date,
                 time.min,
-                tzinfo=timezone.utc,
-            )
+                tzinfo=CLINIC_TIMEZONE,
+            ).astimezone(timezone.utc)
 
-            day_end = day_start + timedelta(days=1)
+            day_end = datetime.combine(
+                appointment_date + timedelta(days=1),
+                time.min,
+                tzinfo=CLINIC_TIMEZONE,
+            ).astimezone(timezone.utc)
 
             statement = statement.where(
                 AppointmentModel.date_time >= day_start,
@@ -68,8 +75,8 @@ class AppointmentRepository:
             start_datetime = datetime.combine(
                 date_from,
                 time.min,
-                tzinfo=timezone.utc,
-            )
+                tzinfo=CLINIC_TIMEZONE,
+            ).astimezone(timezone.utc)
 
             statement = statement.where(
                 AppointmentModel.date_time >= start_datetime,
@@ -79,8 +86,8 @@ class AppointmentRepository:
             end_datetime = datetime.combine(
                 date_to + timedelta(days=1),
                 time.min,
-                tzinfo=timezone.utc,
-            )
+                tzinfo=CLINIC_TIMEZONE,
+            ).astimezone(timezone.utc)
 
             statement = statement.where(
                 AppointmentModel.date_time < end_datetime,
@@ -121,9 +128,7 @@ class AppointmentRepository:
             "doctor_last_name": doctor_last_name,
             "treatment": treatment_name,
             "treatment_price": (
-                float(treatment_price)
-                if treatment_price is not None
-                else None
+                float(treatment_price) if treatment_price is not None else None
             ),
         }
 
@@ -160,15 +165,13 @@ class AppointmentRepository:
         return result.scalar_one_or_none()
 
     async def is_doctor_busy(
-            self,
-            doctor_id: int,
-            date_time: datetime,
-            duration: int,
-            exclude_appointment_id: int | None = None,
+        self,
+        doctor_id: int,
+        date_time: datetime,
+        duration: int,
+        exclude_appointment_id: int | None = None,
     ) -> bool:
-        new_appointment_end = (
-                date_time + timedelta(minutes=duration)
-        )
+        new_appointment_end = date_time + timedelta(minutes=duration)
 
         statement = select(AppointmentModel).where(
             AppointmentModel.doctor_id == doctor_id,
@@ -188,14 +191,12 @@ class AppointmentRepository:
 
         for appointment in appointments:
             appointment_start = appointment.date_time
-            appointment_end = (
-                    appointment_start
-                    + timedelta(minutes=appointment.duration)
+            appointment_end = appointment_start + timedelta(
+                minutes=appointment.duration
             )
 
             has_overlap = (
-                    date_time < appointment_end
-                    and new_appointment_end > appointment_start
+                date_time < appointment_end and new_appointment_end > appointment_start
             )
 
             if has_overlap:
@@ -373,9 +374,7 @@ class AppointmentRepository:
         patient_user = aliased(UserModel)
 
         statement = (
-            select(
-                func.count(AppointmentModel.id)
-            )
+            select(func.count(AppointmentModel.id))
             .join(
                 PatientModel,
                 AppointmentModel.patient_id == PatientModel.id,
@@ -442,10 +441,14 @@ class AppointmentRepository:
         day_start = datetime.combine(
             selected_date,
             time.min,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
-        day_end = day_start + timedelta(days=1)
+        day_end = datetime.combine(
+            selected_date + timedelta(days=1),
+            time.min,
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         statement = (
             select(AppointmentModel)
@@ -476,23 +479,23 @@ class AppointmentRepository:
             year=year,
             month=month,
             day=1,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         if month == 12:
             next_month_start = datetime(
                 year=year + 1,
                 month=1,
                 day=1,
-                tzinfo=timezone.utc,
-            )
+                tzinfo=CLINIC_TIMEZONE,
+            ).astimezone(timezone.utc)
         else:
             next_month_start = datetime(
                 year=year,
                 month=month + 1,
                 day=1,
-                tzinfo=timezone.utc,
-            )
+                tzinfo=CLINIC_TIMEZONE,
+            ).astimezone(timezone.utc)
 
         statement = (
             select(AppointmentModel)
@@ -514,13 +517,21 @@ class AppointmentRepository:
         self,
         now: datetime,
     ) -> dict[str, int]:
-        today_start = datetime.combine(
-            now.date(),
-            time.min,
-            tzinfo=timezone.utc,
+        local_now = now.astimezone(
+            CLINIC_TIMEZONE,
         )
 
-        tomorrow_start = today_start + timedelta(days=1)
+        today_start = datetime.combine(
+            local_now.date(),
+            time.min,
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
+
+        tomorrow_start = datetime.combine(
+            local_now.date() + timedelta(days=1),
+            time.min,
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         statement = select(
             func.count(AppointmentModel.id)
@@ -541,16 +552,14 @@ class AppointmentRepository:
             .filter(
                 AppointmentModel.date_time >= today_start,
                 AppointmentModel.date_time < tomorrow_start,
-                AppointmentModel.status
-                == AppointmentStatusEnum.COMPLETED,
+                AppointmentModel.status == AppointmentStatusEnum.COMPLETED,
             )
             .label("completed_today"),
             func.count(AppointmentModel.id)
             .filter(
                 AppointmentModel.date_time >= today_start,
                 AppointmentModel.date_time < tomorrow_start,
-                AppointmentModel.status
-                == AppointmentStatusEnum.CANCELLED,
+                AppointmentModel.status == AppointmentStatusEnum.CANCELLED,
             )
             .label("cancelled_today"),
         )
@@ -559,16 +568,8 @@ class AppointmentRepository:
         row = result.one()
 
         return {
-            "today_appointments": int(
-                row.today_appointments or 0
-            ),
-            "upcoming_appointments": int(
-                row.upcoming_appointments or 0
-            ),
-            "completed_today": int(
-                row.completed_today or 0
-            ),
-            "cancelled_today": int(
-                row.cancelled_today or 0
-            ),
+            "today_appointments": int(row.today_appointments or 0),
+            "upcoming_appointments": int(row.upcoming_appointments or 0),
+            "completed_today": int(row.completed_today or 0),
+            "cancelled_today": int(row.cancelled_today or 0),
         }

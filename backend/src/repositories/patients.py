@@ -82,8 +82,7 @@ class PatientRepository:
                 ).label("last_visit_date"),
             )
             .where(
-                AppointmentModel.status
-                == AppointmentStatusEnum.COMPLETED,
+                AppointmentModel.status == AppointmentStatusEnum.COMPLETED,
             )
             .group_by(
                 AppointmentModel.patient_id,
@@ -100,18 +99,15 @@ class PatientRepository:
     ):
         if category == "new":
             statement = statement.where(
-                UserModel.registration_date
-                >= func.now() - text("INTERVAL '3 days'")
+                UserModel.registration_date >= func.now() - text("INTERVAL '3 days'")
             )
 
         elif category == "today":
             today_appointment_exists = exists(
                 select(AppointmentModel.id).where(
                     AppointmentModel.patient_id == PatientModel.id,
-                    func.date(AppointmentModel.date_time)
-                    == func.current_date(),
-                    AppointmentModel.status
-                    != AppointmentStatusEnum.CANCELLED,
+                    func.date(AppointmentModel.date_time) == func.current_date(),
+                    AppointmentModel.status != AppointmentStatusEnum.CANCELLED,
                 )
             )
 
@@ -219,10 +215,7 @@ class PatientRepository:
 
         result = await self.session.execute(statement)
 
-        return [
-            dict(row._mapping)
-            for row in result.all()
-        ]
+        return [dict(row._mapping) for row in result.all()]
 
     def update(
         self,

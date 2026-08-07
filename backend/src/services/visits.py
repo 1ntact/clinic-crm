@@ -30,14 +30,11 @@ class VisitService:
         )
 
         if treatment is None:
-            raise ValueError(
-                "Additional treatment not found."
-            )
+            raise ValueError("Additional treatment not found.")
 
         if treatment.is_main:
             raise ValueError(
-                "Only an additional treatment can be selected "
-                "for a visit."
+                "Only an additional treatment can be selected for a visit."
             )
 
         return treatment
@@ -52,9 +49,7 @@ class VisitService:
             and treatment_add2 is not None
             and treatment_add1 == treatment_add2
         ):
-            raise ValueError(
-                "Additional treatments must be different."
-            )
+            raise ValueError("Additional treatments must be different.")
 
     async def _calculate_amount(
         self,
@@ -67,25 +62,17 @@ class VisitService:
         )
 
         if main_treatment is None:
-            raise ValueError(
-                "Main appointment treatment not found."
-            )
+            raise ValueError("Main appointment treatment not found.")
 
         if not main_treatment.is_main:
-            raise ValueError(
-                "Appointment must contain a main treatment."
-            )
+            raise ValueError("Appointment must contain a main treatment.")
 
-        additional_treatment_1 = (
-            await self._get_additional_treatment(
-                treatment_add1,
-            )
+        additional_treatment_1 = await self._get_additional_treatment(
+            treatment_add1,
         )
 
-        additional_treatment_2 = (
-            await self._get_additional_treatment(
-                treatment_add2,
-            )
+        additional_treatment_2 = await self._get_additional_treatment(
+            treatment_add2,
         )
 
         amount = Decimal(main_treatment.price)
@@ -111,9 +98,7 @@ class VisitService:
         )
 
         if appointment is None:
-            raise ValueError(
-                "Appointment not found."
-            )
+            raise ValueError("Appointment not found.")
 
         main_treatment = await self.treatments.get_by_id(
             appointment.treatment_id,
@@ -145,14 +130,10 @@ class VisitService:
             "recommendation": visit.recommendation,
             "amount": visit.amount,
             "main_treatment": (
-                main_treatment.treatment
-                if main_treatment is not None
-                else None
+                main_treatment.treatment if main_treatment is not None else None
             ),
             "main_treatment_price": (
-                main_treatment.price
-                if main_treatment is not None
-                else None
+                main_treatment.price if main_treatment is not None else None
             ),
             "additional_treatment_1": (
                 additional_treatment_1.treatment
@@ -185,20 +166,14 @@ class VisitService:
         )
 
         if appointment is None:
-            raise ValueError(
-                "Appointment not found."
-            )
+            raise ValueError("Appointment not found.")
 
-        existing_visit = (
-            await self.visits.get_by_appointment_id(
-                visit_data.appointment_id,
-            )
+        existing_visit = await self.visits.get_by_appointment_id(
+            visit_data.appointment_id,
         )
 
         if existing_visit is not None:
-            raise ValueError(
-                "A visit already exists for this appointment."
-            )
+            raise ValueError("A visit already exists for this appointment.")
 
         self._validate_different_treatments(
             treatment_add1=visit_data.treatment_add1,
@@ -237,36 +212,29 @@ class VisitService:
         )
 
         if visit is None:
-            raise ValueError(
-                "Visit not found."
-            )
+            raise ValueError("Visit not found.")
 
         return await self._serialize_visit(
             visit,
         )
 
-
     async def get_by_appointment_id(
-            self,
-            appointment_id: int,
+        self,
+        appointment_id: int,
     ) -> dict[str, Any]:
         appointment = await self.appointments.get_by_id(
             appointment_id,
         )
 
         if appointment is None:
-            raise ValueError(
-                "Appointment not found."
-            )
+            raise ValueError("Appointment not found.")
 
         visit = await self.visits.get_by_appointment_id(
             appointment_id,
         )
 
         if visit is None:
-            raise ValueError(
-                "Visit not found for this appointment."
-            )
+            raise ValueError("Visit not found for this appointment.")
 
         return await self._serialize_visit(
             visit,
@@ -282,18 +250,14 @@ class VisitService:
         )
 
         if visit is None:
-            raise ValueError(
-                "Visit not found."
-            )
+            raise ValueError("Visit not found.")
 
         appointment = await self.appointments.get_by_id(
             visit.appointment_id,
         )
 
         if appointment is None:
-            raise ValueError(
-                "Appointment not found."
-            )
+            raise ValueError("Appointment not found.")
 
         update_data = visit_data.model_dump(
             exclude_unset=True,

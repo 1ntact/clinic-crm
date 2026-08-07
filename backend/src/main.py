@@ -21,9 +21,7 @@ app = FastAPI(
     openapi_tags=[
         {
             "name": "accounts",
-            "description": (
-                "Authentication, account lifecycle and user roles."
-            ),
+            "description": ("Authentication, account lifecycle and user roles."),
         },
         {
             "name": "doctors",

@@ -46,9 +46,7 @@ class PatientModel(Base):
         Enum(
             PatientSourceEnum,
             name="patient_source_enum",
-            values_callable=lambda enum_class: [
-                item.value for item in enum_class
-            ],
+            values_callable=lambda enum_class: [item.value for item in enum_class],
         ),
         nullable=False,
         default=PatientSourceEnum.UNKNOWN,

@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from math import ceil
 from typing import Any
-
+from zoneinfo import ZoneInfo
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +26,7 @@ from schemas.appointments import (
 )
 
 
+CLINIC_TIMEZONE = ZoneInfo("Europe/Kyiv")
 WORKDAY_START = time(hour=8, minute=0)
 WORKDAY_END = time(hour=18, minute=0)
 
@@ -69,16 +70,18 @@ class AppointmentService:
             appointment_data.treatment_id,
         )
 
-        appointment_date_time = datetime.combine(
+        local_date_time = datetime.combine(
             appointment_data.appointment_date,
             appointment_data.appointment_time,
-            tzinfo=timezone.utc,
+            tzinfo=CLINIC_TIMEZONE,
+        )
+
+        appointment_date_time = local_date_time.astimezone(
+            timezone.utc,
         )
 
         if appointment_date_time <= datetime.now(timezone.utc):
-            raise ValueError(
-                "Appointment date and time must be in the future."
-            )
+            raise ValueError("Appointment date and time must be in the future.")
 
         doctor_busy = await self.appointments.is_doctor_busy(
             doctor_id=appointment_data.doctor_id,
@@ -87,9 +90,7 @@ class AppointmentService:
         )
 
         if doctor_busy:
-            raise ValueError(
-                "Doctor already has an appointment during this time."
-            )
+            raise ValueError("Doctor already has an appointment during this time.")
 
         try:
             appointment = self.appointments.add(
@@ -105,10 +106,8 @@ class AppointmentService:
             await self.session.rollback()
             raise
 
-        appointment_details = (
-            await self.appointments.get_details_by_id(
-                appointment.id,
-            )
+        appointment_details = await self.appointments.get_details_by_id(
+            appointment.id,
         )
 
         if appointment_details is None:
@@ -128,18 +127,11 @@ class AppointmentService:
         page: int = 1,
         page_size: int = 20,
     ) -> dict[str, Any]:
-        if (
-            date_from is not None
-            and date_to is not None
-            and date_from > date_to
-        ):
-            raise ValueError(
-                "date_from cannot be later than date_to."
-            )
+        if date_from is not None and date_to is not None and date_from > date_to:
+            raise ValueError("date_from cannot be later than date_to.")
 
         if appointment_date is not None and (
-            date_from is not None
-            or date_to is not None
+            date_from is not None or date_to is not None
         ):
             raise ValueError(
                 "Use either appointment_date or date_from/date_to, not both."
@@ -207,10 +199,8 @@ class AppointmentService:
         self,
         appointment_id: int,
     ) -> dict[str, Any]:
-        appointment_details = (
-            await self.appointments.get_details_by_id(
-                appointment_id,
-            )
+        appointment_details = await self.appointments.get_details_by_id(
+            appointment_id,
         )
 
         if appointment_details is None:
@@ -231,8 +221,7 @@ class AppointmentService:
 
         if not treatment.is_main:
             raise ValueError(
-                "Only a main treatment can be selected "
-                "for an appointment."
+                "Only a main treatment can be selected for an appointment."
             )
 
         return treatment
@@ -276,33 +265,22 @@ class AppointmentService:
             new_status == AppointmentStatusEnum.CONFIRMED
             and appointment_date_time <= now
         ):
-            raise ValueError(
-                "Past appointment cannot be confirmed."
-            )
+            raise ValueError("Past appointment cannot be confirmed.")
 
         if (
             new_status == AppointmentStatusEnum.CANCELLED
             and appointment_date_time <= now
         ):
-            raise ValueError(
-                "A past appointment cannot be cancelled."
-            )
+            raise ValueError("A past appointment cannot be cancelled.")
 
         if (
             new_status == AppointmentStatusEnum.COMPLETED
             and appointment_date_time > now
         ):
-            raise ValueError(
-                "A future appointment cannot be completed."
-            )
+            raise ValueError("A future appointment cannot be completed.")
 
-        if (
-            new_status == AppointmentStatusEnum.NO_SHOW
-            and appointment_date_time > now
-        ):
-            raise ValueError(
-                "A future appointment cannot be marked as no-show."
-            )
+        if new_status == AppointmentStatusEnum.NO_SHOW and appointment_date_time > now:
+            raise ValueError("A future appointment cannot be marked as no-show.")
 
     async def update(
         self,
@@ -319,8 +297,7 @@ class AppointmentService:
             AppointmentStatusEnum.NO_SHOW,
         }:
             raise ValueError(
-                "Cancelled, completed or no-show appointment "
-                "cannot be updated."
+                "Cancelled, completed or no-show appointment cannot be updated."
             )
 
         update_data = appointment_data.model_dump(
@@ -342,13 +319,8 @@ class AppointmentService:
         }
 
         for field_name in required_fields:
-            if (
-                field_name in update_data
-                and update_data[field_name] is None
-            ):
-                raise ValueError(
-                    f"{field_name} cannot be null."
-                )
+            if field_name in update_data and update_data[field_name] is None:
+                raise ValueError(f"{field_name} cannot be null.")
 
         new_patient_id = update_data.get(
             "patient_id",
@@ -397,14 +369,10 @@ class AppointmentService:
             "duration",
         }
 
-        schedule_changed = bool(
-            schedule_fields.intersection(update_data)
-        )
+        schedule_changed = bool(schedule_fields.intersection(update_data))
 
         if schedule_changed and new_date_time <= now:
-            raise ValueError(
-                "Past appointment scheduling data cannot be updated."
-            )
+            raise ValueError("Past appointment scheduling data cannot be updated.")
 
         if schedule_changed:
             patient = await self.patients.get_by_id(
@@ -426,19 +394,16 @@ class AppointmentService:
             )
 
             if new_status in DASHBOARD_BLOCKING_STATUSES:
-                doctor_busy = (
-                    await self.appointments.is_doctor_busy(
-                        doctor_id=new_doctor_id,
-                        date_time=new_date_time,
-                        duration=new_duration,
-                        exclude_appointment_id=appointment.id,
-                    )
+                doctor_busy = await self.appointments.is_doctor_busy(
+                    doctor_id=new_doctor_id,
+                    date_time=new_date_time,
+                    duration=new_duration,
+                    exclude_appointment_id=appointment.id,
                 )
 
                 if doctor_busy:
                     raise ValueError(
-                        "Doctor already has an appointment "
-                        "during this time."
+                        "Doctor already has an appointment during this time."
                     )
 
         try:
@@ -464,9 +429,7 @@ class AppointmentService:
         month: int,
     ) -> AppointmentDashboardResponse:
         if month < 1 or month > 12:
-            raise ValueError(
-                "Month must be between 1 and 12."
-            )
+            raise ValueError("Month must be between 1 and 12.")
 
         days_in_month = monthrange(
             year,
@@ -475,11 +438,9 @@ class AppointmentService:
 
         doctor_ids = await self.doctors.get_active_ids()
 
-        month_appointments = (
-            await self.appointments.get_for_month(
-                year=year,
-                month=month,
-            )
+        month_appointments = await self.appointments.get_for_month(
+            year=year,
+            month=month,
         )
 
         appointments_by_doctor_and_date: dict[
@@ -488,7 +449,7 @@ class AppointmentService:
         ] = defaultdict(list)
 
         for appointment in month_appointments:
-            appointment_date = appointment.date_time.date()
+            appointment_date = appointment.date_time.astimezone(CLINIC_TIMEZONE).date()
 
             appointments_by_doctor_and_date[
                 (
@@ -500,7 +461,7 @@ class AppointmentService:
         available_days: list[int] = []
         fully_booked_days: list[int] = []
 
-        today = datetime.now(timezone.utc).date()
+        today = datetime.now(CLINIC_TIMEZONE).date()
 
         if doctor_ids:
             for day_number in range(
@@ -522,21 +483,17 @@ class AppointmentService:
                 day_has_free_slot = False
 
                 for doctor_id in doctor_ids:
-                    doctor_appointments = (
-                        appointments_by_doctor_and_date.get(
-                            (
-                                doctor_id,
-                                selected_date,
-                            ),
-                            [],
-                        )
+                    doctor_appointments = appointments_by_doctor_and_date.get(
+                        (
+                            doctor_id,
+                            selected_date,
+                        ),
+                        [],
                     )
 
-                    doctor_has_free_slot = (
-                        self._doctor_has_free_slot(
-                            selected_date=selected_date,
-                            appointments=doctor_appointments,
-                        )
+                    doctor_has_free_slot = self._doctor_has_free_slot(
+                        selected_date=selected_date,
+                        appointments=doctor_appointments,
                     )
 
                     if doctor_has_free_slot:
@@ -550,10 +507,8 @@ class AppointmentService:
 
         now = datetime.now(timezone.utc)
 
-        statistics = (
-            await self.appointments.get_dashboard_statistics(
-                now=now,
-            )
+        statistics = await self.appointments.get_dashboard_statistics(
+            now=now,
         )
 
         return AppointmentDashboardResponse(
@@ -565,18 +520,10 @@ class AppointmentService:
                 fully_booked_days=fully_booked_days,
             ),
             statistics=AppointmentStatisticsResponse(
-                today_appointments=statistics[
-                    "today_appointments"
-                ],
-                upcoming_appointments=statistics[
-                    "upcoming_appointments"
-                ],
-                completed_today=statistics[
-                    "completed_today"
-                ],
-                cancelled_today=statistics[
-                    "cancelled_today"
-                ],
+                today_appointments=statistics["today_appointments"],
+                upcoming_appointments=statistics["upcoming_appointments"],
+                completed_today=statistics["completed_today"],
+                cancelled_today=statistics["cancelled_today"],
             ),
         )
 
@@ -588,14 +535,14 @@ class AppointmentService:
         workday_start = datetime.combine(
             selected_date,
             WORKDAY_START,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         workday_end = datetime.combine(
             selected_date,
             WORKDAY_END,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         slot_step = timedelta(
             minutes=SLOT_STEP_MINUTES,
@@ -608,24 +555,18 @@ class AppointmentService:
         current_slot_start = workday_start
 
         while current_slot_start + slot_duration <= workday_end:
-            current_slot_end = (
-                current_slot_start + slot_duration
-            )
+            current_slot_end = current_slot_start + slot_duration
 
             slot_is_booked = False
 
             for appointment in appointments:
-                if (
-                    appointment.status
-                    not in DASHBOARD_BLOCKING_STATUSES
-                ):
+                if appointment.status not in DASHBOARD_BLOCKING_STATUSES:
                     continue
 
                 appointment_start = appointment.date_time
 
-                appointment_end = (
-                    appointment_start
-                    + timedelta(minutes=appointment.duration)
+                appointment_end = appointment_start + timedelta(
+                    minutes=appointment.duration
                 )
 
                 has_overlap = (
@@ -658,39 +599,34 @@ class AppointmentService:
             raise ValueError("Doctor not found.")
 
         if duration < 30:
-            raise ValueError(
-                "Appointment duration must be at least 30 minutes."
-            )
+            raise ValueError("Appointment duration must be at least 30 minutes.")
 
         if duration > 180:
-            raise ValueError(
-                "Appointment duration cannot exceed 180 minutes."
-            )
+            raise ValueError("Appointment duration cannot exceed 180 minutes.")
 
-        appointments = (
-            await self.appointments.get_doctor_appointments_by_date(
-                doctor_id=doctor_id,
-                selected_date=selected_date,
-            )
+        appointments = await self.appointments.get_doctor_appointments_by_date(
+            doctor_id=doctor_id,
+            selected_date=selected_date,
         )
 
         workday_start = datetime.combine(
             selected_date,
             WORKDAY_START,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         workday_end = datetime.combine(
             selected_date,
             WORKDAY_END,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=CLINIC_TIMEZONE,
+        ).astimezone(timezone.utc)
 
         now = datetime.now(timezone.utc)
 
         slot_step = timedelta(
             minutes=SLOT_STEP_MINUTES,
         )
+
         requested_duration = timedelta(
             minutes=duration,
         )
@@ -700,18 +636,15 @@ class AppointmentService:
         current_slot_start = workday_start
 
         while current_slot_start + requested_duration <= workday_end:
-            current_slot_end = (
-                current_slot_start + requested_duration
-            )
+            current_slot_end = current_slot_start + requested_duration
 
             is_booked = False
 
             for appointment in appointments:
                 appointment_start = appointment.date_time
 
-                appointment_end = (
-                    appointment_start
-                    + timedelta(minutes=appointment.duration)
+                appointment_end = appointment_start + timedelta(
+                    minutes=appointment.duration
                 )
 
                 has_overlap = (
@@ -724,7 +657,7 @@ class AppointmentService:
                     break
 
             is_expired = (
-                selected_date == now.date()
+                selected_date == datetime.now(CLINIC_TIMEZONE).date()
                 and current_slot_start < now
             )
 
@@ -735,9 +668,13 @@ class AppointmentService:
             else:
                 slot_status = "free"
 
+            local_slot_start = current_slot_start.astimezone(
+                CLINIC_TIMEZONE,
+            )
+
             slots.append(
                 AvailableSlotResponse(
-                    time=current_slot_start.time().replace(
+                    time=local_slot_start.time().replace(
                         tzinfo=None,
                     ),
                     status=slot_status,
@@ -746,10 +683,7 @@ class AppointmentService:
 
             current_slot_start += slot_step
 
-        available_count = sum(
-            slot.status == "free"
-            for slot in slots
-        )
+        available_count = sum(slot.status == "free" for slot in slots)
 
         return AvailableSlotsResponse(
             date=selected_date,

@@ -16,7 +16,4 @@ class TreatmentService:
             is_main=is_main,
         )
 
-        return [
-            TreatmentResponse.model_validate(treatment)
-            for treatment in treatments
-        ]
+        return [TreatmentResponse.model_validate(treatment) for treatment in treatments]
