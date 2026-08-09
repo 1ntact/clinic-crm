@@ -313,7 +313,8 @@ class AppointmentService:
             "patient_id",
             "doctor_id",
             "treatment_id",
-            "date_time",
+            "appointment_date",
+            "appointment_time",
             "duration",
             "status",
         }
@@ -337,10 +338,35 @@ class AppointmentService:
             appointment.treatment_id,
         )
 
-        new_date_time = update_data.get(
-            "date_time",
-            appointment.date_time,
+        current_local_date_time = appointment.date_time.astimezone(
+            CLINIC_TIMEZONE,
         )
+        new_date = update_data.get(
+            "appointment_date",
+            current_local_date_time.date(),
+        )
+
+        new_time = update_data.get(
+            "appointment_time",
+            current_local_date_time.time().replace(tzinfo=None),
+        )
+
+        date_time_changed = (
+            "appointment_date" in update_data or "appointment_time" in update_data
+        )
+
+        if date_time_changed:
+            local_date_time = datetime.combine(
+                new_date,
+                new_time,
+                tzinfo=CLINIC_TIMEZONE,
+            )
+
+            new_date_time = local_date_time.astimezone(
+                timezone.utc,
+            )
+        else:
+            new_date_time = appointment.date_time
 
         new_duration = update_data.get(
             "duration",
@@ -365,7 +391,8 @@ class AppointmentService:
             "patient_id",
             "doctor_id",
             "treatment_id",
-            "date_time",
+            "appointment_date",
+            "appointment_time",
             "duration",
         }
 
@@ -410,6 +437,7 @@ class AppointmentService:
             self.appointments.update(
                 appointment=appointment,
                 appointment_data=appointment_data,
+                date_time=new_date_time if date_time_changed else None,
             )
 
             await self.session.commit()
