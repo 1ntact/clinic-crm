@@ -70,7 +70,7 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
         <>
           Appointments created successfully
           <br />
-          For{selectedUser.firstName} {selectedUser.lastName}
+         {` For ${selectedUser.firstName} For${selectedUser.lastName}`}
         </>,
       );
     } catch (e) {
@@ -87,7 +87,8 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
         <div className="w-full">
           <section></section>
           <section className="mb-[24px]">
-            <Search
+           
+              <Search
               searchLabel="Search patients"
               items={patients}
               placeholder="Find an pacient"

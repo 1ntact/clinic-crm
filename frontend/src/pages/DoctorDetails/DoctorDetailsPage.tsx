@@ -13,6 +13,7 @@ import { removeDoctorThunk } from "@/features/doctors/thunk/removeDoctorThunk";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { Loader } from "@/components/loader/Loader";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 
 export const DoctorDetailsPage = () => {
   const dispatch = useAppDispatch();
@@ -50,11 +51,13 @@ export const DoctorDetailsPage = () => {
           handleAside={handleAside}
           content={<DoctorEditForm />}
           footer={<>
-             <ButtonPage className="flex-1  bg-[#FFFFFF] " onClick={handleAside}>
+             <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
                  <span className=" text-[#172554]">Cancel</span>
                 </ButtonPage>
 
-                <ButtonPage type="submit" form="doctor-edit" className="flex-1 ">
+            <ButtonPage type="submit"
+              form="doctor-edit"
+              className={buttonStyles.formSubmit}>
                   Send an invitation
                 </ButtonPage></>}
           title={"EDIT DOCTOR"}
@@ -92,17 +95,17 @@ export const DoctorDetailsPage = () => {
               </span>
             </div>
 
-            <div className="flex gap-3">
+            <div className="w-[250px] flex gap-3">
               <ButtonPage
-                className="bg-[#EF4444] px-4 hover:bg-black"
-                icon={<IoTrash className="mr-2 text-white" />}
+                className={buttonStyles.removeButton}
+                icon={<IoTrash className="mr-2 text-[#DC2626]" />}
                 onClick={() => setOpenModal(true)}
               >
-                Remove doctor
+                Remove 
               </ButtonPage>
 
               <ButtonPage
-                className="px-4"
+                className={buttonStyles.editButton}
                 icon={<TfiPencil className="mr-2" />}
                 onClick={handleAside}
               >

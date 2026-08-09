@@ -47,7 +47,8 @@ export const UserForm: React.FC = () => {
               </p>
 
               <div className="flex gap-4">
-                <Input
+                  <Input
+                     inputClassName="h-[44px]"
                   className="flex-1"
                   name="firstName"
                   label="First name *"
@@ -58,7 +59,8 @@ export const UserForm: React.FC = () => {
                   error={errors.firstName?.message}
                 />
 
-                <Input
+                  <Input
+                     inputClassName="h-[44px]"
                   className="flex-1"
                   name="lastName"
                   label="Last name *"
@@ -76,7 +78,8 @@ export const UserForm: React.FC = () => {
                 CONTACT
               </p>
 
-              <Input
+                <Input
+                   inputClassName="h-[44px]"
                 name="email"
                 label="Email *"
                 type="email"
@@ -92,7 +95,8 @@ export const UserForm: React.FC = () => {
                 PASSWORD
               </p>
 
-              <Input
+                <Input
+                   inputClassName="h-[44px]"
                 name="password"
                 label="Password *"
                 type="password"

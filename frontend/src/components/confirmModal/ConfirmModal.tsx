@@ -85,11 +85,11 @@ export const ConfirmModal: React.FC<Props> = ({
 
         <div className="mt-6 flex justify-end gap-3">
           <ButtonPage
-            
+      
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className=" w-[171px]  bg-white border"
+            className=" w-[171px] h-[44px] bg-white border"
           >
             <span className="text-[#172554]">
               {cancelText}

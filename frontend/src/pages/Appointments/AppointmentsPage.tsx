@@ -28,6 +28,7 @@ import { Pagination } from "@/components/pagination/Pagination";
 import { Filter } from "@/components/filter/Filter";
 import { AppointmentsViewToggle } from "./components/AppointmentsViewToogle/AppointmentsViewToogle";
 import { AppointmentsCalendar } from "./components/AppointmentsCalendar/AppointmentsCalendar";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 
 type ViewMode = "list" | "calendar";
 
@@ -214,7 +215,7 @@ export const AppointmentsPage = () => {
                         }
                       </Td>
 
-                      <Td className="font-[Inter]  text-[#1F2937] font-semibold">{appointment.treatmentPrice}</Td>
+                      <Td className="font-[Inter]  text-[#1F2937] font-semibold">{`$${appointment.treatmentPrice}`}</Td>
 
                       <Td>{appointment.treatment}</Td>
 
@@ -291,7 +292,7 @@ export const AppointmentsPage = () => {
           footer={
             <>
               <ButtonPage
-                className="flex-1 bg-[#FFFFFF] "
+                className={buttonStyles.formCancel}
                 onClick={handleAside}
               >
                 <span className="text-[#172554]">Cancel</span>
@@ -300,7 +301,7 @@ export const AppointmentsPage = () => {
               <ButtonPage
                 type="submit"
                 form="appointment-create"
-                className="flex-1"
+                className={buttonStyles.formSubmit}
               >
                 Creaate appointment
               </ButtonPage>

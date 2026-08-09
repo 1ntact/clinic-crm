@@ -168,13 +168,13 @@ const appointmentsSlice = createSlice({
       .addCase(getAvailableTimeSlotsThunk.rejected, (state) => {
         state.calendar.calendarLoading = false;
       })
-      .addCase(getTreatmentsThunk.pending, (state) => {
+      .addCase(getTreatmentsThunk.pending, () => {
      
       })
       .addCase(getTreatmentsThunk.fulfilled, (state, action) => {
         state.treatments = action.payload;
       })
-      .addCase(getTreatmentsThunk.rejected, (state) => {
+      .addCase(getTreatmentsThunk.rejected, () => {
        
       })
       .addCase(createAppointmentThunk.pending, (state) => {

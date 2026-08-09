@@ -16,6 +16,7 @@ import { employmentTypes } from "@/features/doctors/model/employmentTypes";
 import {  sortButtons } from "@/features/doctors/model/sortDoctorTypes";
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { useEffect, useState } from "react";
 import { BiPlus } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
@@ -49,11 +50,11 @@ export const DoctorsPage = () => {
           handleAside={handleAside}
           content={<DoctorCreteForm handleAside={handleAside} />}
           footer={   <>
-                <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
+                <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
                     <span className="text-[#172554]">Cancel</span>
                 </ButtonPage>
 
-                <ButtonPage type="submit" form="doctor-create" className="flex-1">
+                <ButtonPage type="submit" form="doctor-create" className={buttonStyles.formSubmit}>
                   Send an invitation
                 </ButtonPage>
               </>}
@@ -69,7 +70,7 @@ export const DoctorsPage = () => {
         />
         <div className="flex  gap-4  ">
           <ButtonPage
-            className="pl-[12px] pr-[12px] "
+            className={buttonStyles.createButton}
             onClick={handleAside}
             icon={<BiPlus className="mr-[8px]" />}
           >
@@ -170,7 +171,11 @@ export const DoctorsPage = () => {
                   Nothing found
                 </p>
             )}
-              <Pagination
+             
+          </div>
+          
+      )}
+       <Pagination
         page={query.page}
         pageSize={query.pageSize}
         total={total}
@@ -182,8 +187,6 @@ export const DoctorsPage = () => {
           )
         }
       />
-        </div>
-      )}
       
 
    

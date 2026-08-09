@@ -52,6 +52,7 @@ export const Filter: React.FC<Props> = ({
   return (
     <div className ={`flex items-center gap-2  ${className ?? ""}`} >
       <Input 
+         inputClassName="h-[36px]"
         name="124"
         type="search"
         value={value}

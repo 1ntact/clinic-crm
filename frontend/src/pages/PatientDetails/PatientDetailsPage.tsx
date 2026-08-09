@@ -12,6 +12,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { UserProfile } from "../../components/userProfile/UserProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
@@ -55,11 +56,13 @@ export const PatientDetailsPage = () => {
           handleAside={handleAside}
           content={<PatientEditForm  />}
           footer={<>
-                <ButtonPage className="flex-1  bg-[#FFFFFF] " onClick={handleAside}>
+                <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
                  <span className=" text-[#172554]">Cancel</span>
                 </ButtonPage>
 
-                <ButtonPage type="submit" form="patient-edit" className="flex-1 ">
+            <ButtonPage type="submit"
+              form="patient-edit"
+              className={buttonStyles.formSubmit}>
                   Update patient
             </ButtonPage>
                 </>}
@@ -88,21 +91,21 @@ export const PatientDetailsPage = () => {
               </span>
             </div>
 
-            <div className="flex gap-3">
+            <div className="w-[250px] flex gap-4">
               <ButtonPage
-                className="bg-[#EF4444] px-4 hover:bg-black"
-                icon={<IoTrash className="mr-2 text-white" />}
+                className={buttonStyles.removeButton}
+                icon={<IoTrash className="mr-2 text-[#DC2626]" />}
                 onClick={() => setOpenModal(true)}
               >
-                Remove patients
+                Remove 
               </ButtonPage>
 
               <ButtonPage
-                className="px-4 h-[36px]"
+                className={buttonStyles.editButton}
                 icon={<TfiPencil className="mr-2" />}
                 onClick={handleAside}
               >
-                Edit patients
+                Edit Patient
               </ButtonPage>
             </div>
           </section>

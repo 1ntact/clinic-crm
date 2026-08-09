@@ -3,7 +3,7 @@ export interface PatientFormData {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: number;
+  phoneNumber: string;
   gender: string;
   dateOfBirth: string;
   address: string;

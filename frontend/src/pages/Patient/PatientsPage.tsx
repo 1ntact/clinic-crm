@@ -21,6 +21,7 @@ import { sortButtons } from "@/features/patients/model/sortPatientType";
 import { Pagination } from "@/components/pagination/Pagination";
 import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
 import { PatientStatisticCard } from "./components/statisticPacient/StatisticPatient";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
@@ -49,11 +50,11 @@ export const PatientsPage = () => {
       handleAside={handleAside}
       content={<PatientCreateForm />}
       footer = { <>
-               <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
+               <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
                       <span className="text-[#172554]">Cancel</span>
                   </ButtonPage>
   
-                  <ButtonPage type="submit" form="patient-create" className="flex-1">
+                  <ButtonPage type="submit" form="patient-create" className={buttonStyles.formSubmit}>
                     Send an invitation
                   </ButtonPage>
              </> }
@@ -71,7 +72,7 @@ export const PatientsPage = () => {
       
           <div className="flex  gap-4  ">
          
-            <ButtonPage className="pl-[12px] pr-[12px] "
+            <ButtonPage className={buttonStyles.createButton}
                onClick={handleAside}
               
               icon={<BiPlus className="mr-[8px]" />} >Add patients</ButtonPage>

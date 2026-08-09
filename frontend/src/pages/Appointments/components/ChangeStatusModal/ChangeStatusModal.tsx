@@ -50,6 +50,7 @@ export const ChangeStatusModal: React.FC<Props> = ({
   const { appointmentsQuery } = useAppSelector(state => state.appointment)
   const {selectedDoctor,selectedDate}= useAppSelector(state=>state.appointment.calendar)
   const dispatch = useAppDispatch();
+  
   useEffect(() => {
     if (!isOpen) return;
 
