@@ -116,7 +116,9 @@ class AppointmentRepository:
             "patient_id": appointment.patient_id,
             "doctor_id": appointment.doctor_id,
             "treatment_id": appointment.treatment_id,
-            "date_time": appointment.date_time,
+            "date_time": appointment.date_time.astimezone(
+                CLINIC_TIMEZONE,
+            ),
             "duration": appointment.duration,
             "status": appointment.status,
             "notes": appointment.notes,
@@ -413,10 +415,14 @@ class AppointmentRepository:
         self,
         appointment: AppointmentModel,
         appointment_data: AppointmentUpdate,
+        date_time: datetime | None = None,
     ) -> AppointmentModel:
         update_data = appointment_data.model_dump(
             exclude_unset=True,
         )
+
+        update_data.pop("appointment_date", None)
+        update_data.pop("appointment_time", None)
 
         for field, value in update_data.items():
             setattr(
@@ -424,6 +430,9 @@ class AppointmentRepository:
                 field,
                 value,
             )
+
+        if date_time is not None:
+            appointment.date_time = date_time
 
         return appointment
 

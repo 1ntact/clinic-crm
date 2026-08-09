@@ -39,12 +39,15 @@ class AppointmentUpdate(BaseModel):
     patient_id: int | None = None
     doctor_id: int | None = None
     treatment_id: int | None = None
-    date_time: datetime | None = None
+    appointment_date: date | None = None
+    appointment_time: time | None = None
+
     duration: int | None = Field(
         default=None,
         ge=30,
         le=180,
     )
+
     status: AppointmentStatusEnum | None = None
     notes: str | None = None
 
