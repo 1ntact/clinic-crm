@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          working-directory: ./backend
+
+      - name: Install dependencies (including dev group)
+        run: uv sync --group dev
+
+      - name: Run linter (ruff)
+        run: uv run ruff check .
+
+      - name: Run tests
+        run: uv run pytest -v
+
+
