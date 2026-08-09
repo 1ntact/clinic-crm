@@ -85,6 +85,7 @@ export const BaseSelect = ({
           className={`
             flex
             w-full
+            h-[36px]
             items-center
             justify-between
             rounded-[8px]

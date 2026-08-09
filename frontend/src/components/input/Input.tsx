@@ -30,6 +30,7 @@ export function Input<T extends FieldValues>({
   type,
   name,
   className,
+ 
   inputClassName,
   ...props
 }: InputProps<T>) {
@@ -39,11 +40,11 @@ export function Input<T extends FieldValues>({
     register ? register(name, rules) : {};
 
  return (
-  <div className={className}>
+   <div className={`w-full flex-1 ${className ?? ""}`}>
     {label && (
       <label
         htmlFor={name}
-        className="mb-1 block text-sm font-medium text-[#374151]"
+        className="mb-[10px] block font-[Inter] font-medium text-[14px]"
       >
         {label}
       </label>
@@ -59,7 +60,7 @@ export function Input<T extends FieldValues>({
             : type
         }
         className={`
-          h-[44px]
+          
           w-full
           rounded-[8px]
           border
@@ -84,15 +85,18 @@ export function Input<T extends FieldValues>({
       />
 
       {type === "password" && (
-        <button
+         <button
+           
           type="button"
           onClick={() =>
             setShowPassword((prev) => !prev)
           }
-          className="
+           className="
+         
             absolute
             right-3
             top-1/2
+             cursor-pointer
             -translate-y-1/2
           "
         >
@@ -106,7 +110,8 @@ export function Input<T extends FieldValues>({
 
       {type === "search" && (
         <CiSearch
-          className="
+           className="
+           cursor-pointer
             absolute
             left-3
             top-1/2

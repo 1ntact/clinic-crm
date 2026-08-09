@@ -120,10 +120,10 @@ export const DoctorsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="w-full h-full p-[24px]">
+        <div className="w-full min-h-[380px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
           <Table>
             <thead>
-              <tr>
+              <tr className="h-[40px] bg-[#F3F4F6]">
                 <Th>ID</Th>
                 <Th>DOCTOR/CONTACT</Th>
                 <Th>WORKLOAD</Th>
@@ -139,7 +139,7 @@ export const DoctorsPage = () => {
                   onClick={() => {
                     navigate(`/doctors/${doctor.id}`);
                   }}
-                  className=" h-[76px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
+                  className=" h-[40px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
                 >
                   <Td>{`#${doctor.doctorCode}`}</Td>
 

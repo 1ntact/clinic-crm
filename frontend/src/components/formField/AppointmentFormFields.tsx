@@ -21,8 +21,14 @@ export const AppointmentFormFields = ({ type }) => {
       register,
       formState: { errors },
     } = useFormContext<AppointmentFormData>();
-  return (<><div className="flex gap-4 mb-6">
-            <Input
+  return (<>
+    <p className="mb-[24px] text-xs text-[#6B7280]">
+          PERSONAL INFO
+        </p>
+    <div className="flex gap-4 mb-[16px]">
+    
+    <Input
+      inputClassName="h-[44px]"
               className="flex-1"
               name="firstName"
               label="First name *"
@@ -34,7 +40,8 @@ export const AppointmentFormFields = ({ type }) => {
               readOnly={type === "create"}
             />
   
-            <Input
+    <Input
+      inputClassName="h-[44px]"
               className="flex-1"
               name="lastName"
               label="Last name *"
@@ -47,7 +54,8 @@ export const AppointmentFormFields = ({ type }) => {
             />
   </div>
    
-        <Input
+    <Input
+      inputClassName="h-[44px] mb-[32px]"
           name="phoneNumber"
           label="Phone *"
           type="tel"
@@ -55,8 +63,12 @@ export const AppointmentFormFields = ({ type }) => {
           register={register}
           rules={formValidation.phone}
           error={errors.phoneNumber?.message}
-      />
-       <div className="flex gap-4 mb-[24px]">
+    />
+     <p className="mb-[24px] text-xs text-[#6B7280]">
+          APPOINTMENT
+    </p>
+    
+       <div className="flex gap-4 mb-[16px]">
                 <Select
                   className="flex-1"
                   name="doctor"
@@ -98,11 +110,12 @@ export const AppointmentFormFields = ({ type }) => {
         />       
             
       </div>
-        <div className="flex gap-4">
+        <div className="flex  gap-4 mb-[16px]">
+     
       <FormDatePicker
         setValue = {setValue}
   name="appointmentDate"
-  label="Appointment date"
+  label="Date*"
   control={control}
   error={errors.appointmentDate?.message}
   availableDays={availableDays}

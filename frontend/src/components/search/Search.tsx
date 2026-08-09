@@ -7,7 +7,7 @@ type Props<T> = {
   items: T[];
   loading: boolean;
   placeholder?: string;
-
+  searchLabel: string;
   onSearch: (value: T) => void;
   onSelect?: (item: T) => void;
   selectedUser: User | null;
@@ -17,6 +17,7 @@ type Props<T> = {
 };
 
 export function Search<T>({
+  searchLabel,
   items,
   loading,
   placeholder = "Search...",
@@ -46,7 +47,9 @@ export function Search<T>({
   return (
     <div className="relative">
       <Input
-        className="border-[1px] border-[#E5E7EB] rounded-[8px]"
+        label={searchLabel}
+        inputClassName="h-[44px]"
+        className=" rounded-[8px] mb-[32px]"
         name="search"
         type="search"
         placeholder={placeholder}

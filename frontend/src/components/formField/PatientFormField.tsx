@@ -24,7 +24,8 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
 
         <div className="flex gap-4 ">
           <Input
-            className="flex-1"
+             className="flex-1"
+          inputClassName=" h-[44px]"
             name="firstName"
             label="First name *"
             type="text"
@@ -36,7 +37,8 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
           />
 
           <Input
-            className="flex-1"
+             className="flex-1"
+          inputClassName=" h-[44px]"
             name="lastName"
             label="Last name *"
             type="text"
@@ -62,7 +64,8 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
       <section>
         <div className="flex gap-4 ">
          <Input
-           className="flex-1"
+            className="flex-1"
+          inputClassName=" h-[44px]"
             name="dateOfBirth"
             label="Date of Birth *"
             type="date"
@@ -73,7 +76,8 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
             
         />
           <Input
-           className="flex-1"
+            className="flex-1"
+          inputClassName=" h-[44px]"
             name="address"
             label="Address *"
             type="string"
@@ -97,7 +101,8 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
       
         <div className="flex gap-4 ">
           <Input
-            className="flex-1"
+             className="flex-1"
+          inputClassName=" h-[44px]"
           disabled
           name="email"
           label="Email *"
@@ -110,6 +115,7 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
           
           <Input
              className="flex-1"
+          inputClassName=" h-[44px]"
           name="phoneNumber"
           label="Phone *"
           type="tel"

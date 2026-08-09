@@ -10,6 +10,7 @@ import { AppointmentFormFields } from "@/components/formField/AppointmentFormFie
 import { createAppointmentThunk } from "./thunk/createAppointmentThunk";
 import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
 import { getAvailableTimeSlotsThunk } from "./thunk/getAvailableSlots";
+import { Loader } from "@/components/loader/Loader";
 
 export const AppointmentCreateForm: React.FC = () => {
   const methods = useForm<AppointmentFormData>();
@@ -17,7 +18,7 @@ export const AppointmentCreateForm: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const dispatch = useAppDispatch();
   const { patients, loading } = useAppSelector((state) => state.patient);
-  const {appointmentsQuery} = useAppSelector((state)=>state.appointment)
+  const {appointmentsQuery,appointmentsLoading} = useAppSelector((state)=>state.appointment)
 const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useAppSelector(
     (state) => state.appointment.calendar
   );
@@ -79,46 +80,47 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
 
   return (
     <>
-      {" "}
-      {/* {loading? (
-          <Loader />
-        ) : ( */}
-      <div className="w-full">
-        <section></section>
-        <section className="mb-[24px]">
-          <Search
-            items={patients}
-            placeholder="Find an pacient"
-            loading={loading}
-            onSearch={(value) =>
-              dispatch(getAllPatientThunk({ search: value }))
-            }
-            selectedUser={setSelectedUser}
-            onSelect={setSelectedUser}
-            getKey={(user) => user.id}
-            getValue={(user) => `${user.firstName} ${user.lastName}`}
-            renderItem={(user) => (
-              <>
-                <div>
-                  {user.firstName} {user.lastName}
-                </div>
-                <div>{user.email}</div>
-              </>
-            )}
-          />
-        </section>
+      
+      {appointmentsLoading ? (
+        <Loader />
+      ) : (
+        <div className="w-full">
+          <section></section>
+          <section className="mb-[24px]">
+            <Search
+              searchLabel="Search patients"
+              items={patients}
+              placeholder="Find an pacient"
+              loading={loading}
+              onSearch={(value) =>
+                dispatch(getAllPatientThunk({ search: value }))
+              }
+              selectedUser={setSelectedUser}
+              onSelect={setSelectedUser}
+              getKey={(user) => user.id}
+              getValue={(user) => `${user.firstName} ${user.lastName}`}
+              renderItem={(user) => (
+                <>
+                  <div>
+                    {user.firstName} {user.lastName}
+                  </div>
+                  <div>{user.email}</div>
+                </>
+              )}
+            />
+          </section>
 
-        <FormProvider {...methods}>
-          <form
-            id="appointment-create"
-            className="flex flex-col gap-6"
-            onSubmit={handleSubmit(onSubmit)}
-          >
-            {<AppointmentFormFields type={"create"} />}
-          </form>
-        </FormProvider>
-      </div>
-      {/* )}{" "} */}
-    </>
+          <FormProvider {...methods}>
+            <form
+              id="appointment-create"
+              className="flex flex-col "
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              {<AppointmentFormFields type={"create"} />}
+            </form>
+          </FormProvider>
+        </div>
+      
+      )}</>
   );
 };

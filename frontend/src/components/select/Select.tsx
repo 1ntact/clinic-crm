@@ -76,13 +76,13 @@ export const Select = <T extends FieldValues>({
             {label && (
               <label
                 htmlFor={name}
-                className="mb-[10px] font-[Inter] font-medium text-[14px]"
+                className="mb-[10px] block font-[Inter] font-medium text-[14px]"
               >
                 {label}
               </label>
             )}
 
-            {/* Select button */}
+           
             <button
               id={name}
               type="button"
@@ -134,7 +134,7 @@ export const Select = <T extends FieldValues>({
                   absolute
                   left-0
                   right-0
-                  top-[calc(80%)]
+                  top-[calc(100%+2px)]
                   z-50
                   max-h-[220px]
                   overflow-y-auto

@@ -68,7 +68,8 @@ export const PatientCreateForm:React.FC = () => {
   
               </section>
             <section className="mb-[24px]">
-              <Search
+            <Search
+              searchLabel="Search users"
                 items={users}
                 placeholder="Find an activated user"
                 loading={loading}
