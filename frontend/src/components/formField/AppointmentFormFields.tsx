@@ -62,7 +62,7 @@ export const AppointmentFormFields = ({ type }) => {
                   name="doctor"
                   label="Doctor *"
                   placeholder="select a doctor"
-          option={doctors.map((doctor) => ({
+          options={doctors.map((doctor) => ({
     value: String(doctor.id),
     label: `Dr. ${doctor.firstName} ${doctor.lastName}`,
   }))}
@@ -73,7 +73,7 @@ export const AppointmentFormFields = ({ type }) => {
       dispatch(setDoctor(doctor));
     }
   }}
-                  register={register}
+                  control={control}
                   rules={formValidation.doctor}
                   error={errors.doctor?.message}
         />
@@ -84,7 +84,7 @@ export const AppointmentFormFields = ({ type }) => {
                   name="treatments"
                   label="Treatments *"
                   placeholder="Choose Treatments"
-          option={treatments.map((treatment) => ({
+          options={treatments.map((treatment) => ({
              value: String(treatment.id),
              label: `${treatment.treatment} - ${treatment.price.slice(0,-3)}$ `,
            }))}
@@ -92,7 +92,7 @@ export const AppointmentFormFields = ({ type }) => {
                    dispatch(setTreatment(value))
                     
                }}
-                  register={register}
+                  control={control}
                   rules={formValidation.treatments}
                   error={errors.treatments?.message}
         />       
@@ -112,7 +112,7 @@ export const AppointmentFormFields = ({ type }) => {
                   name="appointmentTime"
                   label="Time *"
                   placeholder="Choose Time"
-        option={availableTime.map((time) => ({
+        options={availableTime.map((time) => ({
            disabled: time.status === "booked",
              value: String(time.time),
              label: `${time.time.slice(0,-3)}  `,
@@ -121,7 +121,7 @@ export const AppointmentFormFields = ({ type }) => {
                    dispatch(setTime(value))
                     
                }}
-                  register={register}
+                  control={control}
                   rules={formValidation.date}
                   error={errors.appointmentTime?.message}
         />

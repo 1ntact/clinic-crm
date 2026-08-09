@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Input } from "../input/Input";
 import { useDebounce } from "@/hooks/useDebounce"
+import { BaseSelect } from "../select/BaseSelect";
 
 export type FilterOption = {
   label: string;
@@ -58,41 +59,31 @@ export const Filter: React.FC<Props> = ({
         onChange={(e) => setValue(e.target.value)}
         className="w-full h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
       />
-       {firstSelectOptions && (
-  <select
-    value={firstSelect ?? ""}
-    onChange={(e) => onFirstSelectChange?.(e.target.value)}
-    className="w-[190px] h-[36px] rounded-[8px] border border-[#E5E7EB]"
-  >
-    <option value="">
-      {firstPlaceholder ?? "Select"}
-    </option>
-
-    {firstSelectOptions.map((item) => (
-      <option key={item.value} value={item.value}>
-        {item.label}
-      </option>
-    ))}
-  </select>
-)}
+      {firstSelectOptions && (
+        <BaseSelect
+          name="firstSelect"
+          classNames="h-[36px] w-[190px]"
+          placeholder={firstPlaceholder ?? "Select"}
+          value={firstSelect ?? ""}
+          options={firstSelectOptions}
+          onChange={(value) => {
+            onFirstSelectChange?.(value);
+          }}
+        />
+      )}
 
     {secondSelectOptions && (
-  <select
-    value={secondSelect ?? ""}
-    onChange={(e) => onSecondSelectChange?.(e.target.value)}
-    className="w-[190px] h-[36px] rounded-[8px] border border-[#E5E7EB]"
-  >
-    <option value="">
-      {secondPlaceholder ?? "Select"}
-    </option>
-
-    {secondSelectOptions.map((item) => (
-      <option key={item.value} value={item.value}>
-        {item.label}
-      </option>
-    ))}
-  </select>
-)}  
+        <BaseSelect
+          name="secondSelect"
+          classNames="h-[36px] w-[190px]"
+          placeholder={secondPlaceholder ?? "Select"}
+          value={secondSelect ?? ""}
+          options={secondSelectOptions}
+          onChange={(value) => {
+            onSecondSelectChange?.(value);
+          }}
+        />
+      )} 
 
     </div>
   );

@@ -24,12 +24,12 @@ export const ButtonPage: React.FC<Props> = ({
         rounded-[8px]
          border border-[#9CA3AF]
         cursor-pointer
-          disabled:bg-gray-300
+          disabled:bg-[#FFFFFF]
     disabled:border-gray-300
     disabled:text-gray-500
     disabled:cursor-not-allowed
     disabled:opacity-70
-    disabled:line-through
+   
         ${className ?? ""}
       `}
       {...props}

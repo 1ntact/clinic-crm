@@ -8,20 +8,21 @@ import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
 import type { Appointment } from "@/types/appointment";
 import type { AppointmentsQuery } from "./model/appointmentQuery";
 import type { Doctor } from "@/types/doctor";
+import type { AvailableTimeSlot } from "./model/avalibleTimeSlots";
 
 interface CalendarState {
   fullyBookedTimeCount: number;
   availableTimeCount: number;
   availableDays: string[];
   fullyBookedDays: string[];
-  availableTime: string[];
+  availableTime: AvailableTimeSlot[];
   selectedDate: string | null;
   selectedSpecialization: string | null;
   selectedDoctor: Doctor | null;
   selectedSlotsTime: null | string;
   selectedTreatment: null | string;
   query: CalendarQuery;
-  loading: boolean;
+  calendarLoading: boolean;
 }
 
 interface AppointmentsState {
@@ -40,7 +41,7 @@ interface AppointmentsState {
 
   calendar: CalendarState;
 
-  loading: boolean;
+  appointmentsLoading: boolean;
 }
 
 const initialState: AppointmentsState = {
@@ -59,14 +60,14 @@ const initialState: AppointmentsState = {
   selectedAppointment: null,
 
   page: 1,
-  pageSize:4,
+  pageSize: 5,
   pages: 0,
   total: 0,
 
   treatments: [],
   statistic: [],
 
-  loading: false,
+  appointmentsLoading: false,
 
   calendar: {
     availableDays: [],
@@ -86,7 +87,7 @@ const initialState: AppointmentsState = {
       year: new Date().getFullYear(),
     },
 
-    loading: false,
+    calendarLoading: false,
   },
 };
 
@@ -94,7 +95,10 @@ const appointmentsSlice = createSlice({
   name: "appointment",
   initialState,
   reducers: {
-     setAppointmentsQuery(state, action: PayloadAction<Partial<AppointmentsQuery>>) {
+    setAppointmentsQuery(
+      state,
+      action: PayloadAction<Partial<AppointmentsQuery>>,
+    ) {
       state.appointmentsQuery = {
         ...state.appointmentsQuery,
         ...action.payload,
@@ -118,7 +122,7 @@ const appointmentsSlice = createSlice({
     },
     setDate(state, action) {
       state.calendar.selectedDate = action.payload;
-      console.log("calendar data",action.payload)
+      console.log("calendar data", action.payload);
     },
     setSpecialization(state, action) {
       state.calendar.selectedSpecialization = action.payload;
@@ -130,7 +134,7 @@ const appointmentsSlice = createSlice({
     },
     setTime(state, action) {
       state.calendar.selectedSlotsTime = action.payload;
-       console.log("calendar time",action.payload)
+      console.log("calendar time", action.payload);
     },
     setTreatment(state, action) {
       state.calendar.selectedTreatment = action.payload;
@@ -139,64 +143,64 @@ const appointmentsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getAppointmentsDashboardThunk.pending, (state) => {
-        state.loading = true;
+        state.calendar.calendarLoading = true;
       })
       .addCase(getAppointmentsDashboardThunk.fulfilled, (state, action) => {
         state.calendar.availableDays = action.payload.calendar.availableDays;
         state.calendar.fullyBookedDays =
           action.payload.calendar.fullyBookedDays;
         state.statistic = action.payload.statistic;
-        state.loading = false;
-        console.log("забукані дні",action.payload)
+        state.calendar.calendarLoading = false;
+        console.log("забукані дні", action.payload);
       })
       .addCase(getAppointmentsDashboardThunk.rejected, (state) => {
-        state.loading = false;
+        state.calendar.calendarLoading = false;
       })
       .addCase(getAvailableTimeSlotsThunk.pending, (state) => {
-        state.calendar.loading = true;
+        state.calendar.calendarLoading = true;
       })
       .addCase(getAvailableTimeSlotsThunk.fulfilled, (state, action) => {
-         state.calendar.availableTimeCount = action.payload.availableCount;
+        state.calendar.availableTimeCount = action.payload.availableCount;
         state.calendar.fullyBookedTimeCount = action.payload.bookedCount;
         state.calendar.availableTime = action.payload.slots;
-        state.calendar.loading = false;
+        state.calendar.calendarLoading = false;
       })
       .addCase(getAvailableTimeSlotsThunk.rejected, (state) => {
-        state.calendar.loading = false;
+        state.calendar.calendarLoading = false;
       })
       .addCase(getTreatmentsThunk.pending, (state) => {
-        state.loading = true;
+     
       })
       .addCase(getTreatmentsThunk.fulfilled, (state, action) => {
         state.treatments = action.payload;
       })
       .addCase(getTreatmentsThunk.rejected, (state) => {
-        state.loading = false;
+       
       })
       .addCase(createAppointmentThunk.pending, (state) => {
-        state.loading = true;
+        state.appointmentsLoading = true;
       })
       .addCase(createAppointmentThunk.fulfilled, (state) => {
-        state.loading = false;
+        state.appointmentsLoading = false;
       })
       .addCase(createAppointmentThunk.rejected, (staet) => {
-        staet.loading = false;
+        staet.appointmentsLoading = false;
       })
       .addCase(getAppointmentsThunk.pending, (state) => {
-        state.loading = true;
+        state.appointmentsLoading = true;
       })
       .addCase(getAppointmentsThunk.fulfilled, (state, action) => {
-        state.loading = false;
+        state.appointmentsLoading = false;
         state.appointments = action.payload.items;
         state.page = action.payload.page;
         state.pageSize = action.payload.pageSize;
         state.pages = action.payload.pages;
         state.total = action.payload.total;
-        
-        console.log("current information",action.payload);
+
+        console.log("current information", action.payload);
       })
       .addCase(getAppointmentsThunk.rejected, (state) => {
-        state.loading = false;
+        state.appointmentsLoading = false;
       });
   },
 });

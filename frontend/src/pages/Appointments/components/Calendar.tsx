@@ -1,6 +1,5 @@
 
 import dayjs, { Dayjs } from "dayjs";
-
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers";
@@ -26,12 +25,23 @@ function ServerDay({
   sx,
   ...other
 }: ServerDayProps) {
- 
   const date = day.date();
 
-  const available = availableDays.includes(date);
-  const booked = bookedDays.includes(date);
- 
+  const isCurrentMonth =
+    day.month() === dayjs().month() &&
+    day.year() === dayjs().year();
+
+  const isPast = day.isBefore(dayjs(), "day");
+
+  const available =
+    isCurrentMonth &&
+    !isPast &&
+    availableDays.includes(date);
+
+  const booked =
+    isCurrentMonth &&
+    bookedDays.includes(date);
+
   return (
     <PickerDay
       {...other}
@@ -40,24 +50,100 @@ function ServerDay({
         {
           borderRadius: 2,
 
+          
           ...(available && {
-            bgcolor: "#DCFCE7",
-            color: "#15803D",
+            bgcolor: "#FFFFFF",
+            color: "#1F2937",
           }),
 
+          
           ...(booked && {
             bgcolor: "#FEE2E2",
-            color: "#DC2626",
+            color: "#9CA3AF",
           }),
 
+          
+          ...(isPast && {
+            bgcolor: "#FFFFFF",
+            color: "#9CA3AF",
+          }),
+
+      
+          "&.MuiPickersDay-today": {
+            border: "2px solid #2563EB",
+            backgroundColor: "#FFFFFF",
+            color: "#1F2937",
+          },
+
+         
           "&.Mui-selected": {
-            bgcolor: "#2563EB !important",
+            bgcolor: "#1E3A8A !important",
             color: "#fff",
           },
+       
         },
+
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
     />
+  );
+}
+function CustomCalendarHeader(
+  props: PickersCalendarHeaderProps<Dayjs>
+) {
+  const { currentMonth, onMonthChange } = props;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "8px 12px",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() =>
+          onMonthChange(currentMonth.subtract(1, "month"))
+        }
+        style={{
+          border: "none",
+          background: "transparent",
+          fontSize: "28px",
+          cursor: "pointer",
+          lineHeight: 1,
+        }}
+      >
+        ‹
+      </button>
+
+      <div
+        style={{
+          fontSize: "16px",
+          fontWeight: 600,
+          textTransform: "capitalize",
+        }}
+      >
+        {currentMonth.format("MMMM YYYY")}
+      </div>
+
+      <button
+        type="button"
+        onClick={() =>
+          onMonthChange(currentMonth.add(1, "month"))
+        }
+        style={{
+          border: "none",
+          background: "transparent",
+          fontSize: "28px",
+          cursor: "pointer",
+          lineHeight: 1,
+        }}
+      >
+        ›
+      </button>
+    </div>
   );
 }
 
@@ -72,12 +158,17 @@ const dispatch = useAppDispatch();
   return (
     <div className="rounded-2xl border bg-white p-4 shadow-sm">
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DateCalendar
-          disablePast
-          minDate={dayjs()}
-          onMonthChange={(value: Dayjs) => {
-            dispatch(setDate(null));
-           
+   <DateCalendar
+  views={["day"]}
+  openTo="day"
+showDaysOutsideCurrentMonth
+  dayOfWeekFormatter={(date) => date.format("dd")}
+
+
+
+  onMonthChange={(value: Dayjs) => {
+    dispatch(setDate(null));
+
     dispatch(
       setQuery({
         month: value.month() + 1,
@@ -85,25 +176,34 @@ const dispatch = useAppDispatch();
       })
     );
   }}
-          value={value? dayjs(value) : null}
-          onChange={value => {
-            if (!value) { return }
-            dispatch(setDate(value.format("YYYY-MM-DD")));
-          }
-          }
-          shouldDisableDate={(day) => {
-    return !availableDays.includes(day.date());
+
+  value={value ? dayjs(value) : null}
+
+  onChange={(value) => {
+    if (!value) return;
+
+    dispatch(setDate(value.format("YYYY-MM-DD")));
   }}
-          slots={{
-            day: ServerDay,
-          }}
-          slotProps={{
-            day: {
-              availableDays,
-              bookedDays,
-            } as any,
-          }}
-        />
+
+ shouldDisableDate={(day) => {
+  return (
+    day.isBefore(dayjs(), "day") ||
+    !availableDays.includes(day.date())
+  );
+}}
+
+  slots={{
+    day: ServerDay,
+    calendarHeader: CustomCalendarHeader,
+  }}
+
+  slotProps={{
+    day: {
+      availableDays,
+      bookedDays,
+    } as any,
+  }}
+/>
       </LocalizationProvider>
     </div>
   );

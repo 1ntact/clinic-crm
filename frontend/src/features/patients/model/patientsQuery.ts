@@ -1,5 +1,5 @@
 export interface PatientQuery {
-  search: string;
+  search: string ;
 
   sortBy: "name" | "recent_visit" | "upcoming_visit"
 

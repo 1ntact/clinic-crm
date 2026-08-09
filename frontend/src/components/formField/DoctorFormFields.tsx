@@ -18,7 +18,7 @@ type Props = {
 
 export const DoctorFormFields:React.FC<Props> = ({type}) => {
   
-  const {
+  const {control,
     register,
     formState: { errors },
   } = useFormContext<DoctorFormData>();
@@ -66,8 +66,8 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
             name="specialization"
             label="Speciality *"
             placeholder="Enter speciality"
-            option={specializations}
-            register={register}
+            options={specializations}
+            control={control}
             rules={formValidation.specialization}
             error={errors.specialization?.message}
           />

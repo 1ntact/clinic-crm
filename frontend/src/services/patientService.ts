@@ -13,7 +13,7 @@ export const patientsService = {
     return response.data;
   },
   getAllPatients: async (query:PatientQuery) => {
-     const params: Record<string, string | number> = {
+     const params = {
       page: query.page,
       page_size: query.pageSize,
       sort_by: query.sortBy,

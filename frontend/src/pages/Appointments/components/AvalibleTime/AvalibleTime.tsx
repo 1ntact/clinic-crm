@@ -7,13 +7,15 @@ import { specializations } from "@/features/doctors/model/specialties"
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk"
 import type { Doctor } from "@/types/doctor"
 import { useEffect } from "react"
+import { placeholderTimes } from "./playsholderTime"
+import type { AvailableTimeSlot } from "@/features/appointments/model/avalibleTimeSlots"
 
 
 type Props = {
   selectedDate: string | null;
   loading: boolean;
   handleAside: () => void;
-  availableTime: string[];
+  availableTime: AvailableTimeSlot[];
   selectedSpecialization: string | null;
   selectedDoctorId: Doctor | null;
   doctors: Doctor[];
@@ -43,16 +45,19 @@ useEffect(() => {
     <div className=" flex flex-col bg-[#FFFFFF] w-full h-[361px] rounded-[8px] px-[24px] py-[16px]">
      
       <div className="mb-[24px]">
-        <h1>AVALIBLE TIME SLOTS</h1>
-   { <span>{`20 Aug 2026 - ${availableCount} available · ${bookedCount} booked`} </span>}
+        <h1 className="text-[14px] text-[#6B7280]">AVALIBLE TIME SLOTS</h1>
+        {<span className="text-[12px]">
+          <span className="text-[#6B7280]">20 Aug 2026 - </span>
+          <span className="text-[#15803D]">{`${availableCount} available `}</span>
+        <span className="text-[#B91C1C]">{`· ${bookedCount} booked`}</span></span>}
       </div>
       
       
-      <div className="flex justify-between mb-[45px]">
-        <div>
+      <div className=" flex justify-between mb-[45px]">
+        <div className="flex h-[36px]">
         <BaseSelect
           name={"specializationSelect"}
-          classNames="mr-[8px]"
+          classNames="mr-[8px] h-[36px] w-[218px]"
         placeholder={"Select a speciality"}
         value={selectedSpecialization ?? ""}
         options={specializations}
@@ -62,7 +67,8 @@ useEffect(() => {
            
         }} />
       
-        <BaseSelect
+          <BaseSelect
+            classNames="h-[36px] w-[218px]"
           name={'doctorSelect'}
         placeholder={"Select a doctor"}
   value={selectedDoctorId?.id ?? ""}
@@ -70,45 +76,70 @@ useEffect(() => {
     value: String(doctor.id),
     label: `${doctor.firstName} ${doctor.lastName}`,
   }))}
-  onChange={(value) => {
-    const doctor = doctors.find((d) => String(d.id) === value);
+   onChange={(value) => {
+    if (!value) {
+      dispatch(setDoctor(null));
+      return;
+    }
+
+    const doctor = doctors.find(
+      (d) => String(d.id) === value
+    );
 
     if (!doctor) return;
 
     dispatch(setDoctor(doctor));
   }}
+  
           />
         </div>
       <div className="flex items-center gap-6 text-sm">
   <div className="flex items-center gap-2">
     <span className="h-2.5 w-2.5 rounded-full bg-blue-600"></span>
-    <span>Free</span>
+    <span className="text-[14px] text-[#6B7280]">Free</span>
   </div>
 
   <div className="flex items-center gap-2">
     <span className="h-2.5 w-2.5 rounded-full bg-gray-400"></span>
-    <span>Booked</span>
+    <span className="text-[14px] text-[#6B7280]">Booked</span>
   </div>
 </div>
       </div>
      
       
       {loading ? <Loader /> : (<div className="grid grid-cols-7 gap-2 mb-[45px]">
-        {availableTime && availableTime.map((slot) => (
-          <ButtonPage
-      disabled={!selectedDate || slot.status ==='booked' || slot.status === 'expired'}
-            key={slot.time}
-            className="h-[36px] text-[#2563EB]"
-            onClick={() => {
-              handleAside()
-              dispatch(setTime(slot.time))
-            }}
-          >
-            {slot.time.slice(0, -3)}
-          </ButtonPage>
-        ))}
+       {availableTime?.length > 0 ? (
+  availableTime.map((slot) => (
+    <ButtonPage
+      disabled={
+        !selectedDate ||
+        slot.status === "booked" ||
+        slot.status === "expired"
+      }
+      key={slot.time}
+      className="h-[36px] text-[#2563EB]"
+      onClick={() => {
+        handleAside();
+        dispatch(setTime(slot.time));
+      }}
+    >
+      {slot.time.slice(0, -3)}
+    </ButtonPage>
+  ))
+) : (
+  placeholderTimes.map((time) => (
+    <ButtonPage
+      key={time}
+      disabled
+      className="h-[36px] text-[#9CA3AF]"
+    >
+      {time}
+    </ButtonPage>
+  ))
+)}
       </div>)}
-      <span>Click a free slot to schedule a new appointment</span>
+      
+      <span className= " text-[12px] text-[#6B7280]">Click a free slot to schedule a new appointment</span>
     </div>
 
   </>)

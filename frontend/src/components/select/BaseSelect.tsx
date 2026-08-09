@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import { MdKeyboardArrowDown } from "react-icons/md";
 type Option = {
   label: string;
   value: string;
@@ -19,30 +21,207 @@ export const BaseSelect = ({
   label,
   options,
   value,
-  placeholder,
+  placeholder = "Select...",
   onChange,
-}: Props) => (
-  <>
-    <label>{label}</label>
+}: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-    <select className={`h-[44px] rounded-[8px] border border-gray-300 px-[16px] py-[8px] ${classNames ?? ''}`}
-     id={name}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-     
-    >
-      <option value="" disabled>
-        {placeholder}
-      </option>
+  const selectRef = useRef<HTMLDivElement>(null);
 
-      {options.map(option => (
-        <option
-          key={option.id}
-          value={option.value}
+  const selectedOption = options.find(
+    (option) => option.value === String(value ?? "")
+  );
+
+  const hasValue = Boolean(selectedOption);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSelect = (option: Option) => {
+    onChange(option.value);
+    setIsOpen(false);
+  };
+
+  const handleClear = (event: React.MouseEvent) => {
+    event.stopPropagation();
+
+    onChange("");
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      {label && (
+        <label
+          htmlFor={name}
+          className="text-sm font-medium text-[#1F2937]"
         >
-          {option.label}
-        </option>
-      ))}
-    </select>
-  </>
-);
+          {label}
+        </label>
+      )}
+
+      <div
+        ref={selectRef}
+        className={`relative ${classNames ?? ""}`}
+      >
+        <button
+          id={name}
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className={`
+            flex
+            w-full
+            items-center
+            justify-between
+            rounded-[8px]
+            border
+            bg-white
+            
+            px-[12px]
+            py-[8px]
+            text-left
+            outline-none
+            transition-all
+            duration-150
+            cursor-pointer
+
+            ${
+              isOpen
+                ? "border-[#2563EB] ring-2 ring-[#2563EB]"
+                : "border-[#E5E7EB]"
+            }
+          `}
+        >
+          <span
+            className={
+              hasValue
+                ? "text-[#1F2937]"
+                : "text-[#1F2937]"
+            }
+          >
+            {selectedOption?.label ?? placeholder}
+          </span>
+
+          <div className="ml-2  flex items-center gap-2">
+            {hasValue && (
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={handleClear}
+                onKeyDown={(event) => {
+                  if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                  ) {
+                    handleClear(
+                      event as unknown as React.MouseEvent
+                    );
+                  }
+                }}
+                className="
+                  flex
+                  h-[14px]
+                  w-[14px]
+                  items-center
+                  justify-center
+                  rounded-full
+                  text-[16px]
+                  leading-none
+                  text-[#1F2937]
+                  transition-colors
+                  hover:bg-[#F3F4F6]
+                  hover:text-[#1F2937]
+                "
+              >
+                ×
+              </span>
+            )}
+
+         { !hasValue &&  <span
+              className={`
+                text-[12px]
+                text-[#9CA3AF]
+                transition-transform
+                duration-150
+                ${isOpen ? "rotate-180" : ""}
+              `}
+            >
+              {<MdKeyboardArrowDown/>}
+            </span>}
+          </div>
+        </button>
+
+        {isOpen && (
+          <div
+            className="
+              absolute
+              left-0
+              top-[calc(100%+4px)]
+              z-10
+              w-full
+              overflow-hidden
+              rounded-[8px]
+              border
+              border-[#E5E7EB]
+              bg-white
+              mt-[12px]
+              p-[4px]
+              shadow-[0_4px_12px_rgba(0,0,0,0.08)]
+            "
+          >
+            <div className="max-h-[220px] overflow-y-auto">
+              {options.map((option) => {
+                const isSelected =
+                  option.value === String(value ?? "");
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleSelect(option)}
+                    className={`
+                      flex
+                      w-full
+                      h-[36px]
+                      items-center
+                      rounded-[6px]
+                      px-[10px]
+                      py-[8px]
+                      text-left
+                      text-sm
+                      text-[#1F2937]
+                      transition-colors
+                      cursor-pointer
+
+                      ${
+                        isSelected
+                          ? "bg-[#EFF6FF] text-[#2563EB]"
+                          : "text-[#1F2937] hover:bg-[#F3F4F6]"
+                      }
+                    `}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

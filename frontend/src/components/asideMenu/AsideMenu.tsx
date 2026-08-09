@@ -18,7 +18,7 @@ export const AsideMenu: React.FC<Props> = ({  title,
   return (
     <>
       
-      <div className="fixed  inset-0 bg-black/50" />
+       <div className="fixed inset-0 z-[100] bg-black/50" />
 
      
      
@@ -31,7 +31,7 @@ export const AsideMenu: React.FC<Props> = ({  title,
           h-screen
           bg-[#ffff]
           p-[35px] 
-          z-10
+           z-[101]
         "
       >
         <div className="flex justify-between mb-[40px]">
