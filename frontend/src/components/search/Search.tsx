@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components";
 import { Loader } from "../loader/Loader";
 import type { User } from "@/types/User";
+import type { Patient } from "@/types/patient";
 
 type Props<T> = {
   items: T[];
   loading: boolean;
   placeholder?: string;
   searchLabel: string;
-  onSearch: (value: T) => void;
-  onSelect?: (item: T) => void;
-  selectedUser: User | null;
+  onSearch: (value: string) => void;
+  onSelect: (item: T) => void;
+  selectedUser: User | null | Patient;
   getKey: (item: T) => React.Key;
   renderItem: (item: T) => React.ReactNode;
   getValue: (item: T) => string;
@@ -42,7 +43,7 @@ export function Search<T>({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [ query]);
 
   return (
     <div className="relative">

@@ -27,7 +27,6 @@ import { statusOptions } from "@/features/appointments/model/statusAppointments"
 import { Pagination } from "@/components/pagination/Pagination";
 import { Filter } from "@/components/filter/Filter";
 import { AppointmentsViewToggle } from "./components/AppointmentsViewToogle/AppointmentsViewToogle";
-import { AppointmentsCalendar } from "./components/AppointmentsCalendar/AppointmentsCalendar";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 
 type ViewMode = "list" | "calendar";
@@ -114,7 +113,7 @@ export const AppointmentsPage = () => {
         />
         <AppointmentsViewToggle value={viewMode} onChange={setViewMode} />
       </div>
-      {viewMode === "calendar" && <AppointmentsCalendar />}
+      
     
         <div>
           {" "}
@@ -195,7 +194,7 @@ export const AppointmentsPage = () => {
 
                       <Td>
                         <UserContacts
-                          avatar={"favicon.png"}
+                          avatar={"patient.jpg"}
                           firstName={appointment.patientFirstName}
                           lastName={appointment.patientLastName}
                           phone={`Dr.${appointment.doctorFirstName} ${appointment.doctorLastName}`}

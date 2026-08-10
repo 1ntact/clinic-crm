@@ -48,6 +48,7 @@ export const FormDatePicker = ({
       control={control}
       render={({ field }) => (
         <DatePicker
+          
           showDaysOutsideCurrentMonth
           value={field.value ? dayjs(field.value) : null}
           disablePast
@@ -85,6 +86,7 @@ export const FormDatePicker = ({
               helperText: error,
               size: "small",
               fullWidth: true,
+              readOnly:true,
             },
        day: {
   sx: {

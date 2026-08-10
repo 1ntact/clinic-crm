@@ -122,7 +122,7 @@ export function Input<T extends FieldValues>({
       )}
     </div>
 
-    {error && (
+    {error  && (
       <p className="mt-2 text-[13px] text-red-500">
         {error}
       </p>

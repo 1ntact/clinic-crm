@@ -1,10 +1,10 @@
 export interface PatientQuery {
   search: string ;
 
-  sortBy: "name" | "recent_visit" | "upcoming_visit"
+  sortBy?: "name" | "recent_visit" | "upcoming_visit"
 
-  sortOrder: "asc" | "desc";
+  sortOrder?: "asc" | "desc";
 
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
 }

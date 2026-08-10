@@ -1,8 +1,9 @@
+import type { Statistic } from "@/types/statistics";
 import { HiOutlineUserGroup } from "react-icons/hi2";
 import { HiArrowUpRight } from "react-icons/hi2";
 
 type Props = {
-  statistic: Record<string, number>;
+  statistic: Statistic[]
 };
 
 export const PatientStatisticCard: React.FC<Props> = ({ statistic }) => {

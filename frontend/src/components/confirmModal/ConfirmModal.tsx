@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { ButtonPage } from "../button/ButtonsPage";
 import { Loader } from "../loader/Loader";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 
 
 type Props = {
@@ -83,13 +84,13 @@ export const ConfirmModal: React.FC<Props> = ({
 
         {children}
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex w-full gap-3">
           <ButtonPage
       
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className=" w-[171px] h-[44px] bg-white border"
+            className={buttonStyles.notConfirmButton}
           >
             <span className="text-[#172554]">
               {cancelText}
@@ -100,7 +101,7 @@ export const ConfirmModal: React.FC<Props> = ({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className={'w-[171px] bg-[#EF4444]' }
+            className={buttonStyles.confirmButton}
           >
             {loading ? <Loader/>: confirmText}
           </ButtonPage>

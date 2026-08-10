@@ -4,7 +4,7 @@ import type { Patient } from "@/types/patient";
 import type { PatientFormData } from "@/types/patientFormData";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 interface UpdatePatientPayload {
-  id: string;
+  id: number;
   data: PatientFormData;
 }
 export const updatePatientThunk = createAsyncThunk<Patient, UpdatePatientPayload>(

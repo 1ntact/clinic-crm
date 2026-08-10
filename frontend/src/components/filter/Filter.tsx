@@ -46,7 +46,7 @@ export const Filter: React.FC<Props> = ({
   const debouncedSearch = useDebounce(value, 500);
 
   useEffect(() => {
-    onSearchChange(debouncedSearch);
+    onSearchChange(debouncedSearch?? "");
   }, [debouncedSearch]);
 
   return (

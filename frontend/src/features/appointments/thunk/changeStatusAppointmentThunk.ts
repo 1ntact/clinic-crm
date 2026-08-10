@@ -4,7 +4,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const changeStatusAppointmentThunk = createAsyncThunk(
   'appointment/status',
-  async ({status, id}, thunkApi) => {
+  async ({status, id}:{status:string,id:number}, thunkApi) => {
     try {
       return await appointmentsService.changeStatus( status, id)
     }

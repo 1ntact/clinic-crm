@@ -9,12 +9,13 @@ import type { Appointment } from "@/types/appointment";
 import type { AppointmentsQuery } from "./model/appointmentQuery";
 import type { Doctor } from "@/types/doctor";
 import type { AvailableTimeSlot } from "./model/avalibleTimeSlots";
+import type { Treatment } from "@/types/treatment";
 
 interface CalendarState {
   fullyBookedTimeCount: number;
   availableTimeCount: number;
-  availableDays: string[];
-  fullyBookedDays: string[];
+  availableDays: number[];
+  fullyBookedDays: number[];
   availableTime: AvailableTimeSlot[];
   selectedDate: string | null;
   selectedSpecialization: string | null;
@@ -36,7 +37,7 @@ interface AppointmentsState {
   pages: number;
   total: number;
 
-  treatments: string[];
+  treatments: Treatment[];
   statistic: string[];
 
   calendar: CalendarState;

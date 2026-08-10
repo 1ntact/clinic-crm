@@ -8,8 +8,9 @@ import {  changeStatusAppointmentThunk } from "@/features/appointments/thunk/cha
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { getAppointmentsThunk } from "@/features/appointments/thunk/getAppointmentsThunk";
-import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
-import { getAvailableTimeSlotsThunk } from "@/features/appointments/thunk/getAvailableSlots";
+import { setSelectedAppointment, setSpecialization } from "@/features/appointments/appointmentsSlice";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import type { StatusOptions } from "@/features/appointments/model/statusAppointments";
 
 
 
@@ -18,7 +19,7 @@ type Props = {
 
   title: React.ReactNode;
   description?: React.ReactNode;
-status:string[],
+status:StatusOptions[],
   confirmText?: string;
   cancelText?: string;
   appointment: Appointment ;
@@ -28,7 +29,7 @@ status:string[],
 
   children?: React.ReactNode;
 
-  onConfirm: () => void | Promise<void>;
+  
   onCancel: () => void;
 };
 
@@ -36,7 +37,6 @@ status:string[],
 
 export const ChangeStatusModal: React.FC<Props> = ({
   isOpen,
-  
   loading,
   title,
   status,
@@ -46,9 +46,8 @@ export const ChangeStatusModal: React.FC<Props> = ({
   closeOnBackdrop = true,
   onCancel,
 }) => {
-  const [selectedStatus, setSelectedStatus] = useState(null)
+  const [selectedStatus, setSelectedStatus] = useState<null | string>(null)
   const { appointmentsQuery } = useAppSelector(state => state.appointment)
-  const {selectedDoctor,selectedDate}= useAppSelector(state=>state.appointment.calendar)
   const dispatch = useAppDispatch();
   
   useEffect(() => {
@@ -75,7 +74,7 @@ export const ChangeStatusModal: React.FC<Props> = ({
   }
 
   const handleSaveStatus = async () => {
-    if (!selectedStatus || !appointment) {
+    if (!selectedStatus || !appointment ) {
       return
     }
     try {
@@ -86,13 +85,10 @@ export const ChangeStatusModal: React.FC<Props> = ({
         }
       )).unwrap();
     dispatch(setSelectedAppointment(null))
-     
+      dispatch(setSpecialization(null))
       onCancel()
       await dispatch(getAppointmentsThunk(appointmentsQuery))
-      await dispatch(getAvailableTimeSlotsThunk({
-        doctorId: selectedDoctor.id,
-        date: selectedDate,
-      }))
+     
        successToast(
               <>
                 Appointment refresh  status  successfully!!!
@@ -100,7 +96,8 @@ export const ChangeStatusModal: React.FC<Props> = ({
 
               </>,
             );
-    } catch (e) {
+    }
+    catch (e) {
       dispatch(setSelectedAppointment(null))
       onCancel()
       errorToast(e as string)
@@ -152,13 +149,13 @@ export const ChangeStatusModal: React.FC<Props> = ({
         <TfiAlert className="mr-[8px]"/>
         <span >Cancelling will free the appointment slot permanently.</span>
 </div>
-        <div className=" flex justify-end gap-3">
+        <div className=" flex w-full gap-3">
           <ButtonPage
             
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className=" w-[171px] h-[44px] bg-white border"
+            className={buttonStyles.notConfirmButton}
           >
             <span className="text-[#172554]">
               {cancelText}
@@ -166,10 +163,10 @@ export const ChangeStatusModal: React.FC<Props> = ({
           </ButtonPage>
 
           <ButtonPage
-            type="button"
-            onClick={handleSaveStatus}
-            disabled={loading}
-            className={'w-[171px] h-[44px] bg-[#EF4444]' }
+          type="button"
+          onClick={handleSaveStatus}
+          disabled={loading}
+          className={buttonStyles.confirmButton }
           >
             {loading ? <Loader/>: confirmText}
           </ButtonPage>

@@ -11,11 +11,12 @@ import { createAppointmentThunk } from "./thunk/createAppointmentThunk";
 import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
 import { getAvailableTimeSlotsThunk } from "./thunk/getAvailableSlots";
 import { Loader } from "@/components/loader/Loader";
+import type { Patient } from "@/types/patient";
 
 export const AppointmentCreateForm: React.FC = () => {
   const methods = useForm<AppointmentFormData>();
   const { reset, setValue, handleSubmit } = methods;
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState<Patient | null>(null);
   const dispatch = useAppDispatch();
   const { patients, loading } = useAppSelector((state) => state.patient);
   const {appointmentsQuery,appointmentsLoading} = useAppSelector((state)=>state.appointment)
@@ -25,12 +26,13 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
  
 
   useEffect(() => {
-    if (selectedDoctor) {
+    if (selectedDoctor && selectedSlotsTime && selectedDate) {
       setValue("doctor", String(selectedDoctor.id));
       setValue("appointmentDate", selectedDate)
       setValue("appointmentTime",selectedSlotsTime)
   }
     if (!selectedUser) return;
+    
     setValue("firstName", selectedUser.firstName);
     setValue("lastName", selectedUser.lastName);
     setValue("phoneNumber", selectedUser.phoneNumber);
@@ -39,7 +41,11 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
 }, [selectedUser, selectedDoctor, setValue]);
 
    const onSubmit = async () => {
-    if (!selectedUser) {
+     if (!selectedUser ||
+       !selectedDoctor ||
+       !selectedTreatment ||
+       !selectedDate ||
+    !selectedSlotsTime) {
       return;
     }
 
@@ -47,7 +53,7 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
       await dispatch(createAppointmentThunk({
         patientId: selectedUser.id,
         doctorId: selectedDoctor.id,
-        treatmentId: selectedTreatment,
+        treatmentId: Number(selectedTreatment),
         appointmentDate: selectedDate,
         appointmentTime: selectedSlotsTime,
         notes:'',
@@ -96,7 +102,7 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
               onSearch={(value) =>
                 dispatch(getAllPatientThunk({ search: value }))
               }
-              selectedUser={setSelectedUser}
+              selectedUser={selectedUser}
               onSelect={setSelectedUser}
               getKey={(user) => user.id}
               getValue={(user) => `${user.firstName} ${user.lastName}`}

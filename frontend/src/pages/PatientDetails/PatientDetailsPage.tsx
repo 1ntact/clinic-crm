@@ -112,7 +112,9 @@ export const PatientDetailsPage = () => {
 
           <section className="flex items-center justify-between  ">
             {!loading && selectedPatient && (
-              <UserProfile type="patient" selectedUser={selectedPatient} />
+                <UserProfile type="patient"
+                avatar='patient.jpg'  
+                  selectedUser={selectedPatient} />
             )}
           </section>
         </div>

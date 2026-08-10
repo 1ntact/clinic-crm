@@ -116,7 +116,10 @@ export const DoctorDetailsPage = () => {
 
           <section className="flex items-center justify-between rounded-[8px] border border-gray-200 ">
             {!loading && selectedDoctor && (
-              <UserProfile type='doctor' selectedUser={selectedDoctor} />
+                <UserProfile
+                  type='doctor'
+                  avatar={'doctor.jpg'}
+                  selectedUser={selectedDoctor} />
             )}
           </section>
         </div>

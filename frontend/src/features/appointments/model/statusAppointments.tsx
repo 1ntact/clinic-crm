@@ -1,6 +1,16 @@
 
+import type { ReactElement } from "react";
 import { TfiAlert } from "react-icons/tfi";
-export const statusOptions = [
+export type StatusOptions = {
+  value: string;
+  label: string;
+  description: string;
+  color: string;
+  textColor: string;
+  disabled?: boolean;
+  icon?: ReactElement;
+}
+export const statusOptions:StatusOptions[] = [
   {
     value: "scheduled",
     label: "Scheduled",

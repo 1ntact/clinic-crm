@@ -9,7 +9,11 @@ import { setDoctor, setTime, setTreatment } from "@/features/appointments/appoin
 import { FormDatePicker } from "@/pages/Appointments/components/FormDataPicker/FormDataPicker";
 import { TextArea } from "../textArea/TextArea";
 
-export const AppointmentFormFields = ({ type }) => {
+ type Props = {
+  type: "create" | "update"
+}
+
+export const AppointmentFormFields:React.FC<Props> = ({ type }) => {
   const { doctors } = useAppSelector(state => state.doctor)
   const { treatments } = useAppSelector(state => state.appointment)
   const {availableDays, availableTime} = useAppSelector(state =>state.appointment.calendar)
@@ -33,10 +37,10 @@ export const AppointmentFormFields = ({ type }) => {
               name="firstName"
               label="First name *"
               type="text"
-              placeholder="First, select a user."
+              placeholder="First, select a patient."
               register={register}
               rules={formValidation.name}
-              error={errors.firstName?.message}
+            
               readOnly={type === "create"}
             />
   
@@ -46,10 +50,10 @@ export const AppointmentFormFields = ({ type }) => {
               name="lastName"
               label="Last name *"
               type="text"
-              placeholder="First, select a user."
+              placeholder="First, select a patient."
               register={register}
               rules={formValidation.name}
-              error={errors.lastName?.message}
+              
               readOnly={type === "create"}
             />
   </div>
@@ -62,7 +66,7 @@ export const AppointmentFormFields = ({ type }) => {
           placeholder="+38 (0XX) XXX-XXXX"
           register={register}
           rules={formValidation.phone}
-          error={errors.phoneNumber?.message}
+         
     />
      <p className="mb-[24px] text-xs text-[#6B7280]">
           APPOINTMENT
@@ -93,12 +97,12 @@ export const AppointmentFormFields = ({ type }) => {
         
            <Select
                   className="flex-1"
-                  name="treatments"
+                  name="treatmentId"
                   label="Treatments *"
                   placeholder="Choose Treatments"
           options={treatments.map((treatment) => ({
              value: String(treatment.id),
-             label: `${treatment.treatment} - ${treatment.price.slice(0,-3)}$ `,
+             label: `${treatment.treatment} - ${treatment.price.toString().slice(0,-3)}$ `,
            }))}
                  onChange={(value) => {
                    dispatch(setTreatment(value))
@@ -106,13 +110,14 @@ export const AppointmentFormFields = ({ type }) => {
                }}
                   control={control}
                   rules={formValidation.treatments}
-                  error={errors.treatments?.message}
+                  error={errors.treatmentId?.message}
         />       
             
       </div>
         <div className="flex  gap-4 mb-[16px]">
      
       <FormDatePicker
+        readOnly
         setValue = {setValue}
   name="appointmentDate"
   label="Date*"

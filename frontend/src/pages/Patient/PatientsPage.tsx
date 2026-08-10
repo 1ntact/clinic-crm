@@ -79,7 +79,12 @@ export const PatientsPage = () => {
           </div>
            
     </div>
-    <div className="mb-[25px]">{statistic && <PatientStatisticCard statistic={statistic} />} </div>
+    <div className="mb-[25px]">
+      {statistic &&
+        <PatientStatisticCard
+          statistic={statistic}
+        />}
+    </div>
     
      <div className="flex  justify-between">
             <Filter
@@ -140,7 +145,7 @@ export const PatientsPage = () => {
   
                     <Td>
                       <UserContacts
-                        
+                        avatar="patient.jpg"
                         firstName={patient.firstName}
                         lastName={patient.lastName}
                         phone={patient.phoneNumber}
@@ -169,8 +174,8 @@ export const PatientsPage = () => {
         
     )}
    <Pagination
-          page={query.page}
-          pageSize={query.pageSize}
+          page={query.page ?? 1}
+          pageSize={query.pageSize ?? 5}
           total={total}
           onPageChange={(page) =>
             dispatch(

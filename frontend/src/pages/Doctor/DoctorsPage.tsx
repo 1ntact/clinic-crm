@@ -146,7 +146,7 @@ export const DoctorsPage = () => {
 
                   <Td>
                     <UserContacts
-                      avatar = {doctor.avatarUrl}
+                      avatar = {`doctor.jpg`}
                       firstName={doctor.firstName}
                       lastName={doctor.lastName}
                       phone={doctor.phoneNumber}
@@ -176,8 +176,8 @@ export const DoctorsPage = () => {
           
       )}
        <Pagination
-        page={query.page}
-        pageSize={query.pageSize}
+        page={query.page ?? 1}
+        pageSize={query.pageSize ?? 5}
         total={total}
         onPageChange={(page) =>
           dispatch(

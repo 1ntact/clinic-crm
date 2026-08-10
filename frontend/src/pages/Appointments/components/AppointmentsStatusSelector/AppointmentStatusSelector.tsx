@@ -9,7 +9,7 @@ type StatusOption = {
 
 type Props = {
   options: StatusOption[];
-  value: string;
+  value: string| null;
   onChange: (value: string) => void;
 };
 

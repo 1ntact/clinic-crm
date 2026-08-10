@@ -7,6 +7,7 @@ import { updatePatientThunk } from "./thunk/updatePatientThunk";
 import { removePatientThunk } from "./thunk/removePatientThunk";
 import type { PatientQuery } from "./model/patientsQuery";
 import { getStatisticPatient } from "./thunk/getStatisticPatient";
+import type { Statistic } from "@/types/statistics";
 
 
 interface PatientsState {
@@ -18,7 +19,7 @@ interface PatientsState {
 
   total: number;
   query:PatientQuery
-statistic:[]
+statistic:Statistic[]
   
 }
 const initialState: PatientsState = {

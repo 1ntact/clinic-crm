@@ -45,7 +45,7 @@ export const formValidation = {
     valueAsNumber: true,
   },
   workingDays: {
-    validate: (value) =>
+    validate: (value:string[]) =>
       value.length > 0 || "Select at least one working day",
   },
 
@@ -116,7 +116,7 @@ export const formValidation = {
       message: "Address cannot exceed 255 characters",
     },
     pattern: {
-      value: /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s.,'’"\/\-№]+$/,
+      value: /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s.,'’"/\-№]+$/,
       message: "Address contains invalid characters",
     },
  

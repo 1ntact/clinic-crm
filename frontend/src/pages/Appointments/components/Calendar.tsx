@@ -2,15 +2,15 @@
 import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateCalendar } from "@mui/x-date-pickers";
+import { DateCalendar, type PickersCalendarHeaderProps } from "@mui/x-date-pickers";
 import { PickerDay } from "@mui/x-date-pickers/PickerDay";
 
 import { setDate, setQuery } from "@/features/appointments/appointmentsSlice";
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 
 type CalendarProps = {
-  availableDays: string[];
-  bookedDays: string[];
+ availableDays: number[];
+bookedDays: number[];
 };
 
 type ServerDayProps = React.ComponentProps<typeof PickerDay> & {
@@ -89,7 +89,7 @@ function ServerDay({
   );
 }
 function CustomCalendarHeader(
-  props: PickersCalendarHeaderProps<Dayjs>
+  props: PickersCalendarHeaderProps
 ) {
   const { currentMonth, onMonthChange } = props;
 
@@ -201,7 +201,7 @@ showDaysOutsideCurrentMonth
     day: {
       availableDays,
       bookedDays,
-    } as any,
+    } as ServerDayProps,
   }}
 />
       </LocalizationProvider>

@@ -2,17 +2,21 @@ import type { Doctor } from "@/types/doctor";
 import type { Patient } from "@/types/patient";
 import { PiPhoneCallThin, PiEnvelopeSimpleLight } from "react-icons/pi";
 
+type BaseProps = {
+  avatar?: string;
+};
+
 type Props =
-  | {
+  | (BaseProps & {
       type: "doctor";
       selectedUser: Doctor;
-    }
-  | {
+    })
+  | (BaseProps & {
       type: "patient";
       selectedUser: Patient;
-    };
+    });
 
-export const UserProfile: React.FC<Props> = ({ selectedUser, type }) => {
+export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
   const userYear = (date: string) => {
     return new Date().getFullYear() - new Date(date).getFullYear();
   };
@@ -21,7 +25,7 @@ export const UserProfile: React.FC<Props> = ({ selectedUser, type }) => {
     <>
       <div className="flex w-full mr-[16px]">
         <img
-          src={selectedUser.avatarUrl ?? "/favicon.svg"}
+          src={avatar}
           alt="User"
           className="mr-2 h-12 w-12 rounded-lg bg-amber-300 object-cover"
         />
