@@ -147,6 +147,7 @@ docker compose -f docker-compose-dev.yml exec web python src/create_initial_admi
 ```
 
 For detailed backend setup, environment configuration, and available services, see [backend/README.md](backend/README.md).
+For the monitoring setup, see [MONITORING.md](MONITORING.md).
 
 ## ☁️ Deployment
 

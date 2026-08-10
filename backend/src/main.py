@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from config import get_settings
 from routes import accounts_router, doctors_router, patients_router, appointments_router
@@ -37,6 +38,8 @@ app.include_router(doctors_router, prefix="/doctors", tags=["doctors"])
 app.include_router(patients_router, prefix="/patients", tags=["patients"])
 
 origins = [settings.FRONTEND_BASE_URL]
+
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 app.add_middleware(
     CORSMiddleware,
