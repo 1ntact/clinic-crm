@@ -28,7 +28,7 @@ export function Search<T>({
   getValue,
 }: Props<T>) {
   const [query, setQuery] = useState("");
-  const open = query.trim().length >= 1;
+  const open = query.trim().length >= 3;
 
   useEffect(() => {
     if (!open) {
@@ -38,7 +38,7 @@ export function Search<T>({
     const timer = setTimeout(() => {
       onSearch(query);
       
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [query]);

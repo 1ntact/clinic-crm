@@ -1,13 +1,70 @@
+# ================================
+# PYTHON
+# ================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ================================
+# VIRTUAL ENVIRONMENTS
+# ================================
+.venv/
+venv/
+env/
+ENV/
+
+# ================================
+# BUILD & DISTRIBUTION
+# ================================
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+
+# ================================
+# RUFF & LINTING
+# ================================
+.ruff_cache/
+.mypy_cache/
+
+# ================================
+# TESTING & COVERAGE
+# ================================
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# ================================
+# ALEMBIC
+# ================================
+alembic/versions/__pycache__/
+
+# ================================
+# CELERY
+# ================================
+celerybeat-schedule
+celerybeat.pid
+*.pid
+
+# ================================
+# DATABASE
+# ================================
+*.sql.bak
+*.dump
+pg_data/
 # Created by https://www.toptal.com/developers/gitignore/api/python,pycharm+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,pycharm+all
 
 ### PyCharm+all ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
-# AI personal tools
-.codex/
-AGENTS.md
 
 # User-specific stuff
 .idea/**/workspace.xml

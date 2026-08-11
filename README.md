@@ -1,117 +1,174 @@
-# CRM.
+# Clinic CRM
 
-Team #238 Project. CRM.
+[![License](https://img.shields.io/badge/license-all%20rights%20reserved-red)](#license)
+[![Stack](https://img.shields.io/badge/stack-React%20%7C%20FastAPI-blue)](#tech-stack)
+[![Python](https://img.shields.io/badge/python-3.12-3776AB)](#tech-stack)
+[![TypeScript](https://img.shields.io/badge/typescript-5.x-3178C6)](#tech-stack)
 
+Clinic CRM is a modern full-stack platform for managing clinic operations with a focus on patients, appointments, authentication, communication, and day-to-day administrative workflows. The system is designed to support both clinic staff and patients through a streamlined digital experience.
 
-© 2026 Team #238. All rights reserved.
-This repository is publicly available for viewing and portfolio purposes only.
-No permission is granted to use, copy, modify, or distribute this code
-for any purpose without explicit written permission from the authors.
+The project combines a React-based frontend with a FastAPI backend, PostgreSQL data storage, file handling, and transactional email delivery. It is structured as a scalable web application with clear separation between presentation, API, data access, and infrastructure concerns.
 
-# 📅 Appointment Management — UI/UX Specification
+## 🚀 Features
 
-> **GitHub Repository:** Internal Module Documentation  
-> **Target Audience:** UI/UX Designers, Frontend Developers
+- Patient and doctor profile management
+- Appointment booking and clinic workflow support
+- Authentication and role-based access control
+- Email notifications for communication and onboarding flows
+- File storage integration for clinic-related assets
+- Modern admin-oriented UI built for daily operations
 
-Цей документ містить повний опис логіки, статусних переходів, форм та API-ендпоінтів для проектування інтерфейсу модуля управління зустрічами (**Appointment Management**).
+## Engineering Highlights
 
----
+- Async backend architecture with FastAPI, SQLAlchemy, and asyncpg for efficient database access
+- Strong typing on the frontend with TypeScript and validated request/response models on the backend
+- Database evolution and schema management through Alembic migrations
+- Containerized local development workflows with Docker Compose for backend services and dependencies
+- Clear separation of concerns between UI, API, persistence, storage, and email delivery layers
 
-## 🔄 1. Життєвий цикл зустрічі (Status Flow)
+## Screenshots
 
-Зустріч проходить через чіткий цикл статусів:
+Interface screenshots will be added in a future update.
+
+## 🏗️ Architecture
 
 ```mermaid
-stateDiagram-v2
-    [*] --> scheduled
-    scheduled --> confirmed: Confirm
-    scheduled --> cancelled: Cancel
-    confirmed --> completed: Complete
-    confirmed --> no_show: Mark as No-Show
-    confirmed --> cancelled: Cancel
-    cancelled --> scheduled: Restore
+flowchart LR
+    User([Clinic Staff / Patient]) --> Frontend
 
-⏱ Вплив статусів на часовий слот лікаря
-🔒 Займають слот: scheduled, confirmed
+    subgraph Frontend["Frontend · Vercel"]
+        React["React + TypeScript"]
+        Router["React Router"]
+        State["Redux Toolkit"]
+    end
 
-🔓 Звільняють слот: completed, cancelled, no_show
+    subgraph Backend["Backend · Render"]
+        API["FastAPI REST API"]
+        Auth["Auth & Validation"]
+        ORM["SQLAlchemy + Alembic"]
+    end
 
-🗂 2. Дані та поля відображення
-📩 Backend Response Example (GET /appointments/{id}/)
-{
-  "id": 4,
-  "patient_id": 2,
-  "doctor_id": 1,
-  "date_time": "2026-07-23T20:30:00Z",
-  "duration": 30,
-  "reason_for_visit": "Consultation",
-  "status": "confirmed",
-  "channel": "walk_in",
-  "created_at": "2026-07-23T19:48:10.773599Z",
-  "patient_first_name": "John",
-  "patient_last_name": "Doe",
-  "patient_phone_number": null,
-  "doctor_first_name": "Andrii",
-  "doctor_last_name": "Yarotskyi"
-}
+    subgraph Data["Data Layer · Supabase"]
+        DB[(PostgreSQL)]
+        Storage[(Storage)]
+    end
 
-📊 3. Таблиця та Фільтрація (GET /appointments/)
-Фільтри
-В інтерфейсі списку мають бути присутні:
+    subgraph Email["Email Delivery"]
+        Brevo["Brevo"]
+    end
 
-[x] Пошук / фільтр за лікарем (doctor_id)
+    Frontend --> API
+    API --> Auth
+    API --> ORM
+    ORM --> DB
+    API --> Storage
+    API --> Brevo
+```
 
-[x] Пошук / фільтр за пацієнтом (patient_id)
+The application flow is straightforward: the frontend sends HTTP requests to the backend, the backend processes business logic and validation, and the data layer persists information in Supabase while email notifications are delivered through Brevo.
 
-[x] Фільтр за датою (appointment_date) або діапазоном (date_from, date_to)
+## 🛠️ Tech Stack
 
-[x] Фільтр за статусом (appointment_status)
+### Frontend
 
-[x] Пагінація (limit max 100, offset)
+- React 19
+- TypeScript
+- Vite
+- Redux Toolkit
+- React Router
+- React Hook Form
+- Axios
+- Tailwind CSS
+- Sass
+- React Hot Toast
+- React Icons
 
-[x] Кнопка Створення запису + Перехід до деталей
+### Backend
 
-[!NOTE]
-Якщо список порожній (Empty State), відображати повідомлення: "Зустрічей не знайдено".
+- Python 3.12
+- FastAPI
+- Uvicorn
+- SQLAlchemy
+- Alembic
+- Pydantic and Pydantic Settings
+- PostgreSQL with asyncpg
+- PyJWT
+- pwdlib / Argon2
+- aiosmtplib
+- Jinja2
+- aioboto3
+- Pillow
 
+### Infrastructure and Services
 
-🛠 4. Матриця дій (Actions Matrix)
-Залежно від поточного статусу запису, у таблиці та картці деталей мають бути активні відповідні кнопки:
-scheduled	✏️ Edit, 🟢 Confirm, 🚫 Cancel, 🗑 Delete
-confirmed	✏️ Edit, ✅ Complete, 👤❌ No-show, 🚫 Cancel, 🗑 Delete
-cancelled	🔄 Restore, 🗑 Delete
-completed	👁 View Details, 🗑 Delete
-no_show	👁 View Details, 🗑 Delete
+- Vercel for frontend deployment
+- Render for backend deployment
+- Supabase for PostgreSQL and storage
+- Brevo for transactional email
+- Docker Compose for local development and deployment workflows
 
+## 🚀 Quick Start / Setup
 
-[!WARNING]
-Особливості дій у минулому часі:
+### Frontend
 
-Кнопки Confirm та Restore мають бути disabled, якщо запланована дата вже минула.
+The frontend is a Vite + React + TypeScript application. For local development, install dependencies and start the dev server from the frontend folder.
 
-Для підтверджених зустрічей (confirmed) у минулому залишаються доступними лише Complete та No-show.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-Cancel лише міняє статус на cancelled (запис залишається в історії).
+Useful frontend commands from the current configuration:
 
-Delete (DELETE /appointments/{id}/) повністю видаляє запис і вимагає конфлейм-модалки: "Цю дію неможливо скасувати".
+```bash
+npm run build
+npm run lint
+npm run preview
+npm run deploy
+```
 
+For detailed frontend instructions, see [frontend/README.md](frontend/README.md).
 
-🎨 5. Візуальне оформлення (UI Guidelines)
-Статуси (Badges)
-Не покладайтеся тільки на колір — обов'язково залишайте текст статусу:
+### Backend
 
-scheduled ➔ Scheduled (🔵 Інформаційний / Синій)
+The backend is built with FastAPI and is intended to run locally with Docker Compose for development and production-like setups.
 
-confirmed ➔ Confirmed (🟢 Активний / Зелений)
+```bash
+cd backend
+cp .env.sample .env
+docker compose -f docker-compose-dev.yml up --build
+```
 
-completed ➔ Completed (🔘 Завершений / Сірий)
+To create the initial admin account after the services are running:
 
-cancelled ➔ Cancelled (🔴 Скасований / Червоний)
+```bash
+docker compose -f docker-compose-dev.yml exec web python src/create_initial_admin.py --email admin@admin.com
+```
 
-no_show ➔ No-show (🟠 Неявка / Помаранчевий)
+For detailed backend setup, environment configuration, and available services, see [backend/README.md](backend/README.md).
+For the monitoring setup, see [MONITORING.md](MONITORING.md).
 
+## ☁️ Deployment
 
-Канали запису (channel)
-Значення з бази слід перетворювати у Human-readable формат:
+The application is designed for a modern cloud deployment flow:
 
-walk_in ➔ Walk-in
+- Frontend: Vercel for hosting the React application
+- Backend: Render for the FastAPI service
+- Database and storage: Supabase PostgreSQL and storage buckets
+- Email delivery: Brevo for transactional notifications
+
+Environment variables and service credentials should be configured in the respective deployment platforms rather than committed to the repository.
+
+## 📂 Project Structure
+
+The repository is organized into two main application layers:
+
+- [frontend](frontend) for the user interface and client-side logic
+- [backend](backend) for the API, business logic, database access, and services
+
+## 📄 License
+
+© 2026 Clinic CRM. All rights reserved.
+
+This project is intended for portfolio, evaluation, and personal learning use only. The repository may be viewed and reviewed for demonstration purposes, but copying, redistribution, modification, or commercial reuse requires prior written permission from the author.

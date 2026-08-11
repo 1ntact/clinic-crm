@@ -30,7 +30,7 @@ export const doctorsService = {
       params.employment_type = query.employmentType;
     }
   
-    const response = await httpClient.get("/doctors/", { params });
+    const response = await httpClient.get("doctors", { params });
     return response.data
   },
 

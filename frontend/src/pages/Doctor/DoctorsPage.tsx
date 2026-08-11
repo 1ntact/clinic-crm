@@ -12,8 +12,6 @@ import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
 import { setQuery } from "@/features/doctors/doctorsSlice";
-import { employmentTypes } from "@/features/doctors/model/employmentTypes";
-import {  sortButtons } from "@/features/doctors/model/sortDoctorTypes";
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
 import { useEffect, useState } from "react";
@@ -23,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 export const DoctorsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const { doctors, total, loading, query } = useAppSelector(
-    (state) => state.doctor
+    (state) => state.doctor,
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -47,16 +45,7 @@ export const DoctorsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<DoctorCreteForm handleAside={handleAside} />}
-          footer={   <>
-                <ButtonPage className="flex-1 bg-[#FFFFFF] " onClick={handleAside}>
-                    <span className="text-[#172554]">Cancel</span>
-                </ButtonPage>
-
-                <ButtonPage type="submit" form="doctor-create" className="flex-1">
-                  Send an invitation
-                </ButtonPage>
-              </>}
+          forms={<DoctorCreteForm handleAside={handleAside} />}
           title={"ADD NEW DOCTOR"}
           description={"Fill in the details below"}
         />
@@ -81,30 +70,23 @@ export const DoctorsPage = () => {
       <div className="flex  justify-between">
         <Filter
           className="mb-[24px]"
-           search={query.search}
-  firstSelect={query.specialization}
-  secondSelect={query.employmentType}
-
-  firstPlaceholder="All specializations"
-  secondPlaceholder="Employment"
-
-  firstSelectOptions={specializations}
-  secondSelectOptions={employmentTypes}
+          search={query.search}
+          specialization={query.specialization}
+          employmentType={query.employmentType}
+          specializations={specializations}
           onSearchChange={(value) =>
             dispatch(setQuery({ search: value, page: 1 }))
           }
-          onFirstSelectChange={(value) =>
+          onSpecializationChange={(value) =>
             dispatch(setQuery({ specialization: value, page: 1 }))
           }
-          onSecondSelectChange={(value) =>
+          onEmploymentTypeChange={(value) =>
             dispatch(setQuery({ employmentType: value, page: 1 }))
           }
         />
         <Sort
-          userCount = {doctors.length}
           sortBy={query.sortBy}
           sortOrder={query.sortOrder}
-          buttons={sortButtons}
           onChange={(sortBy, sortOrder) =>
             dispatch(
               setQuery({
@@ -169,8 +151,11 @@ export const DoctorsPage = () => {
                 <p className="p-3 text-center text-gray-500">
                   Nothing found
                 </p>
-            )}
-              <Pagination
+              )}
+        </div>
+      )}
+
+      <Pagination
         page={query.page}
         pageSize={query.pageSize}
         total={total}
@@ -182,11 +167,6 @@ export const DoctorsPage = () => {
           )
         }
       />
-        </div>
-      )}
-      
-
-   
     </>
   );
 };

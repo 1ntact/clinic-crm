@@ -4,11 +4,7 @@ import type { Doctor } from "@/types/doctor";
 type Props = {
   firstName: string;
   lastName: string;
-
-  phone?: number | string;
-
-  
-
+  phone: number;
   avatar?:Doctor['avatarUrl']
 }
 export const UserContacts: React.FC<Props> = ({firstName,lastName,phone,avatar }) => {

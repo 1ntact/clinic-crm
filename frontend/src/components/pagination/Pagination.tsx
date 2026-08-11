@@ -14,29 +14,28 @@ export const Pagination: React.FC<Props> = ({
   const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <div className="flex items-center justify-between ">
+    <div className="flex items-center justify-between mt-6">
       <p className="text-sm text-gray-500">
         Showing {(page - 1) * pageSize + 1}-
         {Math.min(page * pageSize, total)} of {total}
       </p>
 
-      {total>pageSize && <div className="flex gap-2">
+      <div className="flex gap-2">
         <button
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
-          className="text-[14px] rounded-[8px] color-[#1F2937] cursor-pointer disabled:opacity-50"
+          className="rounded-[8px] color-[#1F2937] cursor-pointer disabled:opacity-50"
         >
           {"< Previous"}
         </button>
 
         {Array.from({ length: totalPages }).map((_, index) => (
           <button
-            disabled={total === 1 || page ===index+1}
             key={index}
             onClick={() => onPageChange(index + 1)}
-            className={`text-[14px] w-[38px] h-[38px]  rounded -[8px] cursor-pointer ${
+            className={` w-[38px] h-[38px]  rounded -[8px] cursor-pointer ${
               page === index + 1
-                ? "bg-[#DBEAFE] text-[blue] "
+                ? "bg-[#DBEAFE] text-[blue]"
                 : ""
             }`}
           >
@@ -47,11 +46,11 @@ export const Pagination: React.FC<Props> = ({
         <button
           disabled={page === totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="text-[14px] rounded-[8px] color-[#1F2937] cursor-pointer disabled:opacity-50"
+          className="rounded-[8px] color-[#1F2937] cursor-pointer disabled:opacity-50"
         >
           {" Next >"}
         </button>
-      </div>}
+      </div>
     </div>
   );
 };

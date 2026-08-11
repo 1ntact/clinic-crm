@@ -1,45 +1,29 @@
 import { useEffect, useState } from "react";
 import { Input } from "../input/Input";
 import { useDebounce } from "@/hooks/useDebounce"
-import { BaseSelect } from "../select/BaseSelect";
-
-export type FilterOption = {
-  label: string;
-  value: string;
-};
-
+import type { SelectOption } from "@/features/doctors/model/specialties";
+import type { DoctorQuery } from "@/features/doctors/model/DoctorQuery";
 type Props = {
-  className?: string;
+   className?: string;
+  search: string;
+  specialization: DoctorQuery['specialization'];
+  employmentType: DoctorQuery['employmentType'];
 
-  search?: string;
-
-  firstSelect?: string;
-  secondSelect?: string;
-
-  firstPlaceholder?: string;
-  secondPlaceholder?: string;
-
-  firstSelectOptions?: FilterOption[];
-  secondSelectOptions?: FilterOption[];
+  specializations: SelectOption[];
 
   onSearchChange: (value: string) => void;
-  onFirstSelectChange?: (value: string) => void;
-  onSecondSelectChange?: (value: string) => void;
+  onSpecializationChange: (value: string) => void;
+  onEmploymentTypeChange: (value: string) => void;
 };
 
-export const Filter: React.FC<Props> = ({
-  firstPlaceholder,
-  secondPlaceholder,
+
+export const Filter: React.FC<Props> = ({ className, specialization,
+employmentType,
+ specializations,
   search,
-  className,
-  firstSelect,
-  secondSelect,
-  firstSelectOptions,
-  secondSelectOptions,
   onSearchChange,
-  onFirstSelectChange,
-  onSecondSelectChange,
- 
+  onSpecializationChange,
+onEmploymentTypeChange,
 }) => {
   const [value, setValue] = useState(search);
 
@@ -55,35 +39,33 @@ export const Filter: React.FC<Props> = ({
         name="124"
         type="search"
         value={value}
-        placeholder="Search ..."
+        placeholder="Search doctor..."
         onChange={(e) => setValue(e.target.value)}
-        className="w-full h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
+        className="w-[250px] h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
       />
-      {firstSelectOptions && (
-        <BaseSelect
-          name="firstSelect"
-          classNames="h-[36px] w-[190px]"
-          placeholder={firstPlaceholder ?? "Select"}
-          value={firstSelect ?? ""}
-          options={firstSelectOptions}
-          onChange={(value) => {
-            onFirstSelectChange?.(value);
-          }}
-        />
-      )}
+       <select
+        value={specialization.value}
+        onChange={(e) => onSpecializationChange(e.target.value)}
+        className="w-[190px] h-[36px]  rounded-[8px]  bg-white color-[#6B7280] border-1 border-[#E5E7EB]" 
+      >
+        <option value="">All specializations</option>
 
-    {secondSelectOptions && (
-        <BaseSelect
-          name="secondSelect"
-          classNames="h-[36px] w-[190px]"
-          placeholder={secondPlaceholder ?? "Select"}
-          value={secondSelect ?? ""}
-          options={secondSelectOptions}
-          onChange={(value) => {
-            onSecondSelectChange?.(value);
-          }}
-        />
-      )} 
+        {specializations.map((item) => (
+          <option key={item.label} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={employmentType}
+        onChange={(e) => onEmploymentTypeChange(e.target.value)}
+      className=  "w-[140px] h-[36px] rounded-[8px] bg-white color-[#6B7280] border-1 border-[#E5E7EB]"
+      >
+        <option value="">All types</option>
+        <option value="full_time">Full time</option>
+        <option value="part_time">Part time</option>
+      </select>
 
     </div>
   );

@@ -35,15 +35,7 @@ export const DashboardPage = () => {
       title={'ADD NEW USER'}
       description={'An invitation will be sent to the specified email'}
       handleAside={handleAside}
-      content={<UserForm />} 
-    footer={  <>
-              <ButtonPage className="flex-1" onClick={handleAside}>
-                Cancel
-              </ButtonPage>
-              <ButtonPage form="user-create" type="submit" className="flex-1">
-                Send an invitation
-              </ButtonPage>
-            </>}/>}
+    forms={<UserForm  handleAside={handleAside}/>}/>}
     </>
 
   )
