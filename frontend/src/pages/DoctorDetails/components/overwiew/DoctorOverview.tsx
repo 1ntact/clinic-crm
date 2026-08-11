@@ -1,5 +1,4 @@
 import {
-  FiCalendar,
   FiCheckCircle,
   FiClipboard,
   FiUsers,
