@@ -7,6 +7,7 @@ import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { useState } from "react";
 import { BiPlus } from "react-icons/bi";
 import { BiShield } from "react-icons/bi";
+import { DashboardStats } from "./components/statistic";
 export const DashboardPage = () => {
   const userData = useAppSelector(state => state.auth.user)
   const [aside, setOpenAside] = useState(false)
@@ -47,8 +48,8 @@ export const DashboardPage = () => {
         className={buttonStyles.formSubmit}>
                 Send an invitation
               </ButtonPage>
-            </>}/>}
-    </>
+      </>} />}
+    <DashboardStats/>   </>
 
   )
 }

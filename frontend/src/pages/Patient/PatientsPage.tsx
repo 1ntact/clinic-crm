@@ -22,6 +22,8 @@ import { Pagination } from "@/components/pagination/Pagination";
 import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
 import { PatientStatisticCard } from "./components/statisticPacient/StatisticPatient";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
@@ -44,7 +46,7 @@ export const PatientsPage = () => {
     }
     fetchPatient()
   },[dispatch, query])
-
+dayjs.extend(utc);
   return <>
     {aside && (<AsideMenu
       handleAside={handleAside}
@@ -129,7 +131,7 @@ export const PatientsPage = () => {
                   <Th>TYPE OF TREATMENT</Th>
                   <Th>TOTAL VISITS</Th>
                 <Th>STATUS</Th>
-                <Th>ACTION</Th>
+                
                 </tr>
               </thead>
               <tbody>
@@ -152,7 +154,16 @@ export const PatientsPage = () => {
                       />
                     </Td>
   
-                    <Td>{patient.email}</Td>
+                    <Td>  {
+                                              <>
+                                                <div>
+                                                  {dayjs(patient.lastVisitDate).format("YYYY-MM-DD")}
+                                                </div>
+                                                <div>
+                                                  {dayjs.utc(patient.lastVisitDate).format("HH:mm")}
+                                                </div>
+                                              </>
+                                            }</Td>
   
                     <Td>{patient.gender}</Td>
   

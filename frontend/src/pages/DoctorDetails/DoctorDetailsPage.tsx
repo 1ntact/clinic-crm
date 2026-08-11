@@ -14,6 +14,7 @@ import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { Loader } from "@/components/loader/Loader";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import { DashboardOverview } from "./components/overwiew/DoctorOverview";
 
 export const DoctorDetailsPage = () => {
   const dispatch = useAppDispatch();
@@ -124,6 +125,7 @@ export const DoctorDetailsPage = () => {
           </section>
         </div>
       )}
+      <DashboardOverview/>
     </>
   );
 };

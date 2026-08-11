@@ -75,7 +75,7 @@ export const AppointmentFormFields:React.FC<Props> = ({ type }) => {
        <div className="flex gap-4 mb-[16px]">
                 <Select
                   className="flex-1"
-                  name="doctor"
+                  name="doctorId"
                   label="Doctor *"
                   placeholder="select a doctor"
           options={doctors.map((doctor) => ({
@@ -91,7 +91,7 @@ export const AppointmentFormFields:React.FC<Props> = ({ type }) => {
   }}
                   control={control}
                   rules={formValidation.doctor}
-                  error={errors.doctor?.message}
+                  error={errors.doctorId?.message}
         />
           
         

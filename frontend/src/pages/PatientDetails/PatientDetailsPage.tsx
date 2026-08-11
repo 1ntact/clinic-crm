@@ -13,6 +13,8 @@ import { UserProfile } from "../../components/userProfile/UserProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import { PatientInformation } from "./info/InfoItem";
+import { PatientDocuments } from "./info/medicalRecords";
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
@@ -119,6 +121,8 @@ export const PatientDetailsPage = () => {
           </section>
         </div>
       )}
+      <PatientInformation />
+      <PatientDocuments/>
     </>
   );
 };

@@ -10,4 +10,5 @@ export type Patient = {
   email: string,
   id: number,
   avatarUrl?: string;
+  lastVisitDate?: string;
 }

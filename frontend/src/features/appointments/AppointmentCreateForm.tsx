@@ -27,7 +27,7 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
 
   useEffect(() => {
     if (selectedDoctor && selectedSlotsTime && selectedDate) {
-      setValue("doctor", String(selectedDoctor.id));
+      setValue("doctorId", String(selectedDoctor.id))
       setValue("appointmentDate", selectedDate)
       setValue("appointmentTime",selectedSlotsTime)
   }
