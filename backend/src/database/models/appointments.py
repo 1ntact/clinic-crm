@@ -3,7 +3,14 @@ from __future__ import annotations
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, func
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.models.base import Base
@@ -12,14 +19,9 @@ from database.models.base import Base
 class AppointmentStatusEnum(str, enum.Enum):
     SCHEDULED = "scheduled"
     CONFIRMED = "confirmed"
-    COMPLETED = "completed"
     CANCELLED = "cancelled"
-
-
-class AppointmentChannelEnum(str, enum.Enum):
-    WALK_IN = "walk_in"
-    PHONE_CALL = "phone_call"
-    MESSAGE = "message"
+    COMPLETED = "completed"
+    NO_SHOW = "no_show"
 
 
 class AppointmentModel(Base):
@@ -60,6 +62,14 @@ class AppointmentModel(Base):
         nullable=False,
     )
 
+    treatment_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "treatments.id",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+    )
+
     date_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -72,21 +82,34 @@ class AppointmentModel(Base):
         server_default="30",
     )
 
-    reason_for_visit: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
-
     status: Mapped[AppointmentStatusEnum] = mapped_column(
         String(30),
         nullable=False,
         default=AppointmentStatusEnum.SCHEDULED,
+        server_default=AppointmentStatusEnum.SCHEDULED.value,
     )
 
-    channel: Mapped[AppointmentChannelEnum | None] = mapped_column(
-        String(30),
+    notes: Mapped[str | None] = mapped_column(
+        String(1000),
         nullable=True,
     )
 
-    patient = relationship("PatientModel")
-    doctor = relationship("DoctorModel")
+    patient = relationship(
+        "PatientModel",
+    )
+
+    doctor = relationship(
+        "DoctorModel",
+    )
+
+    treatment = relationship(
+        "TreatmentModel",
+        back_populates="appointments",
+    )
+
+    visit = relationship(
+        "VisitModel",
+        back_populates="appointment",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

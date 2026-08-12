@@ -3,8 +3,15 @@ from database.models.appointments import (
     AppointmentModel,
     AppointmentStatusEnum,
 )
-from database.models.doctors import DoctorEmploymentTypeEnum, DoctorModel
-from database.models.patient import PatientGenderEnum, PatientModel
+from database.models.doctors import (
+    DoctorEmploymentTypeEnum,
+    DoctorModel,
+)
+from database.models.patient import (
+    PatientGenderEnum,
+    PatientModel,
+)
+from database.models.treatments import TreatmentModel
 from database.models.users import (
     ActivationTokenModel,
     PasswordResetTokenModel,
@@ -12,6 +19,7 @@ from database.models.users import (
     UserModel,
     UserRoleEnum,
 )
+from database.models.visits import VisitModel
 from database.session_postgresql import (
     AsyncSessionDep,
     get_postgresql_db as get_db,
@@ -22,8 +30,11 @@ from database.session_postgresql import (
 from database.sync_session import SyncSessionLocal
 from database.validators import users as users_validators
 
+
 __all__ = [
     "ActivationTokenModel",
+    "AppointmentModel",
+    "AppointmentStatusEnum",
     "AsyncSessionDep",
     "Base",
     "DoctorEmploymentTypeEnum",
@@ -33,13 +44,13 @@ __all__ = [
     "PatientModel",
     "RefreshTokenModel",
     "SyncSessionLocal",
+    "TreatmentModel",
     "UserModel",
     "UserRoleEnum",
+    "VisitModel",
     "get_db",
     "int_pk",
     "str_null_true",
     "str_uniq",
     "users_validators",
-    "AppointmentModel",
-    "AppointmentStatusEnum",
 ]

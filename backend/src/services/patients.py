@@ -1,12 +1,18 @@
+from math import ceil
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.patient import PatientModel
-from database.models.users import UserModel, UserRoleEnum
+from database.models.users import UserRoleEnum
 from exceptions import DatabaseWriteError
 from repositories.patients import PatientRepository
 from repositories.users import UserRepository
-from schemas.patients import PatientCreate, PatientUpdate
+from schemas.patients import (
+    PatientCreate,
+    PatientStatisticsResponse,
+    PatientUpdate,
+)
 
 
 class PatientService:
@@ -18,7 +24,7 @@ class PatientService:
     async def create_profile(
         self,
         patient_data: PatientCreate,
-    ) -> PatientModel:
+    ) -> dict:
         user = await self.users.get_by_id(patient_data.user_id)
 
         if user is None:
@@ -27,7 +33,9 @@ class PatientService:
         if not user.is_active:
             raise ValueError("Patient profile can be created only for an active user.")
 
-        existing_patient = await self.patients.get_by_user_id(patient_data.user_id)
+        existing_patient = await self.patients.get_by_user_id(
+            patient_data.user_id,
+        )
 
         if existing_patient is not None:
             raise ValueError("Patient profile already exists for this user.")
@@ -35,33 +43,76 @@ class PatientService:
         if user.role != UserRoleEnum.USER:
             raise ValueError("Patient profile can be created only for a regular user.")
 
-        patient = PatientModel(**patient_data.model_dump())
+        patient_fields = patient_data.model_dump(
+            exclude={"phone_number"},
+        )
+        patient = PatientModel(**patient_fields)
+
+        user.phone_number = patient_data.phone_number
 
         try:
             user.role = UserRoleEnum.PATIENT
             self.patients.add(patient)
             await self.session.commit()
+
         except SQLAlchemyError as error:
             await self.session.rollback()
             raise DatabaseWriteError(
                 "An error occurred while creating patient profile."
             ) from error
 
-        created_patient = await self.patients.get_by_user_id(patient_data.user_id)
+        created_patient = await self.patients.get_by_user_id(
+            patient_data.user_id,
+        )
 
         if created_patient is None:
             raise ValueError("Patient profile was not created.")
 
-        return created_patient
+        patient_details = await self.patients.get_details_by_id(
+            created_patient.id,
+        )
 
-    async def get_all(self) -> list[dict]:
-        return await self.patients.get_all()
+        if patient_details is None:
+            raise ValueError("Patient profile was not created.")
+
+        return patient_details
+
+    async def get_all(
+        self,
+        category: str = "all",
+        search: str | None = None,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> dict:
+        offset = (page - 1) * page_size
+
+        total = await self.patients.count(
+            category=category,
+            search=search,
+        )
+
+        items = await self.patients.get_all(
+            category=category,
+            search=search,
+            offset=offset,
+            limit=page_size,
+        )
+
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "pages": ceil(total / page_size) if total else 0,
+        }
 
     async def get_by_id(
         self,
         patient_id: int,
-    ) -> PatientModel:
-        patient = await self.patients.get_by_id(patient_id)
+    ) -> dict:
+        patient = await self.patients.get_details_by_id(
+            patient_id,
+        )
 
         if patient is None:
             raise ValueError("Patient profile not found.")
@@ -72,45 +123,80 @@ class PatientService:
         self,
         patient_id: int,
         patient_data: PatientUpdate,
-    ) -> PatientModel:
+    ) -> dict:
         patient = await self.patients.get_by_id(patient_id)
 
         if patient is None:
             raise ValueError("Patient profile not found.")
 
+        user = await self.users.get_by_id(patient.user_id)
+
+        if user is None:
+            raise ValueError("User not found.")
+
+        if (
+            "phone_number" in patient_data.model_fields_set
+            and patient_data.phone_number is None
+        ):
+            raise ValueError("Phone number cannot be null.")
+
         self.patients.update(
-            patient,
-            patient_data,
+            patient=patient,
+            user=user,
+            patient_data=patient_data,
         )
 
         try:
             await self.session.commit()
-            await self.session.refresh(patient)
+
         except SQLAlchemyError as error:
             await self.session.rollback()
             raise DatabaseWriteError(
                 "An error occurred while updating patient profile."
             ) from error
 
-        return patient
+        updated_patient = await self.patients.get_details_by_id(
+            patient_id,
+        )
+
+        if updated_patient is None:
+            raise ValueError("Patient profile not found.")
+
+        return updated_patient
+
+    async def get_statistics(
+        self,
+    ) -> PatientStatisticsResponse:
+        statistics = await self.patients.get_statistics()
+
+        return PatientStatisticsResponse(
+            **statistics,
+        )
 
     async def delete_profile(
         self,
         patient_id: int,
-    ) -> None:
+    ) -> str:
         patient = await self.patients.get_by_id(patient_id)
 
         if patient is None:
             raise ValueError("Patient profile not found.")
 
-        user: UserModel = await self.users.get_by_id(patient.user_id)
+        user = await self.users.get_by_id(patient.user_id)
+
+        if user is None:
+            raise ValueError("User not found.")
 
         try:
             user.role = UserRoleEnum.USER
+
             await self.patients.delete(patient)
             await self.session.commit()
+
         except SQLAlchemyError as error:
             await self.session.rollback()
             raise DatabaseWriteError(
                 "An error occurred while deleting patient profile."
             ) from error
+
+        return "Patient profile deleted successfully."
