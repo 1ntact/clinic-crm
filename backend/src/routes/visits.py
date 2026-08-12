@@ -15,8 +15,8 @@ from schemas.visits import (
     VisitResponse,
     VisitUpdate,
 )
+from security.permissions import DoctorAdminOrSuperAdminDep
 from services.visits import VisitService
-
 
 router = APIRouter(
     tags=["visits"],
@@ -53,6 +53,7 @@ def raise_http_error(error: ValueError) -> NoReturn:
 )
 async def create_visit(
     visit_data: VisitCreate,
+    current_user: DoctorAdminOrSuperAdminDep,
     db: AsyncSession = Depends(get_postgresql_db),
 ) -> VisitResponse:
     service = VisitService(db)
@@ -71,6 +72,7 @@ async def create_visit(
     status_code=status.HTTP_200_OK,
 )
 async def get_visit_by_appointment(
+    current_user: DoctorAdminOrSuperAdminDep,
     appointment_id: int = Path(
         gt=0,
     ),
@@ -92,6 +94,7 @@ async def get_visit_by_appointment(
     status_code=status.HTTP_200_OK,
 )
 async def get_visit(
+    current_user: DoctorAdminOrSuperAdminDep,
     visit_id: int = Path(
         gt=0,
     ),
@@ -114,6 +117,7 @@ async def get_visit(
 )
 async def update_visit(
     visit_data: VisitUpdate,
+    current_user: DoctorAdminOrSuperAdminDep,
     visit_id: int = Path(
         gt=0,
     ),

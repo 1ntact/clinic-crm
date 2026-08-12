@@ -22,8 +22,8 @@ from schemas.appointments import (
     AvailableSlotsResponse,
     PaginatedAppointmentResponse,
 )
+from security.permissions import DoctorAdminOrSuperAdminDep
 from services.appointments import AppointmentService
-
 
 router = APIRouter(
     tags=["appointments"],
@@ -58,6 +58,7 @@ def raise_http_error(error: ValueError) -> NoReturn:
 )
 async def create_appointment(
     appointment_data: AppointmentCreate,
+    current_user: DoctorAdminOrSuperAdminDep,
     db: AsyncSession = Depends(get_postgresql_db),
 ) -> AppointmentResponse:
     service = AppointmentService(db)
@@ -75,6 +76,7 @@ async def create_appointment(
     response_model=PaginatedAppointmentResponse,
 )
 async def get_appointments(
+    current_user: DoctorAdminOrSuperAdminDep,
     doctor_id: int | None = Query(
         default=None,
         gt=0,
@@ -132,6 +134,7 @@ async def get_appointments(
     response_model=AvailableSlotsResponse,
 )
 async def get_available_slots(
+    current_user: DoctorAdminOrSuperAdminDep,
     selected_date: date = Query(
         alias="date",
     ),
@@ -163,6 +166,7 @@ async def get_available_slots(
     status_code=status.HTTP_200_OK,
 )
 async def get_appointments_dashboard(
+    current_user: DoctorAdminOrSuperAdminDep,
     year: int | None = Query(
         default=None,
         ge=2000,
@@ -196,6 +200,7 @@ async def get_appointments_dashboard(
     response_model=AppointmentResponse,
 )
 async def get_appointment(
+    current_user: DoctorAdminOrSuperAdminDep,
     appointment_id: int = Path(
         gt=0,
     ),
@@ -217,6 +222,7 @@ async def get_appointment(
 )
 async def update_appointment(
     appointment_data: AppointmentUpdate,
+    current_user: DoctorAdminOrSuperAdminDep,
     appointment_id: int = Path(
         gt=0,
     ),
@@ -239,6 +245,7 @@ async def update_appointment(
 )
 async def update_appointment_status(
     status_data: AppointmentStatusUpdate,
+    current_user: DoctorAdminOrSuperAdminDep,
     appointment_id: int = Path(
         gt=0,
     ),
