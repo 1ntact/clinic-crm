@@ -51,3 +51,8 @@ Desktop.ini
 tmp/
 logs/
 *.log
+
+# Local AI tooling
+.ai/
+CLAUDE.md
+.claude/settings.local.json
