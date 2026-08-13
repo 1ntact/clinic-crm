@@ -287,7 +287,7 @@ export const DashboardStats = () => {
                       {item.active && (
                         <div className="absolute bottom-[170px] left-1/2 -translate-x-1/2">
                           <div className="relative whitespace-nowrap rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-medium text-white">
-                            ↑ Peak day
+                            ↑ Peak da
 
                             <span className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 border-x-[6px] border-t-[6px] border-x-transparent border-t-blue-600" />
                           </div>
