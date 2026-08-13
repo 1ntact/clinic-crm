@@ -1,51 +1,30 @@
-import { RiArrowUpDownLine } from "react-icons/ri";
-type SortBy =
-  | "name"
-  | "specialization"
-  | "years_experience"
-  | "created_at";
+
+import type { SortButton } from "@/features/doctors/model/sortDoctorTypes";
 
 type SortOrder = "asc" | "desc";
 
-type Props = {
+type Props<T extends string> = {
+  userCount: number;
   className?: string;
-  sortBy: SortBy;
+  sortBy: T;
   sortOrder: SortOrder;
-
-  onChange: (
-    sortBy: SortBy,
-    sortOrder: SortOrder
-  ) => void;
+  buttons: SortButton<T>[];
+  onChange: (sortBy: T, sortOrder: SortOrder) => void;
 };
 
-const buttons: {
-  value: SortBy;
-  label: string;
-}[] = [
-  {
-    value: "name",
-    label: "Name",
-  },
-  {
-    value: "specialization",
-    label: "Specialization",
-  },
-  {
-    value: "yearsExperience",
-    label: "Experience",
-  },
-];
-
-export const Sort: React.FC<Props> = ({className,
+export const Sort = <T extends string>({
+  className,
+  userCount,
+  buttons,
   sortBy,
   sortOrder,
   onChange,
-}) => {
-  const handleClick = (value: SortBy) => {
+}: Props<T>) => {
+  const handleClick = (value: T) => {
     if (value === sortBy) {
       onChange(
         value,
-        sortOrder === "asc" ? "desc" : "asc"
+        sortOrder === "asc" ? "desc" : "asc",
       );
     } else {
       onChange(value, "asc");
@@ -53,17 +32,29 @@ export const Sort: React.FC<Props> = ({className,
   };
 
   return (
-    <div className={`h-[32px] flex  items-center gap-4 ${className ?? ""}`}>
-      <div className="flex items-center justify-center gap-1">
-  <RiArrowUpDownLine className="h-3 w-3" />
-  <span>Sort:</span>
-</div>
-     
+    <div
+      className={`h-[32px] flex items-center gap-4 ${
+        className ?? ""
+      }`}
+    >
+      <span>Sort:</span>
+
       {buttons.map((button) => (
         <button
           key={button.value}
+          type="button"
+          disabled={userCount < 5}
           onClick={() => handleClick(button.value)}
-          className={` h-[32px] flex items-center rounded-[8px] pl-[12px] pr-[12px] pb-[8px] pt-[8px]   transition
+          className={`h-[32px]
+            flex
+            items-center
+            rounded-[8px]
+            px-3
+            transition
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            disabled:bg-gray-200
+            disabled:text-gray-400
             ${
               sortBy === button.value
                 ? "border-blue-600 bg-blue-600 text-white"
@@ -82,3 +73,4 @@ export const Sort: React.FC<Props> = ({className,
     </div>
   );
 };
+

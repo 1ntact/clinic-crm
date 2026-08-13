@@ -12,8 +12,11 @@ import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
 import { setQuery } from "@/features/doctors/doctorsSlice";
+import { employmentTypes } from "@/features/doctors/model/employmentTypes";
+import {  sortButtons } from "@/features/doctors/model/sortDoctorTypes";
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { useEffect, useState } from "react";
 import { BiPlus } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 export const DoctorsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const { doctors, total, loading, query } = useAppSelector(
-    (state) => state.doctor,
+    (state) => state.doctor
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -45,7 +48,16 @@ export const DoctorsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          forms={<DoctorCreteForm handleAside={handleAside} />}
+          content={<DoctorCreteForm handleAside={handleAside} />}
+          footer={   <>
+                <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
+                    <span className="text-[#172554]">Cancel</span>
+                </ButtonPage>
+
+                <ButtonPage type="submit" form="doctor-create" className={buttonStyles.formSubmit}>
+                  Send an invitation
+                </ButtonPage>
+              </>}
           title={"ADD NEW DOCTOR"}
           description={"Fill in the details below"}
         />
@@ -58,7 +70,7 @@ export const DoctorsPage = () => {
         />
         <div className="flex  gap-4  ">
           <ButtonPage
-            className="pl-[12px] pr-[12px] "
+            className={buttonStyles.createButton}
             onClick={handleAside}
             icon={<BiPlus className="mr-[8px]" />}
           >
@@ -70,23 +82,30 @@ export const DoctorsPage = () => {
       <div className="flex  justify-between">
         <Filter
           className="mb-[24px]"
-          search={query.search}
-          specialization={query.specialization}
-          employmentType={query.employmentType}
-          specializations={specializations}
+           search={query.search}
+  firstSelect={query.specialization}
+  secondSelect={query.employmentType}
+
+  firstPlaceholder="All specializations"
+  secondPlaceholder="Employment"
+
+  firstSelectOptions={specializations}
+  secondSelectOptions={employmentTypes}
           onSearchChange={(value) =>
             dispatch(setQuery({ search: value, page: 1 }))
           }
-          onSpecializationChange={(value) =>
+          onFirstSelectChange={(value) =>
             dispatch(setQuery({ specialization: value, page: 1 }))
           }
-          onEmploymentTypeChange={(value) =>
+          onSecondSelectChange={(value) =>
             dispatch(setQuery({ employmentType: value, page: 1 }))
           }
         />
         <Sort
+          userCount = {doctors.length}
           sortBy={query.sortBy}
           sortOrder={query.sortOrder}
+          buttons={sortButtons}
           onChange={(sortBy, sortOrder) =>
             dispatch(
               setQuery({
@@ -102,10 +121,10 @@ export const DoctorsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="w-full h-full p-[24px]">
+        <div className="w-full min-h-[380px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
           <Table>
             <thead>
-              <tr>
+              <tr className="h-[40px] bg-[#F3F4F6]">
                 <Th>ID</Th>
                 <Th>DOCTOR/CONTACT</Th>
                 <Th>WORKLOAD</Th>
@@ -121,13 +140,13 @@ export const DoctorsPage = () => {
                   onClick={() => {
                     navigate(`/doctors/${doctor.id}`);
                   }}
-                  className=" h-[76px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
+                  className=" h-[40px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
                 >
                   <Td>{`#${doctor.doctorCode}`}</Td>
 
                   <Td>
                     <UserContacts
-                      avatar = {doctor.avatarUrl}
+                      avatar = {`doctor.jpg`}
                       firstName={doctor.firstName}
                       lastName={doctor.lastName}
                       phone={doctor.phoneNumber}
@@ -151,13 +170,14 @@ export const DoctorsPage = () => {
                 <p className="p-3 text-center text-gray-500">
                   Nothing found
                 </p>
-              )}
-        </div>
+            )}
+             
+          </div>
+          
       )}
-
-      <Pagination
-        page={query.page}
-        pageSize={query.pageSize}
+       <Pagination
+        page={query.page ?? 1}
+        pageSize={query.pageSize ?? 5}
         total={total}
         onPageChange={(page) =>
           dispatch(
@@ -167,6 +187,9 @@ export const DoctorsPage = () => {
           )
         }
       />
+      
+
+   
     </>
   );
 };

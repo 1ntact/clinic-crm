@@ -6,8 +6,8 @@ type Props = {
 
 export const Table = ({ children }: Props) => {
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-      <table className="w-full border-collapse">
+    <div className="overflow-x-auto   bg-white">
+      <table className="w-full ">
         {children}
       </table>
     </div>

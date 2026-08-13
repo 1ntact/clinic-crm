@@ -1,21 +1,54 @@
-from datetime import date
+from datetime import date, datetime, timezone
+from typing import NoReturn
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.appointments import AppointmentStatusEnum
 from database.session_postgresql import get_postgresql_db
-from repositories.appointments import AppointmentRepository
 from schemas.appointments import (
     AppointmentCreate,
+    AppointmentDashboardResponse,
     AppointmentResponse,
+    AppointmentStatusUpdate,
     AppointmentUpdate,
+    AvailableSlotsResponse,
+    PaginatedAppointmentResponse,
 )
-
+from security.permissions import DoctorAdminOrSuperAdminDep
+from services.appointments import AppointmentService
 
 router = APIRouter(
     tags=["appointments"],
 )
+
+
+def raise_http_error(error: ValueError) -> NoReturn:
+    message = str(error)
+
+    not_found_messages = {
+        "Appointment not found.",
+        "Patient not found.",
+        "Doctor not found.",
+    }
+
+    if message in not_found_messages:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=message,
+        ) from error
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=message,
+    ) from error
 
 
 @router.post(
@@ -25,42 +58,141 @@ router = APIRouter(
 )
 async def create_appointment(
     appointment_data: AppointmentCreate,
+    current_user: DoctorAdminOrSuperAdminDep,
     db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
+) -> AppointmentResponse:
+    service = AppointmentService(db)
 
     try:
-        return await repository.create(appointment_data)
+        return await service.create(
+            appointment_data=appointment_data,
+        )
     except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
+        raise_http_error(error)
 
 
 @router.get(
     "/",
-    response_model=list[AppointmentResponse],
+    response_model=PaginatedAppointmentResponse,
 )
 async def get_appointments(
-    doctor_id: int | None = None,
-    patient_id: int | None = None,
-    appointment_date: date | None = None,
-    appointment_status: AppointmentStatusEnum | None = None,
-    limit: int = Query(default=100, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
+    current_user: DoctorAdminOrSuperAdminDep,
+    doctor_id: int | None = Query(
+        default=None,
+        gt=0,
+    ),
+    patient_id: int | None = Query(
+        default=None,
+        gt=0,
+    ),
+    search: str | None = Query(
+        default=None,
+    ),
+    appointment_date: date | None = Query(
+        default=None,
+    ),
+    date_from: date | None = Query(
+        default=None,
+    ),
+    date_to: date | None = Query(
+        default=None,
+    ),
+    appointment_status: AppointmentStatusEnum | None = Query(
+        default=None,
+    ),
+    page: int = Query(
+        default=1,
+        ge=1,
+    ),
+    page_size: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
+) -> PaginatedAppointmentResponse:
+    service = AppointmentService(db)
 
-    return await repository.get_all(
-        doctor_id=doctor_id,
-        patient_id=patient_id,
-        appointment_date=appointment_date,
-        appointment_status=appointment_status,
-        limit=limit,
-        offset=offset,
-    )
+    try:
+        return await service.get_all(
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            search=search,
+            appointment_date=appointment_date,
+            date_from=date_from,
+            date_to=date_to,
+            appointment_status=appointment_status,
+            page=page,
+            page_size=page_size,
+        )
+    except ValueError as error:
+        raise_http_error(error)
+
+
+@router.get(
+    "/available-slots/",
+    response_model=AvailableSlotsResponse,
+)
+async def get_available_slots(
+    current_user: DoctorAdminOrSuperAdminDep,
+    selected_date: date = Query(
+        alias="date",
+    ),
+    doctor_id: int = Query(
+        gt=0,
+    ),
+    duration: int = Query(
+        default=30,
+        ge=30,
+        le=180,
+    ),
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> AvailableSlotsResponse:
+    service = AppointmentService(db)
+
+    try:
+        return await service.get_available_slots(
+            selected_date=selected_date,
+            doctor_id=doctor_id,
+            duration=duration,
+        )
+    except ValueError as error:
+        raise_http_error(error)
+
+
+@router.get(
+    "/dashboard/",
+    response_model=AppointmentDashboardResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_appointments_dashboard(
+    current_user: DoctorAdminOrSuperAdminDep,
+    year: int | None = Query(
+        default=None,
+        ge=2000,
+        le=2100,
+    ),
+    month: int | None = Query(
+        default=None,
+        ge=1,
+        le=12,
+    ),
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> AppointmentDashboardResponse:
+    now = datetime.now(timezone.utc)
+
+    selected_year = year if year is not None else now.year
+    selected_month = month if month is not None else now.month
+
+    service = AppointmentService(db)
+
+    try:
+        return await service.get_dashboard(
+            year=selected_year,
+            month=selected_month,
+        )
+    except ValueError as error:
+        raise_http_error(error)
 
 
 @router.get(
@@ -68,20 +200,20 @@ async def get_appointments(
     response_model=AppointmentResponse,
 )
 async def get_appointment(
-    appointment_id: int,
+    current_user: DoctorAdminOrSuperAdminDep,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
+) -> AppointmentResponse:
+    service = AppointmentService(db)
 
-    appointment = await repository.get_by_id(appointment_id)
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Appointment not found.",
+    try:
+        return await service.get_by_id(
+            appointment_id=appointment_id,
         )
-
-    return appointment
+    except ValueError as error:
+        raise_http_error(error)
 
 
 @router.patch(
@@ -89,129 +221,44 @@ async def get_appointment(
     response_model=AppointmentResponse,
 )
 async def update_appointment(
-    appointment_id: int,
     appointment_data: AppointmentUpdate,
+    current_user: DoctorAdminOrSuperAdminDep,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
-
-    appointment = await repository.get_by_id(appointment_id)
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Appointment not found.",
-        )
+) -> AppointmentResponse:
+    service = AppointmentService(db)
 
     try:
-        return await repository.update(
-            appointment=appointment,
+        return await service.update(
+            appointment_id=appointment_id,
             appointment_data=appointment_data,
         )
     except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
-
-
-@router.delete(
-    "/{appointment_id}/",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-async def delete_appointment(
-    appointment_id: int,
-    db: AsyncSession = Depends(get_postgresql_db),
-) -> None:
-    repository = AppointmentRepository(db)
-
-    appointment = await repository.get_by_id(appointment_id)
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Appointment not found.",
-        )
-
-    await repository.delete(appointment)
+        raise_http_error(error)
 
 
 @router.patch(
-    "/{appointment_id}/confirm/",
+    "/{appointment_id}/status/",
     response_model=AppointmentResponse,
 )
-async def confirm_appointment(
-    appointment_id: int,
+async def update_appointment_status(
+    status_data: AppointmentStatusUpdate,
+    current_user: DoctorAdminOrSuperAdminDep,
+    appointment_id: int = Path(
+        gt=0,
+    ),
     db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
-
-    appointment = await repository.get_by_id(appointment_id)
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Appointment not found.",
-        )
+) -> AppointmentResponse:
+    service = AppointmentService(db)
 
     try:
-        return await repository.confirm(appointment)
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
-
-
-@router.patch(
-    "/{appointment_id}/cancel/",
-    response_model=AppointmentResponse,
-)
-async def cancel_appointment(
-    appointment_id: int,
-    db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
-
-    appointment = await repository.get_by_id(appointment_id)
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Appointment not found.",
+        return await service.update(
+            appointment_id=appointment_id,
+            appointment_data=AppointmentUpdate(
+                status=status_data.status,
+            ),
         )
-
-    try:
-        return await repository.cancel(appointment)
     except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
-
-
-@router.patch(
-    "/{appointment_id}/restore/",
-    response_model=AppointmentResponse,
-)
-async def restore_appointment(
-    appointment_id: int,
-    db: AsyncSession = Depends(get_postgresql_db),
-):
-    repository = AppointmentRepository(db)
-
-    appointment = await repository.get_by_id(appointment_id)
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Appointment not found.",
-        )
-
-    try:
-        return await repository.restore(appointment)
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
+        raise_http_error(error)

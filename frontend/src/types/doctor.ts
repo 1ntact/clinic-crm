@@ -9,7 +9,7 @@ export type Doctor = {
    "specialization": string,
    "yearsExperience": number,
   "employmentType": string,
-  "avatarUrl"?: null,
+  "avatarUrl"?: string,
   "workingDays"?: string[];
 
 }
