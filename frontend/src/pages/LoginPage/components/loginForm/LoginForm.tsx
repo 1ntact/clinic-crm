@@ -40,6 +40,7 @@ export const LoginForm = () => {
       />
       <section>
         <Input
+          inputClassName="h-[44px]"
           className="mb-[16px]"
           name="email"
           label="Email"
@@ -50,6 +51,7 @@ export const LoginForm = () => {
           error={errors.email?.message}
         />
         <Input
+          inputClassName="h-[44px]"
           name="password"
           label="Password"
           type="password"
