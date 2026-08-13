@@ -2,21 +2,23 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components";
 import { Loader } from "../loader/Loader";
 import type { User } from "@/types/User";
+import type { Patient } from "@/types/patient";
 
 type Props<T> = {
   items: T[];
   loading: boolean;
   placeholder?: string;
-
-  onSearch: (value: T) => void;
-  onSelect?: (item: T) => void;
-  selectedUser: User | null;
+  searchLabel: string;
+  onSearch: (value: string) => void;
+  onSelect: (item: T) => void;
+  selectedUser: User | null | Patient;
   getKey: (item: T) => React.Key;
   renderItem: (item: T) => React.ReactNode;
   getValue: (item: T) => string;
 };
 
 export function Search<T>({
+  searchLabel,
   items,
   loading,
   placeholder = "Search...",
@@ -28,7 +30,7 @@ export function Search<T>({
   getValue,
 }: Props<T>) {
   const [query, setQuery] = useState("");
-  const open = query.trim().length >= 3;
+  const open = query.trim().length >= 1;
 
   useEffect(() => {
     if (!open) {
@@ -38,15 +40,17 @@ export function Search<T>({
     const timer = setTimeout(() => {
       onSearch(query);
       
-    }, 500);
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [ query]);
 
   return (
     <div className="relative">
       <Input
-        className="border-[1px] border-[#E5E7EB] rounded-[8px]"
+        label={searchLabel}
+        inputClassName="h-[44px]"
+        className=" rounded-[8px] mb-[32px]"
         name="search"
         type="search"
         placeholder={placeholder}

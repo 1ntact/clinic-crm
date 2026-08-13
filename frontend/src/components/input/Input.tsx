@@ -30,6 +30,7 @@ export function Input<T extends FieldValues>({
   type,
   name,
   className,
+ 
   inputClassName,
   ...props
 }: InputProps<T>) {
@@ -38,65 +39,94 @@ export function Input<T extends FieldValues>({
   const registerProps =
     register ? register(name, rules) : {};
 
-  return (
-    <div className={`flex flex-col ${className ?? ""}`}>
-      {label && (
-        <label
-          htmlFor={name}
-          className="mb-[10px] font-[Inter] font-medium text-[14px]"
+ return (
+   <div className={`w-full flex-1 ${className ?? ""}`}>
+    {label && (
+      <label
+        htmlFor={name}
+        className="mb-[10px] block font-[Inter] font-medium text-[14px]"
+      >
+        {label}
+      </label>
+    )}
+
+    <div className="relative">
+      <input
+        readOnly={readOnly}
+        id={name}
+        type={
+          showPassword && type === "password"
+            ? "text"
+            : type
+        }
+        className={`
+          
+          w-full
+          rounded-[8px]
+          border
+          bg-white
+          p-2
+          text-[14px]
+          outline-none
+          transition-colors
+
+          ${type === "search" ? "pl-10" : "pr-10"}
+
+          ${
+            error
+              ? "border-[#EF4444] focus:border-[#EF4444]"
+              : "border-[#E5E7EB] focus:border-[#2563EB]"
+          }
+
+          ${inputClassName ?? ""}
+        `}
+        {...props}
+        {...registerProps}
+      />
+
+      {type === "password" && (
+         <button
+           
+          type="button"
+          onClick={() =>
+            setShowPassword((prev) => !prev)
+          }
+           className="
+         
+            absolute
+            right-3
+            top-1/2
+             cursor-pointer
+            -translate-y-1/2
+          "
         >
-          {label}
-        </label>
+          {showPassword ? (
+            <PiEyeLight />
+          ) : (
+            <PiEyeSlash />
+          )}
+        </button>
       )}
 
-      <div className="relative">
-        <input
-          readOnly={readOnly}
-          id={name}
-          type={
-            showPassword && type === "password"
-              ? "text"
-              : type
-          }
-          className={`
-            w-full
-            h-[44px]
-            rounded-[8px]          
-            p-2
-            text-[14px]
-            ${type === "search" ? "pl-10" : "pr-10"}
-            ${inputClassName ?? ""}
-          `}
-          {...props}
-          {...registerProps}
+      {type === "search" && (
+        <CiSearch
+           className="
+           cursor-pointer
+            absolute
+            left-3
+            top-1/2
+            -translate-y-1/2
+            text-xl
+          "
         />
-
-        {type === "password" && (
-          <button
-            type="button"
-            onClick={() =>
-              setShowPassword((prev) => !prev)
-            }
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-          >
-            {showPassword ? (
-              <PiEyeLight />
-            ) : (
-              <PiEyeSlash />
-            )}
-          </button>
-        )}
-
-        {type === "search" && (
-          <CiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-xl" />
-        )}
-      </div>
-
-      {error && (
-        <p className="mt-2 text-[13px] text-red-500">
-          {error}
-        </p>
       )}
     </div>
-  );
+
+    {error  && (
+      <p className="mt-2 text-[13px] text-red-500">
+        {error}
+      </p>
+    )}
+  </div>
+);
 }

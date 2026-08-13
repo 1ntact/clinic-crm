@@ -3,9 +3,11 @@ import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { ButtonPage } from "@/components/button/ButtonsPage"
 import { PageTitle } from "@/components/pageTitle/PageTitle"
 import { UserForm } from "@/features/users/UserForm";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { useState } from "react";
 import { BiPlus } from "react-icons/bi";
 import { BiShield } from "react-icons/bi";
+import { DashboardStats } from "./components/statistic";
 export const DashboardPage = () => {
   const userData = useAppSelector(state => state.auth.user)
   const [aside, setOpenAside] = useState(false)
@@ -19,11 +21,11 @@ export const DashboardPage = () => {
       text={`Hello,${userData?.firstName}!`}
         description={nowTime} />
       <div className="flex  gap-4  ">
-        <ButtonPage className="pl-[12px] pr-[12px]"
+        <ButtonPage className={buttonStyles.editButton}
        
           icon={<BiShield className="mr-[8px]" />} >
           Change role</ButtonPage>
-        <ButtonPage className="pl-[12px] pr-[12px]"
+        <ButtonPage className={buttonStyles.createButton}
            onClick={handleAside}
           
           icon={<BiPlus className="mr-[8px]" />} >Invite a member</ButtonPage>
@@ -35,8 +37,19 @@ export const DashboardPage = () => {
       title={'ADD NEW USER'}
       description={'An invitation will be sent to the specified email'}
       handleAside={handleAside}
-    forms={<UserForm  handleAside={handleAside}/>}/>}
-    </>
+      content={<UserForm />} 
+    footer={  <>
+              <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
+                Cancel
+              </ButtonPage>
+      <ButtonPage
+        form="user-create"
+        type="submit"
+        className={buttonStyles.formSubmit}>
+                Send an invitation
+              </ButtonPage>
+      </>} />}
+    <DashboardStats/>   </>
 
   )
 }

@@ -1,71 +1,90 @@
 import { useEffect, useState } from "react";
 import { Input } from "../input/Input";
 import { useDebounce } from "@/hooks/useDebounce"
-import type { SelectOption } from "@/features/doctors/model/specialties";
-import type { DoctorQuery } from "@/features/doctors/model/DoctorQuery";
-type Props = {
-   className?: string;
-  search: string;
-  specialization: DoctorQuery['specialization'];
-  employmentType: DoctorQuery['employmentType'];
+import { BaseSelect } from "../select/BaseSelect";
 
-  specializations: SelectOption[];
-
-  onSearchChange: (value: string) => void;
-  onSpecializationChange: (value: string) => void;
-  onEmploymentTypeChange: (value: string) => void;
+export type FilterOption = {
+  label: string;
+  value: string;
 };
 
+type Props = {
+  className?: string;
 
-export const Filter: React.FC<Props> = ({ className, specialization,
-employmentType,
- specializations,
+  search?: string;
+
+  firstSelect?: string;
+  secondSelect?: string;
+
+  firstPlaceholder?: string;
+  secondPlaceholder?: string;
+
+  firstSelectOptions?: FilterOption[];
+  secondSelectOptions?: FilterOption[];
+
+  onSearchChange: (value: string) => void;
+  onFirstSelectChange?: (value: string) => void;
+  onSecondSelectChange?: (value: string) => void;
+};
+
+export const Filter: React.FC<Props> = ({
+  firstPlaceholder,
+  secondPlaceholder,
   search,
+  className,
+  firstSelect,
+  secondSelect,
+  firstSelectOptions,
+  secondSelectOptions,
   onSearchChange,
-  onSpecializationChange,
-onEmploymentTypeChange,
+  onFirstSelectChange,
+  onSecondSelectChange,
+ 
 }) => {
   const [value, setValue] = useState(search);
 
   const debouncedSearch = useDebounce(value, 500);
 
   useEffect(() => {
-    onSearchChange(debouncedSearch);
+    onSearchChange(debouncedSearch?? "");
   }, [debouncedSearch]);
 
   return (
     <div className ={`flex items-center gap-2  ${className ?? ""}`} >
       <Input 
+         inputClassName="h-[36px]"
         name="124"
         type="search"
         value={value}
-        placeholder="Search doctor..."
+        placeholder="Search ..."
         onChange={(e) => setValue(e.target.value)}
-        className="w-[250px] h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
+        className="w-full h-[36px] rounded-[8px]  bg-white color-[#6B7280] "
       />
-       <select
-        value={specialization.value}
-        onChange={(e) => onSpecializationChange(e.target.value)}
-        className="w-[190px] h-[36px]  rounded-[8px]  bg-white color-[#6B7280] border-1 border-[#E5E7EB]" 
-      >
-        <option value="">All specializations</option>
+      {firstSelectOptions && (
+        <BaseSelect
+          name="firstSelect"
+          classNames="h-[36px] w-[190px]"
+          placeholder={firstPlaceholder ?? "Select"}
+          value={firstSelect ?? ""}
+          options={firstSelectOptions}
+          onChange={(value) => {
+            onFirstSelectChange?.(value);
+          }}
+        />
+      )}
 
-        {specializations.map((item) => (
-          <option key={item.label} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-
-      <select
-        value={employmentType}
-        onChange={(e) => onEmploymentTypeChange(e.target.value)}
-      className=  "w-[140px] h-[36px] rounded-[8px] bg-white color-[#6B7280] border-1 border-[#E5E7EB]"
-      >
-        <option value="">All types</option>
-        <option value="full_time">Full time</option>
-        <option value="part_time">Part time</option>
-      </select>
+    {secondSelectOptions && (
+        <BaseSelect
+          name="secondSelect"
+          classNames="h-[36px] w-[190px]"
+          placeholder={secondPlaceholder ?? "Select"}
+          value={secondSelect ?? ""}
+          options={secondSelectOptions}
+          onChange={(value) => {
+            onSecondSelectChange?.(value);
+          }}
+        />
+      )} 
 
     </div>
   );

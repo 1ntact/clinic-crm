@@ -35,14 +35,14 @@ export function RadioGroup<T extends FieldValues> ({
         {label}
       </label>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 ">
         {options.map((option) => (
           <label
             key={option.label}
             htmlFor={`${name}-${option.label}`}
-            className="flex flex-1 cursor-pointer items-center gap-2 rounded-[8px] border p-[12px] h-[44px]"
+            className="flex flex-1 cursor-pointer items-center gap-2 rounded-[8px] border border-[#E5E7EB] p-[12px] h-[44px]"
           >
-            <input
+            <input className=""
               id={`${name}-${option.label}`}
               type="radio"
               value={option.value}

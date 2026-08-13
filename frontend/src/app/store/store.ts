@@ -3,11 +3,15 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/features/auth/authSlice'
 import userReducer from "@/features/users/userSlice"
 import doctorReducer from "@/features/doctors/doctorsSlice"
+import patientsReducer from "@/features/patients/patientsSlice"
+import appointmentsReducer from '@/features/appointments/appointmentsSlice'
 const store = configureStore({
   reducer: {
 auth:authReducer,
     user: userReducer,  
-  doctor: doctorReducer,
+    doctor: doctorReducer,
+    patient: patientsReducer,
+  appointment:appointmentsReducer,
   },
 });
 

@@ -88,6 +88,7 @@ const doctorSlice = createSlice({
 
         state.doctors = action.payload.items;
         state.total = action.payload.total;
+        
       })
 
       .addCase(getAllDoctorsThunk.rejected, (state, action) => {

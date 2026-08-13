@@ -8,7 +8,7 @@ type Props = {
 export const Th = ({ children, className = "" }: Props) => {
   return (
     <th
-      className={`px-6 py-4 text-left text-sm font-semibold text-gray-500 ${className}`}
+      className={` pl-[16px] text-left text-sm font-semibold text-gray-500 ${className}`}
     >
       {children}
     </th>

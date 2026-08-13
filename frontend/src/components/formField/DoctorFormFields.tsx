@@ -17,7 +17,8 @@ type Props = {
 }
 
 export const DoctorFormFields:React.FC<Props> = ({type}) => {
-  const {
+  
+  const {control,
     register,
     formState: { errors },
   } = useFormContext<DoctorFormData>();
@@ -36,6 +37,7 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
         <div className="flex gap-4 mb-6">
           <Input
             className="flex-1"
+            inputClassName=" h-[44px]"
             name="firstName"
             label="First name *"
             type="text"
@@ -48,6 +50,7 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
 
           <Input
             className="flex-1"
+            inputClassName=" h-[44px]"
             name="lastName"
             label="Last name *"
             type="text"
@@ -65,14 +68,15 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
             name="specialization"
             label="Speciality *"
             placeholder="Enter speciality"
-            option={specializations}
-            register={register}
+            options={specializations}
+            control={control}
             rules={formValidation.specialization}
             error={errors.specialization?.message}
           />
 
           <Input
             className="flex-1"
+            inputClassName=" h-[44px]"
             name="yearsExperience"
             label="Experience *"
             type="number"
@@ -99,6 +103,8 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
         </p>
 
         <Input
+          className="flex-1"
+          inputClassName=" h-[44px]"
           disabled
           name="email"
           label="Email *"
@@ -112,6 +118,8 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
 
       <section>
         <Input
+          className="flex-1"
+          inputClassName=" h-[44px]"
           name="phoneNumber"
           label="Phone *"
           type="tel"
