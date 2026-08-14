@@ -1,7 +1,7 @@
 import { authClient as client } from "@/http/authClient";
 import { accessTokenService } from "./accessTokenService";
 import type { LoginData } from "@/types/loginFormData";
-import type { User } from "@/types/User";
+import type { User } from "@/types/user"
 
 
 interface AuthData {

@@ -1,7 +1,4 @@
-
-import type { SortButton } from "@/features/doctors/model/sortDoctorTypes";
-
-type SortOrder = "asc" | "desc";
+import type { SortButton, SortOrder } from "./sortTypes";
 
 type Props<T extends string> = {
   userCount: number;
@@ -73,4 +70,3 @@ export const Sort = <T extends string>({
     </div>
   );
 };
-

@@ -11,7 +11,7 @@ export const doctorsService = {
   },
 
   getAllDoctors: async(query: DoctorQuery) => {
-    const params: Record<string, string | number> = {
+    const params: Record<string, string | number | undefined> = {
       page: query.page,
       page_size: query.pageSize,
       sort_by: query.sortBy,
