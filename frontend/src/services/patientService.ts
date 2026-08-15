@@ -13,7 +13,7 @@ export const patientsService = {
     return response.data;
   },
   getAllPatients: async (query:PatientQuery) => {
-     const params = {
+     const params:Record<string, string | number | undefined> = {
       page: query.page,
       page_size: query.pageSize,
       sort_by: query.sortBy,
@@ -49,7 +49,7 @@ export const patientsService = {
   },
 
   updatePatient: async (
-    data: PatientFormData, id: string
+    data: PatientFormData, id: number
   ) => {
     const response = await httpClient.patch(`/patients/${id}`, data,
       {

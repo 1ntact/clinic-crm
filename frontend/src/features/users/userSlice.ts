@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createUserThunk } from "./createUserThunk";
-import type { User } from "@/types/User";
+import type { User } from "@/types/user";
 import { searchUsersThunk } from "./searchUserThunk";
 
 interface userState {
