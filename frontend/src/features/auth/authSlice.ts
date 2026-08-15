@@ -2,7 +2,7 @@ import { createSlice} from "@reduxjs/toolkit";
 import { loginThunk } from "./authThunk";
 import { refreshThunk } from "./refreshThunk";
 import { logoutThunk } from "./logOutThunk";
-import type { User } from "@/types/User";
+import type { User } from "@/types/user";
 
 interface authState {
   user: User | null;

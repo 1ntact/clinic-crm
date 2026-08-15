@@ -1,11 +1,12 @@
-import type { SortBy } from "@/types/sortTypes";
+import type { SortButton } from "@/components/sorter/sortTypes";
 
-export type SortButton = {
-  value: SortBy;
-  label: string;
-};
+export type DoctorSortBy =
+  | "name"
+  | "recent_visit"
+  | "upcoming_visit";
 
-export const sortButtons: SortButton[] = [
+
+export const doctorSortButtons: SortButton<DoctorSortBy>[] = [
   {
     value: "name",
     label: "Name",

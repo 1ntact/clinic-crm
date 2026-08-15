@@ -5,7 +5,6 @@ import { Select } from "@/components/select/Select";
 import { CheckboxGroup } from "@/components/checkBoxGroup/CheskBoxGroup";
 import { RadioGroup } from "@/components/radioButtonGroup/RadioButtonGroup";
 
-
 import type { DoctorFormData } from "@/types/dotorFormData";
 import { formValidation } from "@/features/auth/model/form.validation";
 import { specializations } from "@/features/doctors/model/specialties";
@@ -13,12 +12,12 @@ import { employmentTypes } from "@/features/doctors/model/employmentTypes";
 import { workingDays } from "@/features/doctors/model/workingDays";
 import { UploadAvatar } from "../uploadAvatar/UploadAvatar";
 type Props = {
-  type?: 'create'
-}
+  type?: "create";
+};
 
-export const DoctorFormFields:React.FC<Props> = ({type}) => {
-  
-  const {control,
+export const DoctorFormFields: React.FC<Props> = ({ type }) => {
+  const {
+    control,
     register,
     formState: { errors },
   } = useFormContext<DoctorFormData>();
@@ -26,13 +25,9 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
   return (
     <>
       <section>
-        <UploadAvatar/>
-     
+        <UploadAvatar />
 
-
-        <p className="mb-6 text-xs text-[#6B7280]">
-          PERSONAL INFO
-        </p>
+        <p className="mb-6 text-xs text-[#6B7280]">PERSONAL INFO</p>
 
         <div className="flex gap-4 mb-6">
           <Input
@@ -82,7 +77,7 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
             type="number"
             placeholder="E.g. 10"
             register={register}
-            rules={formValidation.experience}
+            rules={formValidation.yearsExperience}
             error={errors.yearsExperience?.message}
           />
         </div>
@@ -93,14 +88,12 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
         label="Type *"
         options={employmentTypes}
         register={register}
-        rules={formValidation.partTime}
+        rules={formValidation.employmentType}
         error={errors.employmentType?.message}
       />
 
       <section>
-        <p className="mb-6 text-xs text-[#6B7280]">
-          CONTACT
-        </p>
+        <p className="mb-6 text-xs text-[#6B7280]">CONTACT</p>
 
         <Input
           className="flex-1"
@@ -125,7 +118,7 @@ export const DoctorFormFields:React.FC<Props> = ({type}) => {
           type="tel"
           placeholder="+38 (0XX) XXX-XXXX"
           register={register}
-          rules={formValidation.phone}
+          rules={formValidation.phoneNumber}
           error={errors.phoneNumber?.message}
         />
       </section>

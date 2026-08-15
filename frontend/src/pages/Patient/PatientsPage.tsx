@@ -16,18 +16,17 @@ import { Filter } from "@/components/filter/Filter";
 import { setQuery } from "@/features/patients/patientsSlice";
 import { specializations } from "@/features/doctors/model/specialties";
 import { employmentTypes } from "@/features/doctors/model/employmentTypes";
-import { Sort } from "@/components/sorter/Sort";
-import { sortButtons } from "@/features/patients/model/sortPatientType";
+
 import { Pagination } from "@/components/pagination/Pagination";
 import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
-import { PatientStatisticCard } from "./components/statisticPacient/StatisticPatient";
+
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
-  const { loading , patients,query, total, statistic} = useAppSelector(state => state.patient)
+  const { loading , patients,query, total} = useAppSelector(state => state.patient)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
     const handleAside = () =>
@@ -82,10 +81,10 @@ dayjs.extend(utc);
            
     </div>
     <div className="mb-[25px]">
-      {statistic &&
+      {/* {statistic &&
         <PatientStatisticCard
           statistic={statistic}
-        />}
+        />} */}
     </div>
     
      <div className="flex  justify-between">
@@ -102,7 +101,7 @@ dayjs.extend(utc);
                   
                      
                    />
-      <Sort
+      {/* <Sort
         userCount={patients.length}
               sortBy={query.sortBy}
         sortOrder={query.sortOrder}
@@ -116,7 +115,7 @@ dayjs.extend(utc);
                   }),
                 )
               }
-            /> 
+            />  */}
           </div>
    {loading ? (
           <Loader />
