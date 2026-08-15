@@ -5,17 +5,23 @@ import type {
   UseFormRegister,
 } from "react-hook-form";
 
-type Props<T extends FieldValues> = {
-  name: Path<T>;
+type Props<
+  T extends FieldValues,
+  TName extends Path<T>
+> = {
+  name: TName;
   label: string;
   options: string[];
   disabledOptions?: string[];
   register?: UseFormRegister<T>;
-  rules?: RegisterOptions<T, Path<T>>;
+  rules?: RegisterOptions<T, TName>;
   error?: string;
 };
 
-export function CheckboxGroup<T extends FieldValues>({
+export function CheckboxGroup<
+  T extends FieldValues,
+  TName extends Path<T>
+>({
   name,
   label,
   options,
@@ -23,7 +29,7 @@ export function CheckboxGroup<T extends FieldValues>({
   register,
   rules,
   error,
-}: Props<T>) {
+}: Props<T, TName>) {
   return (
     <div className="flex flex-col">
       <label className="mb-[10px] font-[Inter] font-medium text-[14px]">
@@ -52,14 +58,14 @@ export function CheckboxGroup<T extends FieldValues>({
               <div
                 className={`
                   flex
-                  w-[55px]
                   h-[44px]
+                  w-[55px]
                   items-center
                   justify-center
                   rounded-[8px]
                   border
-                  transition-all
                   border-gray-300
+                  transition-all
                   peer-checked:border-blue-600
                   peer-checked:bg-blue-50
                   peer-checked:text-blue-600
@@ -84,4 +90,4 @@ export function CheckboxGroup<T extends FieldValues>({
       )}
     </div>
   );
-};
+}

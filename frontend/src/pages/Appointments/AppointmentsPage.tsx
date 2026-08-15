@@ -208,7 +208,7 @@ export const AppointmentsPage = () => {
                               {dayjs(appointment.dateTime).format("YYYY-MM-DD")}
                             </div>
                             <div>
-                              {dayjs.utc(appointment.dateTime).format("HH:mm")}
+                              {dayjs(appointment.dateTime).format("HH:mm")}
                             </div>
                           </>
                         }

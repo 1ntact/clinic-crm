@@ -1,5 +1,5 @@
 
-import type { User } from "@/types/User";
+import type { User } from "@/types/user";
 import { httpClient } from "../http/httpClient";
 import { accessTokenService } from "./accessTokenService";
 import type { UserData } from "@/types/userFormData";

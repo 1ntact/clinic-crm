@@ -74,10 +74,12 @@ if (data.phoneNumber) {
   if (data.avatar?.length) {
     formData.append("avatar", data.avatar[0]);
    }
-  
+  if (!doctorId) {
+  return;
+}
     try {
       await dispatch(updateDoctorThunk({
-        id: doctorId,
+        id: doctorId?.toString(),
         data: formData,
       })).unwrap();
       reset();

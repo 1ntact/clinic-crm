@@ -1,3 +1,4 @@
+
 export const formValidation = {
   email: {
     required: "email is required",
@@ -12,10 +13,11 @@ export const formValidation = {
     pattern: {
       value:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>_\-\\[\]\\/]).{8,}$/,
-      message: "The password must consist of at least 8 characters and contain letters, numbers, and special characters.",
+      message:
+        "The password must consist of at least 8 characters and contain letters, numbers, and special characters.",
     },
   },
-  phone: {
+  phoneNumber: {
     required: "Phone number is required",
     pattern: {
       value: /^\+?[0-9]{10,15}$/,
@@ -32,7 +34,7 @@ export const formValidation = {
   specialization: {
     required: "Specialization is required",
   },
-  experience: {
+  yearsExperience: {
     required: "Experience is required",
     min: {
       value: 1,
@@ -45,15 +47,14 @@ export const formValidation = {
     valueAsNumber: true,
   },
   workingDays: {
-    validate: (value:string[]) =>
-      value.length > 0 || "Select at least one working day",
+    validate: (value:string[]) => value.length > 0 || "Select at least one working day",
   },
 
-  partTime: {
+  employmentType: {
     required: "Please select employment type",
   },
   gender: {
-    required: "Please select a gender"
+    required: "Please select a gender",
   },
 
   birthDate: {
@@ -62,10 +63,7 @@ export const formValidation = {
       notInFuture: (value: string | number) => {
         const birth = new Date(String(value));
 
-        return (
-          birth <= new Date() ||
-          "Date of birth cannot be in the future"
-        );
+        return birth <= new Date() || "Date of birth cannot be in the future";
       },
 
       validAge: (value: string | number) => {
@@ -119,14 +117,12 @@ export const formValidation = {
       value: /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s.,'’"/\-№]+$/,
       message: "Address contains invalid characters",
     },
- 
   },
   doctor: {
     required: "Select a doctor",
   },
   treatments: {
     required: "Treatments is required",
-    
   },
   date: {
     required: "Select a time",
@@ -135,6 +131,6 @@ export const formValidation = {
     maxLength: {
       value: 255,
       message: "Notes cannot exceed 255 characters",
-    }
-  }
-}
+    },
+  },
+};

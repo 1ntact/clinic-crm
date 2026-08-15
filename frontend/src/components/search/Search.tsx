@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components";
 import { Loader } from "../loader/Loader";
-import type { User } from "@/types/User";
+import type { User } from "@/types/user";
 import type { Patient } from "@/types/patient";
 
 type Props<T> = {

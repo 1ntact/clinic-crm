@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { useEffect, useState } from "react";
 import { searchUsersThunk } from "../users/searchUserThunk";
 import { Search } from "@/components/search/Search";
-import type { User } from "@/types/User";
+import type { User } from "@/types/user";
 import { Loader } from "@/components/loader/Loader";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import type { DoctorFormData } from "@/types/dotorFormData";

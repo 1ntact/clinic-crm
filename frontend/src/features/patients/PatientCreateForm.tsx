@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import type { PatientFormData } from "@/types/patientFormData";
-import type { User } from "@/types/User";
+
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { searchUsersThunk } from "../users/searchUserThunk";
@@ -10,6 +10,7 @@ import { Search } from "@/components/search/Search";
 import { createPatientThunk } from "./thunk/createPatientThunk";
 import { PatientsFormFields } from "@/components/formField/PatientFormField";
 import { getAllPatientThunk } from "./thunk/getAllPacientThunk";
+import type { User } from "@/types/user";
 
 
 export const PatientCreateForm:React.FC = () => {
