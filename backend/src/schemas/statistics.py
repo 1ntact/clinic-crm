@@ -1,25 +1,46 @@
 from pydantic import BaseModel
-from datetime import date
+from datetime import datetime
 
 
 class StatisticCardResponse(BaseModel):
-    total: int | float
+    total: int
+    change: float | None
+
+
+class DailyRevenueResponse(BaseModel):
+    total: float
     change: float | None
 
 
 class AppointmentOutcomesResponse(BaseModel):
-    date: date
     total: int
+    completed: int
+    no_show: int
     cancelled: int
-    repeated: int
 
 
-class RevenueDayResponse(BaseModel):
+class WeeklyRevenueDayResponse(BaseModel):
     day: str
-    value: float
+    actual: float
+    expected: float
+    total: float
+    is_peak_day: bool
 
 
-class RevenueChartResponse(BaseModel):
+class WeeklyRevenueResponse(BaseModel):
     total: float
     change: float | None
-    data: list[RevenueDayResponse]
+    data: list[WeeklyRevenueDayResponse]
+
+
+class PatientAppointmentsResponse(BaseModel):
+    total: int
+
+class PatientNoShowsResponse(BaseModel):
+    total: int
+
+
+class PatientHygieneResponse(BaseModel):
+    status: str
+    last_hygiene_visit: datetime | None
+    months_since_last_visit: int | None
