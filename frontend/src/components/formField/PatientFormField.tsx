@@ -6,10 +6,10 @@ import { RadioGroup } from "../radioButtonGroup/RadioButtonGroup";
 import { GenderTypes } from "@/features/patients/model/gender";
 
 type Props = {
-  type?: 'create'
-}
+  type?: "create";
+};
 
-export const PatientsFormFields:React.FC<Props> = ({type}) => {
+export const PatientsFormFields: React.FC<Props> = ({ type }) => {
   const {
     register,
     formState: { errors },
@@ -18,14 +18,12 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
   return (
     <>
       <section>
-        <p className="mb-6 text-xs text-[#6B7280]">
-          PERSONAL INFO
-        </p>
+        <p className="mb-6 text-xs text-[#6B7280]">PERSONAL INFO</p>
 
         <div className="flex gap-4 ">
           <Input
-             className="flex-1"
-          inputClassName=" h-[44px]"
+            className="flex-1"
+            inputClassName=" h-[44px]"
             name="firstName"
             label="First name *"
             type="text"
@@ -37,8 +35,8 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
           />
 
           <Input
-             className="flex-1"
-          inputClassName=" h-[44px]"
+            className="flex-1"
+            inputClassName=" h-[44px]"
             name="lastName"
             label="Last name *"
             type="text"
@@ -50,22 +48,21 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
           />
         </div>
       </section>
-       <section >
+      <section>
         <RadioGroup
-            name="gender"
-            label="Gender *"
-            options={GenderTypes}
-            register={register}
-            rules={formValidation.gender}
-            error={errors.gender?.message}
+          name="gender"
+          label="Gender *"
+          options={GenderTypes}
+          register={register}
+          rules={formValidation.gender}
+          error={errors.gender?.message}
         />
-         
       </section>
       <section>
         <div className="flex gap-4 ">
-         <Input
+          <Input
             className="flex-1"
-          inputClassName=" h-[44px]"
+            inputClassName=" h-[44px]"
             name="dateOfBirth"
             label="Date of Birth *"
             type="date"
@@ -73,11 +70,10 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
             register={register}
             rules={formValidation.birthDate}
             error={errors.dateOfBirth?.message}
-            
-        />
+          />
           <Input
             className="flex-1"
-          inputClassName=" h-[44px]"
+            inputClassName=" h-[44px]"
             name="address"
             label="Address *"
             type="string"
@@ -85,51 +81,40 @@ export const PatientsFormFields:React.FC<Props> = ({type}) => {
             register={register}
             rules={formValidation.address}
             error={errors.address?.message}
-            
-        />
-       </div>
-        </section>
-
-     
-
-      <section>
-        <p className="mb-6 text-xs text-[#6B7280]">
-          CONTACT
-        </p>
- 
-
-      
-        <div className="flex gap-4 ">
-          <Input
-             className="flex-1"
-          inputClassName=" h-[44px]"
-          disabled
-          name="email"
-          label="Email *"
-          type="email"
-          placeholder="example@gmail.com"
-          register={register}
-          rules={formValidation.email}
-          error={errors.email?.message}
           />
-          
-          <Input
-             className="flex-1"
-          inputClassName=" h-[44px]"
-          name="phoneNumber"
-          label="Phone *"
-          type="tel"
-          placeholder="+38 (0XX) XXX-XXXX"
-          register={register}
-          rules={formValidation.phone}
-          error={errors.phoneNumber?.message}
-        />
         </div>
       </section>
 
-      
+      <section>
+        <p className="mb-6 text-xs text-[#6B7280]">CONTACT</p>
 
-     
+        <div className="flex gap-4 ">
+          <Input
+            className="flex-1"
+            inputClassName=" h-[44px]"
+            disabled
+            name="email"
+            label="Email *"
+            type="email"
+            placeholder="example@gmail.com"
+            register={register}
+            rules={formValidation.email}
+            error={errors.email?.message}
+          />
+
+          <Input
+            className="flex-1"
+            inputClassName=" h-[44px]"
+            name="phoneNumber"
+            label="Phone *"
+            type="tel"
+            placeholder="+38 (0XX) XXX-XXXX"
+            register={register}
+            rules={formValidation.phoneNumber}
+            error={errors.phoneNumber?.message}
+          />
+        </div>
+      </section>
     </>
   );
 };

@@ -22,10 +22,15 @@ def get_jwt_auth_manager(
 def get_accounts_email_notificator(
     settings: Settings = Depends(get_settings),
 ) -> EmailSenderInterface:
+    # Use SMTP-based EmailSender configured via env vars (MailHog locally,
+    # production SMTP credentials in prod). We removed Brevo API HTTP calls.
     return EmailSender(
-        api_key=settings.EMAIL_API_KEY,
+        hostname=settings.EMAIL_HOST,
+        port=settings.EMAIL_PORT,
+        email=settings.EMAIL_HOST_USER,
         email_from=settings.EMAIL_FROM,
-        sender_name="Clinic CRM",
+        password=settings.EMAIL_HOST_PASSWORD,
+        use_tls=settings.EMAIL_USE_TLS,
         template_dir=settings.PATH_TO_EMAIL_TEMPLATES_DIR,
         activation_email_template_name=settings.ACTIVATION_EMAIL_TEMPLATE_NAME,
         activation_complete_email_template_name=settings.ACTIVATION_COMPLETE_EMAIL_TEMPLATE_NAME,

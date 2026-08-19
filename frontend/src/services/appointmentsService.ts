@@ -6,6 +6,7 @@ import type { AppointmentFormData } from "@/types/appointmentFormData";
 import { accessTokenService } from "./accessTokenService";
 
 
+
 export const appointmentsService = {
   getAppointmentsDashboard: async (query:CalendarQuery) => {
     const params = {
@@ -80,7 +81,7 @@ getAppointments: async (query: AppointmentsQuery) => {
     const response = await httpClient.post('/appointments', data,)
     return response.data
   },
-  changeStatus: async (status, id: number) => {
+  changeStatus: async (status:string, id: number) => {
   const response = await httpClient.patch(`appointments/${id}/status`, {status},
       {
         headers: {
