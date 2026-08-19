@@ -209,7 +209,7 @@ export const AppointmentsPage = () => {
                             </div>
                             <div>
                               {dayjs(appointment.dateTime).format("HH:mm")}
-                            </div>
+                             </div>
                           </>
                         }
                       </Td>

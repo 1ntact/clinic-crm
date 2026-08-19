@@ -6,8 +6,7 @@ import { getPatientByIdThunk } from "./thunk/getPatientByIdThunk";
 import { updatePatientThunk } from "./thunk/updatePatientThunk";
 import { removePatientThunk } from "./thunk/removePatientThunk";
 import type { PatientQuery } from "./model/patientsQuery";
-import { getStatisticPatient } from "./thunk/getStatisticPatient";
-import type { Statistic } from "@/types/statistics";
+
 
 
 interface PatientsState {
@@ -19,7 +18,7 @@ interface PatientsState {
 
   total: number;
   query:PatientQuery
-statistic:Statistic[]
+
   
 }
 const initialState: PatientsState = {
@@ -35,7 +34,6 @@ const initialState: PatientsState = {
     page: 1,
     pageSize: 5,   
   },
-  statistic:[]
   
 }
 
@@ -60,17 +58,7 @@ const patientsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-         .addCase(getStatisticPatient.pending, (state) => {
-        state.loading = true
-      })
-     .addCase(getStatisticPatient.fulfilled, (state, action) => {
-       state.loading = false
-       state.statistic = action.payload
-       console.log(action.payload)
-     })
-     .addCase(getStatisticPatient.rejected, (state) => {
-        state.loading = false
-      })
+         
       .addCase(createPatientThunk.pending, (state) => {
         state.loading = true;
       })

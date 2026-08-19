@@ -60,12 +60,6 @@ export const patientsService = {
     
 
   },
-  getStatisticPatient: async () => {
-    const response = await httpClient.get('/patients/statistics', {
-        headers: {
-        Authorization: `Bearer ${accessTokenService.get()}`
-      }})
-      return response.data
-  }
+
   
 };

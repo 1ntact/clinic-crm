@@ -15,19 +15,24 @@ import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { PatientInformation } from "./info/InfoItem";
 import { PatientDocuments } from "./info/medicalRecords";
+import { detailsPatientCardStatistics } from "@/features/statistics/model/detailsPatientCardStatistics";
+import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
+import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
+
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const [modal, setOpenModal] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
+  const cards = useAppSelector(state=>state.statistic.statistics.patientDetailsCard)
   const { patientId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!patientId) return;
-
-    dispatch(getPatientByIdThunk(Number(patientId)));
+    dispatch(getPatientByIdThunk(Number(patientId)))
+      dispatch(patientDetailsStatisticThunk(Number(patientId)));
   }, [dispatch, patientId]);
 
   const handleAside = () => setOpenAside((prev) => !prev);
@@ -76,7 +81,7 @@ export const PatientDetailsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="rounded-xl bg-white p-[16px] shadow-sm">
+        <div className="rounded-xl bg-white p-[16px] shadow-sm mb-[16px]">
           <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span
@@ -112,7 +117,7 @@ export const PatientDetailsPage = () => {
             </div>
           </section>
 
-          <section className="flex items-center justify-between  ">
+          <section className="flex items-center justify-between ">
             {!loading && selectedPatient && (
                 <UserProfile type="patient"
                 avatar='patient.jpg'  
@@ -121,6 +126,26 @@ export const PatientDetailsPage = () => {
           </section>
         </div>
       )}
+      
+      <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
+          {detailsPatientCardStatistics.map((card) => {
+  const data =
+    card.key === "balance"
+      ? undefined
+      : cards?.[card.key];
+
+  return (
+    <CardStatistics
+      key={card.key}
+      title={card.title}
+      icon={card.icon}
+      iconClass={card.iconClass}
+      value={data?.total ?? card.value}
+      change={data?.change ?? card.change}
+    />
+  );
+})}
+          </div>
       <PatientInformation />
       <PatientDocuments/>
     </>
