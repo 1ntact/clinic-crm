@@ -19,6 +19,8 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { ActionModal } from "./components/ActionModal/ActionModal";
 import {
+  resetAppointmentsQuery,
+  resetCalendarQuery,
   setAppointmentsQuery,
   setSelectedAppointment,
 } from "@/features/appointments/appointmentsSlice";
@@ -28,6 +30,8 @@ import { Pagination } from "@/components/pagination/Pagination";
 import { Filter } from "@/components/filter/Filter";
 import { AppointmentsViewToggle } from "./components/AppointmentsViewToogle/AppointmentsViewToogle";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import { EmptyState } from "@/components/emptyState/EmptyState";
+
 
 type ViewMode = "list" | "calendar";
 
@@ -59,6 +63,14 @@ export const AppointmentsPage = () => {
   } = useAppSelector((state) => state.appointment);
   const { doctors } = useAppSelector((state) => state.doctor);
 
+  useEffect(() => {
+    return () => {
+      dispatch(resetCalendarQuery());
+      dispatch(resetAppointmentsQuery());
+    
+  };
+}, [dispatch]);
+  
   useEffect(() => {
     dispatch(
       getAppointmentsDashboardThunk({
@@ -252,7 +264,7 @@ export const AppointmentsPage = () => {
                 </tbody>
               </Table>
               {appointments.length === 0 && (
-                <p className="p-3 text-center text-gray-500">Nothing found</p>
+                <EmptyState description=" No Appointments match your current filters. Try adjusting or clearing them."/>
               )}
 </div>
               <Pagination

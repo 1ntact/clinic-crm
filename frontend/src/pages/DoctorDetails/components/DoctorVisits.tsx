@@ -1,4 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook"
+import { EmptyState } from "@/components/emptyState/EmptyState"
+import { Filter } from "@/components/filter/Filter"
 import { Pagination } from "@/components/pagination/Pagination"
 import { Td } from "@/components/table/Td"
 import { Th } from "@/components/table/Th"
@@ -6,11 +8,13 @@ import { UserContacts } from "@/components/userContacts/UserContacts"
 import { setAppointmentsQuery } from "@/features/appointments/appointmentsSlice"
 import { statusOptions } from "@/features/appointments/model/statusAppointments"
 import { getAppointmentsThunk } from "@/features/appointments/thunk/getAppointmentsThunk"
+import { dateOptions } from "@/features/doctors/model/dataRange"
 
 import Table from "@mui/material/Table"
 import dayjs from "dayjs"
 import { useEffect } from "react"
 import { useParams } from "react-router-dom"
+
 
 export const DoctorVisits = () => {
     const {
@@ -19,24 +23,61 @@ export const DoctorVisits = () => {
   } = useAppSelector((state) => state.appointment);
   const dispatch = useAppDispatch();
    const { doctorId } = useParams();
- const now = new Date();
+ 
 
   useEffect(() => {
     if (!doctorId) {
       return
     }
     dispatch(getAppointmentsThunk({
-    appointmentDate: now.toISOString().split("T")[0],
+      ...appointmentsQuery,
       doctorId: Number(doctorId),
-      page: 1,
       pageSize: 5,
+      
     }))
-  }, [doctorId, dispatch])
+  }, [doctorId,appointmentsQuery, dispatch])
 
   const doctorAppointments = useAppSelector(state=>state.appointment.appointments)
   return(<> <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
-          <div className="flex justify-between mb-[16px]">
-            <span className="text-[14px] font-medium text-[#374151]" >PATIENTS VISITS</span>
+    <div className="flex justify-between mb-[16px]">
+       
+      <span className="text-[14px] font-medium text-[#374151]" >PATIENTS VISITS</span>
+   <div className="flex ">
+   
+       <Filter
+          className="ml-[16px]" 
+           firstPlaceholder="Date"
+  firstSelectOptions={dateOptions}
+ firstSelect={
+    appointmentsQuery.dateFrom && appointmentsQuery.dateTo
+      ? `${appointmentsQuery.dateFrom}_${appointmentsQuery.dateTo}`
+      : ""
+  }
+  onFirstSelectChange={(value) => {
+    const [dateFrom, dateTo] = value.split("_");
+
+    dispatch(
+      setAppointmentsQuery({
+        dateFrom,
+        dateTo,
+        appointmentDate: null,
+        page: 1,
+      }),
+    );
+  }}
+                  secondSelect={appointmentsQuery.appointmentStatus ?? ""}
+                  secondPlaceholder="All statuses" 
+                  secondSelectOptions={statusOptions}
+                  onSecondSelectChange={(value) =>
+                    dispatch(
+                      setAppointmentsQuery({
+                        appointmentStatus: value || null,
+                        page: 1,
+                      }),
+                    )
+                  }
+        />
+        </div>
           </div> 
                       <Table>
                         <thead>
@@ -106,7 +147,7 @@ export const DoctorVisits = () => {
                         </tbody>
                       </Table>
                       {doctorAppointments.length === 0 && (
-                        <p className="p-3 text-center text-gray-500">Nothing found</p>
+                       <EmptyState description=" No Visits match your current filters. Try adjusting or clearing them."/>
     )}
      
   </div>

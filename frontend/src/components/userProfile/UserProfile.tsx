@@ -51,13 +51,13 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type , patie
               <span>
                 {type === "patient"
                   ? `ID: #${selectedUser.id}`
-                  : selectedUser.doctorCode}
+                  : `ID: #${selectedUser.doctorCode}`}
               </span>
 
               <span>
                 {type === "patient"
                   ? `· ${userYear(selectedUser.dateOfBirth)} y.o.`
-                  : `${selectedUser.yearsExperience} yrs exp.`}
+                  : `· ${selectedUser.yearsExperience} yrs exp.`}
               </span>
             </div>
 
@@ -85,7 +85,13 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type , patie
           </div>
 
           <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full w-[80%] rounded-full bg-[#EF4444]"
+            <div className={`h-full w-[80%] rounded-full ${
+  workload < 65
+    ? "bg-[#FB923C]"
+    : workload < 85
+      ? "bg-[#22C55E]"
+      : "bg-[#EF4444]"
+}`}
             style={{width:workload}}/>
           </div>
         </div>

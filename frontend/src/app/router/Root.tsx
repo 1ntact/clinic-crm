@@ -14,7 +14,7 @@ import { ActivatePage } from "@/pages/Activation/ActivatePage";
 import { DoctorDetailsPage } from "@/pages/DoctorDetails/DoctorDetailsPage";
 import { PatientDetailsPage } from "@/pages/PatientDetails/PatientDetailsPage";
 import { DoctorVisits } from "@/pages/DoctorDetails/components/DoctorVisits";
-import { DoctorOverview } from "@/pages/DoctorDetails/components/DoactorOwerview";
+import { DoctorOverview } from "@/pages/DoctorDetails/components/DoctorOwerview";
 
 
 

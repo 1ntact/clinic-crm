@@ -23,6 +23,7 @@ import utc from "dayjs/plugin/utc";
 import { patientManagementThunk } from "@/features/statistics/thunk/patientManagementThunk";
 import { patientManagmentCard } from "@/features/statistics/model/patientManagmentCardStatistics";
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
+import { EmptyState } from "@/components/emptyState/EmptyState";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
@@ -184,9 +185,7 @@ dayjs.extend(utc);
                 
               </Table>
                {patients.length === 0 && (
-                  <p className="p-3 text-center text-gray-500">
-                    Nothing found
-                  </p>
+                  <EmptyState description=" No patients match your current filters. Try adjusting or clearing them."/>
                 )}
         </div>
         
