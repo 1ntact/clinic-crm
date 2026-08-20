@@ -6,15 +6,13 @@ export const NavBar: React.FC = () => {
   return (
     <>
       <div className=" flex flex-col w-[260px] p-[16px] h-full bottom-0 bg-[#fff]">
-        <div className="flex border-b  border-[#F3F4F6]  mb-[24px] p-[16px]">
-          <img className="mr-[8px]" src="smallLogo.png" alt="smallLogo" />
-          <div className="flex flex-col ">
+        <div className="h-[68px] flex items-center border-b  border-[#F3F4F6]  mb-[24px] p-[16px]">
+          <img className="mr-[16px]" src="smallLogo.png" alt="smallLogo" />
+          <div className="flex  ">
             <span className=" m-0 p-0 font-[Inter] font-semibold text-[18px]">
               {"LumiDent"}
             </span>
-            <span className="m-0 p-0 leading-[16px] font-[Inter] font-medium text-[12px] text-[#6B7280]">
-              {"Admin Panel"}
-            </span>
+           
           </div>
         </div>
 

@@ -20,7 +20,7 @@ export const WeeklyRevenue: React.FC<Props> = ({ currentDay, total, change, data
   ...data.map((item) => Math.max(item.expected, item.actual))
 );
 
-const maxYAxis = maxValue ;
+const maxYAxis = Math.ceil(maxValue / 1000) * 1000;
 
 const yAxis = Array.from(
   { length: 5 },
@@ -56,9 +56,9 @@ const yAxis = Array.from(
           {/* Y axis */}
 
           <div className="absolute left-0 top-0 flex h-[208px] flex-col justify-between text-[12px] text-gray-500">
-           {yAxis.map((item) => (
+      {yAxis.map((item) => (
   <span key={item}>
-    ₴{Math.round(((item) / 1000))}K
+    ${item >= 1000 ? `${item / 1000}K` : item}
   </span>
 ))}
            

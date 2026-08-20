@@ -18,6 +18,7 @@ type Card = {
   iconClass: string;
   value: number;
   change: number;
+  prefix?: string;
 };
 
 export const patientManagmentCard: Card[] = [

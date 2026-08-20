@@ -127,7 +127,7 @@ export const DoctorsPage = () => {
               <tr className="h-[40px] bg-[#F3F4F6]">
                 <Th>ID</Th>
                 <Th>DOCTOR/CONTACT</Th>
-                <Th>WORKLOAD</Th>
+                <Th>EMAIL</Th>
                 <Th>SPECIALITY</Th>
                 <Th>SCHEDULE</Th>
                 <Th>TYPE</Th>

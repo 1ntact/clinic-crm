@@ -4,10 +4,11 @@ type CardStatisticsProps = {
   icon: React.ElementType;
   change: number | string | null;
   iconClass: string;
+  prefix?: string;
 };
 
 export const CardStatistics: React.FC<CardStatisticsProps> = ({
-  
+  prefix,
   iconClass,
   value,
   title,
@@ -23,7 +24,7 @@ export const CardStatistics: React.FC<CardStatisticsProps> = ({
           </p>
 
           <p className="mt-3 text-[21px] font-semibold leading-none text-gray-900">
-            {value}
+           {prefix} {value}
           </p>
         </div>
 

@@ -114,7 +114,8 @@ export const DashboardPage = () => {
       <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {cards &&
           dashboardCards.map((card) => (
-            <CardStatistics           
+            <CardStatistics 
+            prefix={card.prefix} 
               key={card.key}
               title={card.title}
               icon={card.icon}

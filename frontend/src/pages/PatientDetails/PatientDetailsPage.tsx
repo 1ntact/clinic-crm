@@ -136,6 +136,7 @@ export const PatientDetailsPage = () => {
 
   return (
     <CardStatistics
+      prefix={card.prefix} 
       key={card.key}
       title={card.title}
       icon={card.icon}

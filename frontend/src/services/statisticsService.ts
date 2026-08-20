@@ -53,6 +53,28 @@ export const statisticsService = {
      const responce = await httpClient.get(`statistics/patients/${patientId}/hygiene`)
      return responce.data
   },
+  getDoctorPatients: async (doctorId: number) => {
+    const responce = await httpClient.get(`statistics/doctors/${doctorId}/patients-today`)
+    return responce.data
+  },
+  getDoctorCompletedVisits: async (doctorId: number) => {
+    const response = await httpClient.get(`statistics/doctors/${doctorId}/completed-visits`)
+    return response.data
+  },
+   getDoctorCancelledVisits: async (doctorId: number) => {
+    const response = await httpClient.get(`statistics/doctors/${doctorId}/cancelled-visits`)
+    return response.data
+  },
+    getDoctorNoShowVisits: async (doctorId: number) => {
+    const response = await httpClient.get(`statistics/doctors/${doctorId}/no-shows`)
+    return response.data
+  },
+     getDoctorWeeklyRevenue: async (doctorId: number) => {
+    const response = await httpClient.get(`statistics/doctors/${doctorId}/weekly-revenue`)
+    return response.data
+  },
+   
+   
    
 
 

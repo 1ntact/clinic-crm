@@ -16,14 +16,15 @@ type Card = {
   iconClass: string;
   value: number;
   change: number;
-  
+   prefix?:string,
 };
 
 export const detailsPatientCardStatistics: Card[] = [
     {key: 'appointments',
       title: "APPOINTMENTS",
       value: 0,
-      change:0,
+    change: 0,
+     
   
       icon:PiCalendarCheckLight,
       iconClass: "bg-blue-100 text-blue-600",
@@ -32,7 +33,7 @@ export const detailsPatientCardStatistics: Card[] = [
       title: "BALANCE",
       value: 200,
       change: 5,
-    
+    prefix:'+$',
       icon: PiVaultLight,
       iconClass: "bg-green-100 text-green-600",
     },

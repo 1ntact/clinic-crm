@@ -13,6 +13,8 @@ import { ROUTES } from "@/shared/config/routes";
 import { ActivatePage } from "@/pages/Activation/ActivatePage";
 import { DoctorDetailsPage } from "@/pages/DoctorDetails/DoctorDetailsPage";
 import { PatientDetailsPage } from "@/pages/PatientDetails/PatientDetailsPage";
+import { DoctorVisits } from "@/pages/DoctorDetails/components/DoctorVisits";
+import { DoctorOverview } from "@/pages/DoctorDetails/components/DoactorOwerview";
 
 
 
@@ -31,7 +33,11 @@ export const Root: React.FC = () => {
             <Route path={ROUTES.PATIENT} element={<PatientsPage />} />
             <Route path={ROUTES.PATDETAILS} element={<PatientDetailsPage/>}/>
             <Route path={ROUTES.DOCTORS} element={<DoctorsPage />} />
-            <Route path={ROUTES.DETAILS} element={<DoctorDetailsPage/>}/>
+            <Route path={ROUTES.DETAILS} element={<DoctorDetailsPage />} >
+              <Route index element={<DoctorOverview />}/>
+              <Route  path="visits" element={<DoctorVisits/>}/>
+              </Route>
+            
             <Route path={ROUTES.APPOINTMENTS} element={<AppointmentsPage/>} />
             <Route path={ROUTES.CALENDAR} element={<CalendarPage/>} />
           </Route>

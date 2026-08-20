@@ -5,6 +5,8 @@ import {
 
  } from "./thunk/patientManagementThunk";
 import { patientDetailsStatisticThunk } from "./thunk/patientDetailsStatisticsThunk";
+import { doctorDetailsStatisticThunk } from "./thunk/doctorDetailsStatisticsThunk";
+
 export type WeeklyRevenueDay = {
   actual: number;
   day: string;
@@ -47,10 +49,14 @@ type PatientManagementCards = {
 type PatientDetailsCards = {
   appointments: StatisticCard;
   noShow: StatisticCard;
-  hygiene: StatisticCard;
-  
-  
-
+  hygiene: StatisticCard;  
+}
+type DoctorDetailsCards = {
+  patients: StatisticCard;
+  completedVisits:StatisticCard,
+        cancelledVisits:StatisticCard,
+        noShowVisits:StatisticCard,
+       
 }
 
 type DashboardStatistics = {
@@ -58,7 +64,9 @@ type DashboardStatistics = {
   appointmentOutcomes: AppointmentOutcomesData | null;
   weeklyRevenue: WeeklyRevenueData | null;
   patientsManagmentCard: PatientManagementCards | null;
-  patientDetailsCard:PatientDetailsCards | null
+  patientDetailsCard: PatientDetailsCards | null;
+  doctorDetailsCard: DoctorDetailsCards | null;
+  doctorWeeklyRevenue: WeeklyRevenueData | null;
 };
 
 type DashboardState = {
@@ -73,7 +81,9 @@ const initialState: DashboardState = {
     appointmentOutcomes: null,
     weeklyRevenue: null,
     patientsManagmentCard: null,
-    patientDetailsCard:null,
+    patientDetailsCard: null,
+    doctorDetailsCard: null,
+    doctorWeeklyRevenue:null,
   },
   isLoading: false,
   error: null,
@@ -96,7 +106,7 @@ const statisticsSlice = createSlice({
           action.payload.appointmentOutcomes;
         state.statistics.weeklyRevenue =
           action.payload.weeklyRevenue;
-        console.log("STATISTICS:", action.payload);
+        
       })
       .addCase(dashboardStatisticsThunk.rejected, (state, action) => {
         state.isLoading = false;
@@ -125,6 +135,21 @@ const statisticsSlice = createSlice({
         state.isLoading = false;
         
     })
+
+     .addCase(doctorDetailsStatisticThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(doctorDetailsStatisticThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.statistics.doctorDetailsCard = action.payload.doctorDetailsCard;
+        state.statistics.doctorWeeklyRevenue = action.payload.doctorDetailsCard.doctorWeeklyRevenue;
+        console.log(action.payload)
+      })
+    .addCase(doctorDetailsStatisticThunk.rejected, (state) => {
+        state.isLoading = false;
+        
+    })
+
   },
 });
 export default statisticsSlice.reducer;

@@ -5,7 +5,7 @@ import { IoTrash } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { DoctorEditForm } from "@/features/doctors/DoctorEditForm";
-import { useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 
 import { UserProfile } from "../../components/userProfile/UserProfile";
 import { getDoctorByIdThunk } from "@/features/doctors/thunk/getDoctorByIdThunk";
@@ -14,7 +14,9 @@ import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { Loader } from "@/components/loader/Loader";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
-import { DashboardOverview } from "./components/overwiew/DoctorOverview";
+import { doctorDetailsStatisticThunk } from "@/features/statistics/thunk/doctorDetailsStatisticsThunk";
+
+import { SmallNavbar } from "./components/SmallNavbar";
 
 export const DoctorDetailsPage = () => {
   const dispatch = useAppDispatch();
@@ -24,11 +26,13 @@ export const DoctorDetailsPage = () => {
   const { doctorId } = useParams();
   const navigate = useNavigate();
   const { selectedDoctor, loading } = useAppSelector((state) => state.doctor);
-
+  const cards = useAppSelector(state => state.statistic.statistics.doctorDetailsCard)
+  
   useEffect(() => {
     if (!doctorId) return;
 
     dispatch(getDoctorByIdThunk(doctorId));
+    dispatch(doctorDetailsStatisticThunk(+doctorId))
   }, [dispatch, doctorId]);
 
   const handleAside = () => setOpenAside((prev) => !prev);
@@ -44,7 +48,8 @@ export const DoctorDetailsPage = () => {
       setOpenModal(false);
     }
   };
-
+  
+  
   return (
     <>
       {aside && (
@@ -79,7 +84,7 @@ export const DoctorDetailsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="rounded-xl bg-white p-[16px] shadow-sm">
+        <div className="rounded-xl bg-white p-[16px] mb-[16px] shadow-sm">
           <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span
@@ -115,9 +120,10 @@ export const DoctorDetailsPage = () => {
             </div>
           </section>
 
-          <section className="flex items-center justify-between rounded-[8px] border border-gray-200 ">
+          <section className="flex items-center justify-between  rounded-[8px] ">
             {!loading && selectedDoctor && (
                 <UserProfile
+                  patients = {cards?.patients?.total != null ? Number(cards.patients.total) : null}
                   type='doctor'
                   avatar={'doctor.jpg'}
                   selectedUser={selectedDoctor} />
@@ -125,7 +131,11 @@ export const DoctorDetailsPage = () => {
           </section>
         </div>
       )}
-      <DashboardOverview/>
+      <SmallNavbar />
+      
+     
+        <Outlet />
+
     </>
   );
 };

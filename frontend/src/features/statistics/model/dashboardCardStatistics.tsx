@@ -17,6 +17,7 @@ type StatisticsCard = {
   iconClass: string;
   value: number;
   change: number;
+  prefix?: string;
 };
 export const dashboardCards:StatisticsCard[] = [
     {key: 'patientToday',
@@ -39,7 +40,7 @@ export const dashboardCards:StatisticsCard[] = [
       title: "DAILY REVENUE",
       value: 0,
       change: 0,
-     
+     prefix:'$',
       icon: FiDollarSign,
       iconClass: "bg-orange-100 text-orange-600",
     },
@@ -47,7 +48,7 @@ export const dashboardCards:StatisticsCard[] = [
       title: "MONTHLY REVENUE",
       value: 0,
       change: 0,
-    
+    prefix:"$",
       icon: FiGitBranch,
       iconClass: "bg-purple-100 text-purple-600",
     },

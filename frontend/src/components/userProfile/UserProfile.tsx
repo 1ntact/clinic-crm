@@ -1,9 +1,11 @@
+import { calculateWorkload } from "@/shared/functions/workloadFunction";
 import type { Doctor } from "@/types/doctor";
 import type { Patient } from "@/types/patient";
 import { PiPhoneCallThin, PiEnvelopeSimpleLight } from "react-icons/pi";
 
 type BaseProps = {
   avatar?: string;
+  patients?: number | null;
 };
 
 type Props =
@@ -16,14 +18,16 @@ type Props =
       selectedUser: Patient;
     });
 
-export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
+export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type , patients}) => {
   const userYear = (date: string) => {
     return new Date().getFullYear() - new Date(date).getFullYear();
   };
-
+ 
+    const workload = calculateWorkload(patients);
+    
   return (
     <>
-      <div className="flex w-full mr-[16px]">
+      <div className="flex w-full mr-[16px] ">
         <img
           src={avatar}
           alt="User"
@@ -74,14 +78,15 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
       </div>
 
       {type === "doctor" && (
-        <div className="mt-6 w-[320px] ml-auto">
+        <div className=" w-[320px] ml-auto">
           <div className="mb-2 flex justify-between text-sm">
             <span className="font-medium">Workload</span>
-            <span>80%</span>
+            <span>{workload}%</span>
           </div>
 
           <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full w-[80%] rounded-full bg-[#EF4444]" />
+            <div className="h-full w-[80%] rounded-full bg-[#EF4444]"
+            style={{width:workload}}/>
           </div>
         </div>
       )}
