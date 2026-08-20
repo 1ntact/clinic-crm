@@ -15,6 +15,9 @@ import { DoctorDetailsPage } from "@/pages/DoctorDetails/DoctorDetailsPage";
 import { PatientDetailsPage } from "@/pages/PatientDetails/PatientDetailsPage";
 import { DoctorVisits } from "@/pages/DoctorDetails/components/DoctorVisits";
 import { DoctorOverview } from "@/pages/DoctorDetails/components/DoctorOwerview";
+import { PatientInformation } from "@/pages/PatientDetails/components/PatientInformation";
+import { PatientDocuments } from "@/pages/PatientDetails/components/PatientDocuments";
+import { PatientHistory } from "@/pages/PatientDetails/components/PatientHistoty";
 
 
 
@@ -31,7 +34,11 @@ export const Root: React.FC = () => {
             <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
             <Route path={ROUTES.REMINDER} element={<ReminderPage />} />
             <Route path={ROUTES.PATIENT} element={<PatientsPage />} />
-            <Route path={ROUTES.PATDETAILS} element={<PatientDetailsPage/>}/>
+            <Route path={ROUTES.PATDETAILS} element={<PatientDetailsPage />}>
+                <Route index element={<PatientInformation />}/>
+              <Route path="history" element={<PatientHistory />} />
+              <Route  path="records" element={<PatientDocuments/>}/>
+            </Route>
             <Route path={ROUTES.DOCTORS} element={<DoctorsPage />} />
             <Route path={ROUTES.DETAILS} element={<DoctorDetailsPage />} >
               <Route index element={<DoctorOverview />}/>

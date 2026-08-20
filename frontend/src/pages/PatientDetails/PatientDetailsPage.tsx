@@ -8,16 +8,15 @@ import { removePatientThunk } from "@/features/patients/thunk/removePatientThunk
 import { useEffect, useState } from "react";
 import { IoTrash } from "react-icons/io5";
 import { TfiPencil } from "react-icons/tfi";
-import { useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { UserProfile } from "../../components/userProfile/UserProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
-import { PatientInformation } from "./info/InfoItem";
-import { PatientDocuments } from "./info/medicalRecords";
-import { detailsPatientCardStatistics } from "@/features/statistics/model/detailsPatientCardStatistics";
-import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
+import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
+import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
+
 
 
 export const PatientDetailsPage = () => {
@@ -25,7 +24,7 @@ export const PatientDetailsPage = () => {
   const [modal, setOpenModal] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
-  const cards = useAppSelector(state=>state.statistic.statistics.patientDetailsCard)
+
   const { patientId } = useParams();
   const navigate = useNavigate();
 
@@ -126,29 +125,12 @@ export const PatientDetailsPage = () => {
           </section>
         </div>
       )}
+       <SmallNavbar
+        arrayNavigation={patientDetailsNavigation} />
       
-      <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
-          {detailsPatientCardStatistics.map((card) => {
-  const data =
-    card.key === "balance"
-      ? undefined
-      : cards?.[card.key];
-
-  return (
-    <CardStatistics
-      prefix={card.prefix} 
-      key={card.key}
-      title={card.title}
-      icon={card.icon}
-      iconClass={card.iconClass}
-      value={data?.total ?? card.value}
-      change={data?.change ?? card.change}
-    />
-  );
-})}
-          </div>
-      <PatientInformation />
-      <PatientDocuments/>
+    
+     
+      <Outlet/>
     </>
   );
 };

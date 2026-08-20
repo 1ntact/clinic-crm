@@ -15,7 +15,7 @@ import { Loader } from "@/components/loader/Loader";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { doctorDetailsStatisticThunk } from "@/features/statistics/thunk/doctorDetailsStatisticsThunk";
-
+import { doctorDetailsNavigation } from "@/features/doctors/model/doctorDetailsNavigation";
 import { SmallNavbar } from "./components/SmallNavbar";
 
 export const DoctorDetailsPage = () => {
@@ -131,7 +131,8 @@ export const DoctorDetailsPage = () => {
           </section>
         </div>
       )}
-      <SmallNavbar />
+      <SmallNavbar
+      arrayNavigation={doctorDetailsNavigation}/>
       
      
         <Outlet />

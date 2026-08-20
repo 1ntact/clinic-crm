@@ -1,11 +1,22 @@
-import { doctorDetailsNavigation } from "@/features/doctors/model/doctorDetailsNavigation";
+
 import { NavLink } from "react-router-dom";
 
-export const SmallNavbar = () => {
+ type Navigation={
+    label: string;
+   path: string;
+   
+}
+type Props = {
+  arrayNavigation: Navigation[]
+  
+ 
+  }
+
+export const SmallNavbar:React.FC<Props> = ({arrayNavigation}) => {
   return (
-    <div className="mb-[24px] border-b border-gray-200">
+    <div className="mb-[16px] border-b border-gray-200">
       <div className="flex h-7 items-start gap-4">
-        {doctorDetailsNavigation.map((item) => (
+        {arrayNavigation.map((item) => (
           <NavLink
             key={item.label}
             to={item.path}
@@ -20,13 +31,14 @@ export const SmallNavbar = () => {
           >
             {({ isActive }) => (
               <>
-                {item.label}
+                {`${item.label} `}
 
                 {isActive && (
                   <span className="absolute bottom-[-1px] left-0 h-[2px] w-full bg-blue-600" />
                 )}
               </>
             )}
+            
           </NavLink>
         ))}
       </div>

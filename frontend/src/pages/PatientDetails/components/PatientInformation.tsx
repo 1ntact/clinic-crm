@@ -1,5 +1,7 @@
-
-
+import { detailsPatientCardStatistics } from "@/features/statistics/model/detailsPatientCardStatistics";
+import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
+import { useAppSelector } from "@/app/store/hook";
+import dayjs from "dayjs";
 
 const InfoItem = ({
   label,
@@ -15,42 +17,12 @@ const InfoItem = ({
 );
 
 export const PatientInformation = () => {
-  return (
-    <div className="w-full bg-[#f5f6f8] p-4 text-slate-900">
-      {/* Tabs */}
-      <div className="border-b border-slate-200">
-        <div className="flex items-center gap-5">
-          <button
-            type="button"
-            className="border-b-2 border-blue-600 px-0 pb-3 text-[13px] font-medium text-blue-600"
-          >
-            Patient information
-          </button>
-
-          <button
-            type="button"
-            className="flex items-center gap-2 pb-3 text-[13px] text-slate-400"
-          >
-            Appointment history
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] text-blue-400">
-              5
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className="flex items-center gap-2 pb-3 text-[13px] text-slate-400"
-          >
-            Medical records
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] text-blue-400">
-              24
-            </span>
-          </button>
-        </div>
-      </div>
-
+  
+  const cards = useAppSelector(state => state.statistic.statistics.patientDetailsCard)
+  const selectedPatient = useAppSelector(state=>state.patient.selectedPatient)
+  return (<>
       {/* Medical alerts */}
-      <section className="mt-4 rounded-lg border border-slate-200 bg-white px-5 py-4">
+      <section className="mb-[8px] rounded-lg border border-slate-200 bg-white px-5 py-4">
         <h2 className="text-[13px] font-semibold uppercase text-slate-500">
           Medical alerts & conditions
         </h2>
@@ -78,28 +50,48 @@ export const PatientInformation = () => {
             Add allergy
           </button>
         </div>
-      </section>
+    </section>
+    <section>
+        <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[8px]">
+          {detailsPatientCardStatistics.map((card) => {
+  const data =
+    card.key === "balance"
+      ? undefined
+      : cards?.[card.key];
 
-     
-
-      {/* Information */}
-      <div className="mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.2fr]">
+  return (
+    <CardStatistics
+      prefix={card.prefix} 
+      key={card.key}
+      title={card.title}
+      icon={card.icon}
+      iconClass={card.iconClass}
+      value={data?.total ?? card.value}
+      change={data?.change ?? card.change}
+    />
+  );
+})}
+          </div>
+    </section>
+    {/* Information */}
+      <div className=" grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.2fr]">
         {/* Personal info */}
-        <section className="rounded-lg border border-slate-200 bg-white px-5 py-4">
-          <h2 className="text-[13px] font-semibold uppercase text-slate-500">
+        <section className=" rounded-lg border border-slate-200 bg-white px-5 py-4">
+          <h2 className="mb-[24px] text-[13px] font-semibold uppercase text-slate-500">
             Personal info
           </h2>
 
-          <div className="mt-6 grid grid-cols-2 gap-x-8 gap-y-7">
-            <InfoItem label="Gender" value="Female" />
-            <InfoItem label="Mobile number" value="+380935671250" />
+         {selectedPatient && <div className=" grid grid-cols-2 gap-x-8 gap-y-7">
+           
+       <InfoItem label="Gender" value={selectedPatient?.gender} />
+            <InfoItem label="Mobile number" value={selectedPatient?.phoneNumber} />
 
-            <InfoItem label="City" value="London" />
+            <InfoItem label="City" value={selectedPatient?.address} />
             <InfoItem label="Address" value="St. Saint Street" />
 
-            <InfoItem label="Birth date" value="24 March, 1995" />
+            <InfoItem label="Birth date" value={dayjs(selectedPatient.dateOfBirth).format("D MMMM YYYY")} />
             <InfoItem label="Member status" value="Active" />
-          </div>
+          </div>}
         </section>
 
         {/* Administrative info */}
@@ -129,6 +121,5 @@ export const PatientInformation = () => {
           </div>
         </section>
       </div>
-    </div>
-  );
-};
+  </>)
+}

@@ -24,6 +24,8 @@ import { patientManagementThunk } from "@/features/statistics/thunk/patientManag
 import { patientManagmentCard } from "@/features/statistics/model/patientManagmentCardStatistics";
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
+import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
+import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
@@ -82,6 +84,7 @@ dayjs.extend(utc);
           </div>
            
     </div>
+   
     <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
        {cards &&
               patientManagmentCard.map((card) => (
