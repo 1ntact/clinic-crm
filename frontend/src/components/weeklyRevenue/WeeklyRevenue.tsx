@@ -4,6 +4,7 @@ import { useState } from "react";
 type HoveredBar = {
   day: string;
   type: "actual" | "expected";
+  clasName?:'border-[#1D4ED8]'
 };
 
 type Props = {
@@ -58,7 +59,7 @@ const yAxis = Array.from(
           <div className="absolute left-0 top-0 flex h-[208px] flex-col justify-between text-[12px] text-gray-500">
       {yAxis.map((item) => (
   <span key={item}>
-    ${item >= 1000 ? `${item / 1000}K` : item}
+    ${item >= 1000 ?  `${Math.round(item / 1000)}K` : item}
   </span>
 ))}
            
@@ -89,7 +90,7 @@ const yAxis = Array.from(
               >
                 {/* Peak day */}
 
-                {item.isPeakDay && (
+                {item.isPeakDay && item.actual>0 && (
                   <div
                     className=" absolute left-6 -translate-x-1/2 z-20" 
                     style={{
@@ -107,7 +108,7 @@ const yAxis = Array.from(
                 {/* EXPECTED BAR */}
 
                 <div
-                  className="relative w-[22px]"
+                  className="relative w-[22px]  rounded-t-md  hover:border-[2px] border-amber-400  "
                   style={{
                     height: `${(item.expected / maxValue) * 98}%`,
                   }}
@@ -126,7 +127,7 @@ const yAxis = Array.from(
                   {hoveredBar?.day === item.day &&
                     hoveredBar.type === "expected" && (
                      <div className="absolute bottom-[calc(100%-10px)] left-[14px] z-50">
-        <div className="relative w-[207px] h-[64px] rounded-[8px] border border-blue-500 bg-white px-[14px] p-[8px] shadow-sm">
+        <div className="relative w-[207px] h-[64px] rounded-[8px] border border-amber-400 bg-white px-[14px] p-[8px] shadow-sm">
           <div className="flex items-center gap-[6px] text-[12px] font-medium text-blue-500">
             <span className="text-[16px] leading-none">
                +
@@ -150,7 +151,7 @@ const yAxis = Array.from(
                 {/* ACTUAL BAR */}
 
                 <div
-                  className={`relative w-[22px] rounded-t-md ${
+                  className={`relative w-[22px] rounded-t-md hover:border-[2px] border-[#1D4ED8] ${
                     item.day === currentDay
                       ? "bg-sky-500"
                       : "bg-sky-200"
@@ -177,7 +178,7 @@ const yAxis = Array.from(
               ↑
             </span>
 
-            <span>Actual of  this day</span>
+           {item.isPeakDay?<span>Pick day this week</span>:( <span>Actual of this day</span>)}
           </div>
 
           <div className="mt-[4px] text-[14px] font-semibold text-gray-900">
@@ -193,7 +194,8 @@ const yAxis = Array.from(
 </div>
                   {/* Day */}
 
-                  <span className="absolute -bottom-8 text-[12px] text-gray-500">
+                <span className={`absolute -bottom-8 rounded-[8px] px-[6px] py-[3px] text-[12px] 
+                    ${item.day === currentDay?' text-[#030712] bg-[#DCFCE7]': 'text-gray-500'}`}>
                     {item.day}
                   </span>
                 </div>

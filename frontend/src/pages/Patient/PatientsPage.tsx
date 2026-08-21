@@ -24,8 +24,7 @@ import { patientManagementThunk } from "@/features/statistics/thunk/patientManag
 import { patientManagmentCard } from "@/features/statistics/model/patientManagmentCardStatistics";
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
-import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
-import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
+
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
@@ -94,7 +93,7 @@ dayjs.extend(utc);
                   icon={card.icon}
                   iconClass={card.iconClass}
                   value={cards[card.key].total}
-                  change={cards[card.key].change}
+                  change={card.change !== null ? Number(card.change) : null}
                 />
               ))} 
     </div>

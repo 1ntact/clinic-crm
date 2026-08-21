@@ -9,7 +9,7 @@ import type { Doctor } from "@/types/doctor"
 import { useEffect } from "react"
 import { placeholderTimes } from "./playsholderTime"
 import type { AvailableTimeSlot } from "@/features/appointments/model/avalibleTimeSlots"
-import { resetQuery } from "@/features/doctors/doctorsSlice"
+
 
 
 type Props = {

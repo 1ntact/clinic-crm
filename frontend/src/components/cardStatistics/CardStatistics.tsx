@@ -2,7 +2,7 @@ type CardStatisticsProps = {
   value: number | string;
   title: string;
   icon: React.ElementType;
-  change: number | string | null;
+  change: number |  null;
   iconClass: string;
   prefix?: string;
 };
@@ -35,12 +35,12 @@ export const CardStatistics: React.FC<CardStatisticsProps> = ({
         </div>
       </div>
 
-     {  change !== 0 && change !== null ? (<p className={`mt-3 text-[11px] font-medium ${change<0? "text-red-600":"text-green-700"}`}>
+     {  change  ? (<p className={`mt-3 text-[11px] font-medium ${change<0? "text-red-600":"text-green-700"}`}>
         {change > 0 ? '↗ +' : '↓'}
        { `${change}% vs last week`}
-      </p>):(<p className={`mt-3 text-[11px] font-medium ${change<0? "text-red-600":"text-green-700"}`}>
+      </p>):(<p className='mt-3 text-[11px] font-medium text-green-700'>
         
-       { `first week of works`}
+       { `on this week`}
       </p>)}
     </div>
   );
