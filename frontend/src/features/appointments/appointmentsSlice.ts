@@ -118,6 +118,9 @@ const appointmentsSlice = createSlice({
     resetQuery(state) {
       state.calendar.query = initialState.calendar.query;
     },
+    resetCalendarQuery(state) {
+      state.calendar = initialState.calendar
+    },
     setSelectedAppointment(state, action) {
       state.selectedAppointment = action.payload;
     },
@@ -208,6 +211,7 @@ const appointmentsSlice = createSlice({
 export const {
   setAppointmentsQuery,
   resetAppointmentsQuery,
+  resetCalendarQuery,
   setTime,
   setQuery,
   resetQuery,
@@ -216,5 +220,6 @@ export const {
   setDate,
   setDoctor,
   setTreatment,
+
 } = appointmentsSlice.actions;
 export default appointmentsSlice.reducer;

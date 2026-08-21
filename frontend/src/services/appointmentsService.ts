@@ -62,6 +62,9 @@ getAppointments: async (query: AppointmentsQuery) => {
   if (query.dateTo) {
     params.date_to = query.dateTo;
   }
+   if (query.appointmentDate) {
+    params.appointment_date = query.appointmentDate;
+  }
 
   if (query.appointmentStatus) {
     params.appointment_status = query.appointmentStatus;

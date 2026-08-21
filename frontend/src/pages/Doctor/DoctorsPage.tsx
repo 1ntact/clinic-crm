@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { ButtonPage } from "@/components/button/ButtonsPage";
+import { EmptyState } from "@/components/emptyState/EmptyState";
 import { Filter } from "@/components/filter/Filter";
 import { Loader } from "@/components/loader/Loader";
 import { PageTitle } from "@/components/pageTitle/PageTitle";
@@ -11,7 +12,7 @@ import { Td } from "@/components/table/Td";
 import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
-import { setQuery } from "@/features/doctors/doctorsSlice";
+import { resetQuery, setQuery } from "@/features/doctors/doctorsSlice";
 import { employmentTypes } from "@/features/doctors/model/employmentTypes";
 
 import { specializations } from "@/features/doctors/model/specialties";
@@ -29,6 +30,12 @@ export const DoctorsPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  useEffect(() => {
+  return () => {
+    dispatch(resetQuery());
+  };
+}, [dispatch]);
+  
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -127,7 +134,7 @@ export const DoctorsPage = () => {
               <tr className="h-[40px] bg-[#F3F4F6]">
                 <Th>ID</Th>
                 <Th>DOCTOR/CONTACT</Th>
-                <Th>WORKLOAD</Th>
+                <Th>EMAIL</Th>
                 <Th>SPECIALITY</Th>
                 <Th>SCHEDULE</Th>
                 <Th>TYPE</Th>
@@ -167,9 +174,7 @@ export const DoctorsPage = () => {
               
             </Table>
              {doctors.length === 0 && (
-                <p className="p-3 text-center text-gray-500">
-                  Nothing found
-                </p>
+                <EmptyState description=" No doctors match your current filters. Try adjusting or clearing them."/>
             )}
              
           </div>

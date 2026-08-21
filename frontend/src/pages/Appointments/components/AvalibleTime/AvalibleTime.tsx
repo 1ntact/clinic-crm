@@ -11,6 +11,7 @@ import { placeholderTimes } from "./playsholderTime"
 import type { AvailableTimeSlot } from "@/features/appointments/model/avalibleTimeSlots"
 
 
+
 type Props = {
   selectedDate: string | null;
   loading: boolean;
@@ -31,6 +32,7 @@ export const AvalibleTime:React.FC<Props> = ({
   selectedDoctorId,
   doctors,bookedCount,availableCount }) => {
   const dispatch = useAppDispatch()
+ 
 useEffect(() => {
   if (!selectedSpecialization) return;
   dispatch(

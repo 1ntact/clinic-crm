@@ -16,17 +16,20 @@ import { Filter } from "@/components/filter/Filter";
 import { setQuery } from "@/features/patients/patientsSlice";
 import { specializations } from "@/features/doctors/model/specialties";
 import { employmentTypes } from "@/features/doctors/model/employmentTypes";
-
 import { Pagination } from "@/components/pagination/Pagination";
-import { getStatisticPatient } from "@/features/patients/thunk/getStatisticPatient";
-
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { patientManagementThunk } from "@/features/statistics/thunk/patientManagementThunk";
+import { patientManagmentCard } from "@/features/statistics/model/patientManagmentCardStatistics";
+import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
+import { EmptyState } from "@/components/emptyState/EmptyState";
+
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
-  const { loading , patients,query, total} = useAppSelector(state => state.patient)
+  const { loading, patients, query, total } = useAppSelector(state => state.patient)
+  const cards = useAppSelector(state=>state.statistic.statistics.patientsManagmentCard)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
     const handleAside = () =>
@@ -37,7 +40,7 @@ export const PatientsPage = () => {
       try {
         
         await dispatch(getAllPatientThunk(query)).unwrap()
-        await dispatch(getStatisticPatient()).unwrap()
+        await dispatch(patientManagementThunk()).unwrap()
       } 
       catch (e) {
         console.log(e)
@@ -80,16 +83,24 @@ dayjs.extend(utc);
           </div>
            
     </div>
-    <div className="mb-[25px]">
-      {/* {statistic &&
-        <PatientStatisticCard
-          statistic={statistic}
-        />} */}
+   
+    <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
+       {cards &&
+              patientManagmentCard.map((card) => (
+                <CardStatistics         
+                  key={card.key}
+                  title={card.title}
+                  icon={card.icon}
+                  iconClass={card.iconClass}
+                  value={cards[card.key].total}
+                  change={card.change !== null ? Number(card.change) : null}
+                />
+              ))} 
     </div>
     
      <div className="flex  justify-between">
             <Filter
-        className="mb-[24px]"
+        className="mb-[16px]"
         search={query.search}
        
         
@@ -176,9 +187,7 @@ dayjs.extend(utc);
                 
               </Table>
                {patients.length === 0 && (
-                  <p className="p-3 text-center text-gray-500">
-                    Nothing found
-                  </p>
+                  <EmptyState description=" No patients match your current filters. Try adjusting or clearing them."/>
                 )}
         </div>
         
