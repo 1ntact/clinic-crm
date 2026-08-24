@@ -1,9 +1,12 @@
 
+
+import { useAppSelector } from "@/app/store/hook";
 import { NavLink } from "react-router-dom";
 
  type Navigation={
     label: string;
    path: string;
+   showCount?: boolean;
    
 }
 type Props = {
@@ -12,7 +15,10 @@ type Props = {
  
   }
 
-export const SmallNavbar:React.FC<Props> = ({arrayNavigation}) => {
+export const SmallNavbar: React.FC<Props> = ({ arrayNavigation }) => {
+  const { selectedPatient } = useAppSelector(state => state.patient)
+  
+  console.log('rrrrrrrrrrrrrrrrrrr',selectedPatient)
   return (
     <div className="mb-[16px] border-b border-gray-200">
       <div className="flex h-7 items-start gap-4">
@@ -31,7 +37,8 @@ export const SmallNavbar:React.FC<Props> = ({arrayNavigation}) => {
           >
             {({ isActive }) => (
               <>
-                {`${item.label} `}
+                {`${item.label}  `}
+  
 
                 {isActive && (
                   <span className="absolute bottom-[-1px] left-0 h-[2px] w-full bg-blue-600" />

@@ -44,11 +44,10 @@ export const PatientHistory = () => {
                             <Th>ID</Th>
                             <Th>DOCTOR/CONTACT</Th>
                             <Th>DATE</Th>
-
                             <Th>TREATMENT</Th>
                             <Th>FEE</Th>
-                            
-        <Th>STATUS</Th>
+                             <Th>STATUS</Th>
+                             
         
                           </tr>
                         </thead>
@@ -63,8 +62,8 @@ export const PatientHistory = () => {
         
                               <Td>
                                 <UserContacts
-                                  avatar={"patient.jpg"}
-                                  firstName={appointment.doctorFirstName}
+                                  avatar={"doctor.jpg"}
+                                  firstName={`Dr.${appointment.doctorFirstName}`}
                                   lastName={appointment.doctorLastName}
                                   phone={`${appointment.patientPhoneNumber}`}
                                 />
@@ -76,7 +75,7 @@ export const PatientHistory = () => {
                                             {dayjs(appointment.dateTime).format("YYYY-MM-DD")}
                                          </div>
                                           <div>
-                                           {dayjs.utc(appointment.dateTime).format("HH:mm")}
+                                           {dayjs(appointment.dateTime).format("HH:mm")}
                                           </div>
                                        </>
                                       }</Td>
@@ -93,7 +92,7 @@ export const PatientHistory = () => {
                               <Td>{statusOptions.map((status) =>
               
                                 status.value === appointment.status && (
-                                  <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                                  <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] text-[#1F2937] bg-[#E5E7EB]`}>{status.label}</span>
                                 ))}
                                 </Td>
                             
@@ -104,10 +103,7 @@ export const PatientHistory = () => {
                       {patientAppointments.length === 0 && (
                        <EmptyState description=" No Visits match your current filters. Try adjusting or clearing them."/>
     )}
-     
-  </div>
-       )}
-     <Pagination
+       <Pagination
                   page={appointmentsQuery.page}
                   pageSize={appointmentsQuery.pageSize}
                   total={total}
@@ -118,5 +114,8 @@ export const PatientHistory = () => {
                       }),
                     )
                   }
-                /></>)
+                />
+  </div>
+       )}
+   </>)
 }

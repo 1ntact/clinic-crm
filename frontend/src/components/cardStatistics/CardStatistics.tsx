@@ -1,8 +1,8 @@
 type CardStatisticsProps = {
-  value: number | string;
+  value: number ;
   title: string;
   icon: React.ElementType;
-  change: number |  null;
+  change: number | null;
   iconClass: string;
   prefix?: string;
 };
