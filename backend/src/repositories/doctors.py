@@ -1,8 +1,20 @@
+from datetime import datetime, time,  timezone
+from zoneinfo import ZoneInfo
 from sqlalchemy import Select, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+
 from database import DoctorEmploymentTypeEnum, DoctorModel, UserModel
+from database.models.appointments import (
+    AppointmentModel,
+    AppointmentStatusEnum,
+)
+
+
+CLINIC_TIMEZONE = ZoneInfo("Europe/Kyiv")
+WORKDAY_START = time(hour=8, minute=0)
+WORKDAY_END = time(hour=18, minute=0)
 
 
 class DoctorRepository:
@@ -34,6 +46,49 @@ class DoctorRepository:
         result = await self.session.scalars(statement)
 
         return list(result.all())
+
+    async def get_daily_appointments_count(
+            self,
+            doctor_id: int,
+    ) -> int:
+        now_local = datetime.now(
+            CLINIC_TIMEZONE,
+        )
+
+        local_day_start = datetime.combine(
+            now_local.date(),
+            WORKDAY_START,
+            tzinfo=CLINIC_TIMEZONE,
+        )
+
+        local_day_end = datetime.combine(
+            now_local.date(),
+            WORKDAY_END,
+            tzinfo=CLINIC_TIMEZONE,
+        )
+
+        day_start_utc = local_day_start.astimezone(
+            timezone.utc,
+        )
+
+        day_end_utc = local_day_end.astimezone(
+            timezone.utc,
+        )
+
+        statement = select(
+            func.count(AppointmentModel.id)
+        ).where(
+            AppointmentModel.doctor_id == doctor_id,
+            AppointmentModel.date_time >= day_start_utc,
+            AppointmentModel.date_time < day_end_utc,
+            AppointmentModel.status != AppointmentStatusEnum.CANCELLED,
+        )
+
+        result = await self.session.scalar(
+            statement,
+        )
+
+        return int(result or 0)
 
     def add(self, doctor: DoctorModel) -> None:
         self.session.add(doctor)
