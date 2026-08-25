@@ -13,9 +13,13 @@ type Props = {
   value?: string | number | null;
   placeholder?: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
+  error?: boolean;
 };
 
 export const BaseSelect = ({
+  error,
+  disabled,
   name,
   classNames,
   label,
@@ -81,7 +85,11 @@ export const BaseSelect = ({
         <button
           id={name}
           type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
+          disabled={disabled}
+          onClick={() => {
+            if (disabled) return;
+            setIsOpen((prev) => !prev)
+          }}
           className={`
             flex
             w-full
@@ -98,14 +106,23 @@ export const BaseSelect = ({
             outline-none
             transition-all
             duration-150
-            cursor-pointer
+            
 
             ${
-              isOpen
-                ? "border-[#2563EB] ring-2 ring-[#2563EB]"
-                : "border-[#E5E7EB]"
-            }
-          `}
+      disabled
+        ? "cursor-not-allowed border-[#E5E7EB] bg-[#F3F4F6] text-[#9CA3AF]"
+        : isOpen
+          ? "cursor-pointer border-[#2563EB] ring-2 ring-[#2563EB]"
+          : "cursor-pointer border-[#E5E7EB] bg-white"
+    }
+     ${
+    error
+      ? "border-red-500"
+      : isOpen
+        ? "border-[#2563EB] ring-2 ring-[#2563EB]"
+        : "border-[#E5E7EB]"
+  }
+  `}
         >
           <span
             className={

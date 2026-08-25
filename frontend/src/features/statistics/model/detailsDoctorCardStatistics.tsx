@@ -13,16 +13,15 @@ type Card = {
   title: string;
   icon: React.ElementType;
   iconClass: string;
-  value: number;
-  change: number;
+  
    prefix?:string,
 };
 
 export const detailsDoctorCardStatistics: Card[] = [
     {key: 'patients',
       title: "PATIENTS",
-      value: 0,
-    change: 0,
+     
+    
      
   
       icon:PiUsersThin,
@@ -30,24 +29,21 @@ export const detailsDoctorCardStatistics: Card[] = [
     },
     { key: 'completedVisits',
       title: "COMPLETED VISITS",
-      value: 200,
-      change: 5,
+     
     prefix:'+$',
       icon: PiCheckCircleLight,
       iconClass: "bg-green-100 text-green-600",
     },
     {key: 'cancelledVisits',
       title: "CANCELLED VISITS",
-      value: 0,
-      change: 0,
+      
      
       icon: PiUserMinusLight,
       iconClass: "bg-orange-100 text-orange-600",
     },
     {key: 'noShowVisits',
       title: "NO-SHOW",
-      value: 0,
-      change:0,
+     
       
     
       icon: PiCalendarMinusLight,

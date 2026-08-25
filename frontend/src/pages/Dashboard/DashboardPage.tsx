@@ -22,6 +22,8 @@ import utc from "dayjs/plugin/utc";
 import { statusOptions } from "@/features/appointments/model/statusAppointments";
 import { useNavigate } from "react-router-dom";
 import { getAccess } from "@/premissoons/getAccessPremissions";
+import { EmptyState } from "@/components/emptyState/EmptyState";
+
 
 export const DashboardPage = () => {
   const userData = useAppSelector((state) => state.auth.user);
@@ -214,7 +216,7 @@ export const DashboardPage = () => {
           </tbody>
         </Table>
         {appointmentsToday.length === 0 && (
-          <p className="p-3 text-center text-gray-500">Nothing found</p>
+        <EmptyState description="No appointments for today."/>
         )}
       </div>
     </>

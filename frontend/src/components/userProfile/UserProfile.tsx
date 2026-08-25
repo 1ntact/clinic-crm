@@ -1,4 +1,5 @@
-import { calculateWorkload } from "@/shared/functions/workloadFunction";
+
+import { capitalizeFirstLetter } from "@/shared/functions/capitalizwFirstLetter";
 import type { Doctor } from "@/types/doctor";
 import type { Patient } from "@/types/patient";
 import { PiPhoneCallThin, PiEnvelopeSimpleLight } from "react-icons/pi";
@@ -18,12 +19,12 @@ type Props =
       selectedUser: Patient;
     });
 
-export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type , patients}) => {
+export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
   const userYear = (date: string) => {
     return new Date().getFullYear() - new Date(date).getFullYear();
   };
  
-    const workload = calculateWorkload(patients);
+  
     
   return (
     <>
@@ -40,8 +41,8 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type , patie
               {selectedUser.firstName} {selectedUser.lastName}
             </h1>
 
-            <span className="rounded-md bg-teal-100 px-3 py-1 text-sm font-medium text-teal-700">
-              {type === "patient" ? "active" : selectedUser.employmentType}
+            <span className="rounded-md bg-teal-100 px-[7px] py-[4px] text-[12px] font-medium text-teal-700">
+              {type === "patient" ? "active" :capitalizeFirstLetter( selectedUser.employmentType)}
             </span>
           </div>
 
@@ -78,22 +79,30 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type , patie
       </div>
 
       {type === "doctor" && (
-        <div className=" w-[320px] ml-auto">
+        <div className="w-[320px] pl-[16px] ml-auto border-l border-[#E5E7EB]">
           <div className="mb-2 flex justify-between text-sm">
-            <span className="font-medium">Workload</span>
-            <span>{workload}%</span>
+            <span className="font-medium text-[#9CA3AF]">WORKLOAD</span>
+            
           </div>
+    <div className="flex items-center gap-3">
+  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+    <div
+      className={`h-full rounded-full ${
+        selectedUser.workload < 65
+          ? "bg-[#FB923C]"
+          : selectedUser.workload < 85
+            ? "bg-[#22C55E]"
+            : "bg-[#EF4444]"
+      }`}
+      style={{ width: `${selectedUser.workload}%` }}
+    />
+  </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-            <div className={`h-full w-[80%] rounded-full ${
-  workload < 65
-    ? "bg-[#FB923C]"
-    : workload < 85
-      ? "bg-[#22C55E]"
-      : "bg-[#EF4444]"
-}`}
-            style={{width:workload}}/>
-          </div>
+  <div className="w-10 text-[#9CA3AF] text-right">
+    {selectedUser.workload}%
+  </div>
+</div>
+       
         </div>
       )}
     </>

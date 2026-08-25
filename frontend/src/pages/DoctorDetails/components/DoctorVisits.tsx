@@ -149,9 +149,7 @@ export const DoctorVisits = () => {
                       {doctorAppointments.length === 0 && (
                        <EmptyState description=" No Visits match your current filters. Try adjusting or clearing them."/>
     )}
-     
-  </div>
-     <Pagination
+       <Pagination
                   page={appointmentsQuery.page}
                   pageSize={appointmentsQuery.pageSize}
                   total={total}
@@ -163,5 +161,7 @@ export const DoctorVisits = () => {
                     )
                   }
                 />
+  </div>
+   
   </>)
 }

@@ -24,7 +24,6 @@ export const PatientDetailsPage = () => {
   const [modal, setOpenModal] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
-
   const { patientId } = useParams();
   const navigate = useNavigate();
 

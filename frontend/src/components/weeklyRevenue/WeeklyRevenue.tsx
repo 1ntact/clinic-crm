@@ -57,8 +57,8 @@ const yAxis = Array.from(
           {/* Y axis */}
 
           <div className="absolute left-0 top-0 flex h-[208px] flex-col justify-between text-[12px] text-gray-500">
-      {yAxis.map((item) => (
-  <span key={item}>
+      {yAxis.map((item,index) => (
+  <span key={`${item}-${index}`}>
     ${item >= 1000 ?  `${Math.round(item / 1000)}K` : item}
   </span>
 ))}
@@ -94,10 +94,10 @@ const yAxis = Array.from(
                   <div
                     className=" absolute left-6 -translate-x-1/2 z-20" 
                     style={{
-                      bottom: `${(item.actual / maxValue) * 103}%`,
+                      bottom: `${(item.actual / maxValue) * 101}%`,
                     }}
                   >
-                    <div className="  relative p-[8px] whitespace-nowrap rounded-lg bg-blue-600  text-[12px] font-medium text-white">
+                    <div className="  relative p-[3px] whitespace-nowrap rounded-lg bg-blue-600  text-[12px] font-medium text-white">
                       ↑ Peak day
 
                       <span className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 border-x-[6px] border-t-[6px] border-x-transparent border-t-blue-600" />

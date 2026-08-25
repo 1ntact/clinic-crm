@@ -28,8 +28,8 @@ export type AppointmentOutcomesData = {
     cancelled: number;
 }
 type StatisticCard = {
-  total: number | string ;
-  change: number | string;
+  total: number  ;
+  change: number ;
 };
 
 

@@ -25,6 +25,8 @@ import { patientManagmentCard } from "@/features/statistics/model/patientManagme
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
 import { getAccess } from "@/premissoons/getAccessPremissions";
+import { statusOptions } from "@/features/appointments/model/statusAppointments";
+
 
 
 export const PatientsPage = () => {
@@ -32,6 +34,7 @@ export const PatientsPage = () => {
   const user = useAppSelector(state => state.auth.user)
   const access = getAccess(user);
   const { loading, patients, query, total } = useAppSelector(state => state.patient)
+  console.log("pacientotat", patients)
   const cards = useAppSelector(state=>state.statistic.statistics.patientsManagmentCard)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
@@ -143,7 +146,8 @@ dayjs.extend(utc);
                   <Th>LAST VISIT</Th>
                   <Th>TYPE OF TREATMENT</Th>
                   <Th>TOTAL VISITS</Th>
-                <Th>STATUS</Th>
+                  <Th>STATUS</Th>
+                 
                 
                 </tr>
               </thead>
@@ -172,17 +176,24 @@ dayjs.extend(utc);
                                                 <div>
                                                   {dayjs(patient.lastVisitDate).format("YYYY-MM-DD")}
                                                 </div>
-                                                <div>
+                                                <div className="font-medium text-[#1F2937]">
                                                   {dayjs.utc(patient.lastVisitDate).format("HH:mm")}
                                                 </div>
                                               </>
                                             }</Td>
   
-                    <Td>{patient.gender}</Td>
+                    <Td>{patient.treatment}</Td>
   
-                    <Td>{"09:00-18:00"}</Td>
+                    <Td className="font-medium text-[#1F2937]">{`${patient.totalVisits} visits`}</Td>
   
-                    <Td>{patient.address}</Td>
+          
+                     <Td>{statusOptions.map((status) =>
+                          
+                                            status.value ===patient.status && (
+                                              <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                                            ))}
+                    </Td>
+                    
                   </tr>
                 ))}
                
@@ -191,11 +202,8 @@ dayjs.extend(utc);
               </Table>
                {patients.length === 0 && (
                   <EmptyState description=" No patients match your current filters. Try adjusting or clearing them."/>
-                )}
-        </div>
-        
-    )}
-   <Pagination
+          )}
+           <Pagination
           page={query.page ?? 1}
           pageSize={query.pageSize ?? 5}
           total={total}
@@ -206,5 +214,9 @@ dayjs.extend(utc);
               }),
             )
           }
-        /></>
+        />
+        </div>
+        
+    )}
+  </>
 };
