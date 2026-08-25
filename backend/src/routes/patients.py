@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date
 
 from database.session_postgresql import get_postgresql_db
 from exceptions import DatabaseWriteError
 from schemas.patients import (
     PaginatedPatientResponse,
+    PatientCardStatisticsResponse,
     PatientCreate,
     PatientResponse,
     PatientStatisticsResponse,
@@ -53,6 +55,10 @@ async def get_patients(
     current_user: DoctorAdminOrSuperAdminDep,
     category: str = Query("all"),
     search: str | None = Query(None),
+    doctor_id: int | None = Query(None, ge=1),
+    visit_date: date | None = Query(None),
+    sort_by: str = Query("last_name"),
+    sort_order: str = Query("asc"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_postgresql_db),
@@ -62,10 +68,13 @@ async def get_patients(
     return await service.get_all(
         category=category,
         search=search,
+        doctor_id=doctor_id,
+        visit_date=visit_date,
+        sort_by=sort_by,
+        sort_order=sort_order,
         page=page,
         page_size=page_size,
     )
-
 
 @router.get(
     "/statistics",
@@ -78,6 +87,29 @@ async def get_patient_statistics(
     service = PatientService(db)
 
     return await service.get_statistics()
+
+
+@router.get(
+    "/{patient_id}/statistics",
+    response_model=PatientCardStatisticsResponse,
+)
+async def get_patient_card_statistics(
+    patient_id: int,
+    current_user: DoctorAdminOrSuperAdminDep,
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> PatientCardStatisticsResponse:
+    service = PatientService(db)
+
+    try:
+        return await service.get_patient_card_statistics(
+            patient_id=patient_id,
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
 
 
 @router.get(

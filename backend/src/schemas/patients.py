@@ -73,7 +73,11 @@ class PatientListResponse(BaseModel):
     phone_number: str | None = None
     date_of_birth: date | None = None
     source: PatientSourceEnum = PatientSourceEnum.UNKNOWN
+
     last_visit_date: datetime | None = None
+    treatment: str | None = None
+    total_visits: int = 0
+    status: str | None = None
 
 
 class PaginatedPatientResponse(BaseModel):
@@ -89,3 +93,18 @@ class PatientStatisticsResponse(BaseModel):
     new_patients: int
     patients_today: int
     inactive_patients: int
+
+class PatientCardStatisticsResponse(BaseModel):
+    completed_visits: int
+    next_appointment: datetime | None = None
+
+    patient_value: float
+    average_visit_value: float | None = None
+
+    no_shows: int
+    no_show_rate: float | None = None
+
+    hygiene_status: str
+    last_hygiene_visit: datetime | None = None
+    months_since_hygiene: int | None = None
+

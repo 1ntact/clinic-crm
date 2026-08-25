@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 type CalendarProps = {
   availableDays: number[];
   bookedDays: number[];
+  selectedDate: string | null;
 };
 
 function createServerDay(
@@ -155,6 +156,7 @@ function CustomCalendarHeader(
 export default function Calendar({
   availableDays,
   bookedDays,
+  selectedDate,
 }: CalendarProps) {
   const dispatch = useAppDispatch();
 
@@ -169,7 +171,13 @@ export default function Calendar({
   );
 
   return (
-    <div className="rounded-2xl border bg-white p-4 shadow-sm">
+   <div
+  className={`rounded-2xl border bg-white p-3 shadow-sm ${
+    selectedDate
+      ? "border-gray-200"
+      : "border-red-500"
+  }`}
+>
       <LocalizationProvider
         dateAdapter={AdapterDayjs}
       >

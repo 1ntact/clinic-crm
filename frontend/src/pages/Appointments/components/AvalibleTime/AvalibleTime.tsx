@@ -9,6 +9,7 @@ import type { Doctor } from "@/types/doctor"
 import { useEffect } from "react"
 import { placeholderTimes } from "./playsholderTime"
 import type { AvailableTimeSlot } from "@/features/appointments/model/avalibleTimeSlots"
+import dayjs from "dayjs"
 
 
 
@@ -41,17 +42,37 @@ useEffect(() => {
     })
   );
 }, [selectedSpecialization, dispatch]);
- 
+  
   return (<>
     
     <div className=" flex flex-col bg-[#FFFFFF] w-full h-[361px] rounded-[8px] px-[24px] py-[16px]">
      
       <div className="mb-[24px]">
         <h1 className="text-[14px] text-[#6B7280]">AVALIBLE TIME SLOTS</h1>
-        {<span className="text-[12px]">
-          <span className="text-[#6B7280]">20 Aug 2026 - </span>
-          <span className="text-[#15803D]">{`${availableCount} available `}</span>
-        <span className="text-[#B91C1C]">{`· ${bookedCount} booked`}</span></span>}
+      {selectedDate ? (
+  <span className="text-[12px]">
+    <span className="text-[#6B7280]">
+      {dayjs(selectedDate).format("D MMMM YYYY")} {" "}
+    </span>
+
+           
+    {selectedDoctorId && (
+      <>
+        <span className="text-[#15803D]">
+          - {availableCount} available{" "}
+        </span>
+
+        <span className="text-[#B91C1C]">
+          · {bookedCount} booked
+        </span>
+      </>
+    )}
+  </span>
+) : (
+  <span className="text-[14px] text-[#B91C1C]">
+    Select a date for the appointment.
+  </span>
+)}
       </div>
       
       
@@ -59,7 +80,8 @@ useEffect(() => {
         <div className="flex h-[36px]">
         <BaseSelect
           name={"specializationSelect"}
-          classNames="mr-[8px] h-[36px] w-[218px]"
+            classNames={`mr-[8px] h-[36px] w-[218px] `}
+             error={!selectedSpecialization && !!selectedDate}
         placeholder={"Select a speciality"}
         value={selectedSpecialization ?? ""}
         options={specializations}
@@ -70,6 +92,8 @@ useEffect(() => {
         }} />
       
           <BaseSelect
+            error={!!selectedSpecialization && !!selectedDate && !selectedDoctorId}
+            disabled={!selectedSpecialization}
             classNames="h-[36px] w-[218px]"
           name={'doctorSelect'}
         placeholder={"Select a doctor"}
