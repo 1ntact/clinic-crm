@@ -21,9 +21,11 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { statusOptions } from "@/features/appointments/model/statusAppointments";
 import { useNavigate } from "react-router-dom";
+import { getAccess } from "@/premissoons/getAccessPremissions";
 
 export const DashboardPage = () => {
   const userData = useAppSelector((state) => state.auth.user);
+   const access = getAccess(userData);
   const cards = useAppSelector((state) => state.statistic.statistics?.cards);
   const revenue = useAppSelector(
     (state) => state.statistic.statistics?.weeklyRevenue,
@@ -71,7 +73,7 @@ export const DashboardPage = () => {
           text={`Hello,${userData?.firstName}!`}
           description={nowTime}
         />
-        <div className="flex  gap-4  ">
+      { access?.canCreateUser && <div className="flex  gap-4  ">
           <ButtonPage
             className={buttonStyles.editButton}
             icon={<BiShield className="mr-[8px]" />}
@@ -85,7 +87,7 @@ export const DashboardPage = () => {
           >
             Invite a member
           </ButtonPage>
-        </div>
+        </div>}
       </div>
       {aside && (
         <AsideMenu
@@ -113,7 +115,7 @@ export const DashboardPage = () => {
         />
       )}
 
-      <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+       <><div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {cards &&
           dashboardCards.map((card) => (
             <CardStatistics
@@ -127,7 +129,8 @@ export const DashboardPage = () => {
             />
           ))}
       </div>
-      <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
+        
+      {access?.canViewStatistics && <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
         {roundedDiagram && (
           <RoundedDiagram info={roundedDiagram} currentMonth={currentMonth} />
         )}
@@ -140,7 +143,7 @@ export const DashboardPage = () => {
             data={revenue.data}
           />
         )}
-      </div>
+      </div>}</>
       <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
         <div className="flex justify-between mb-[16px]">
           <span className="text-[14px] font-medium text-[#374151]">

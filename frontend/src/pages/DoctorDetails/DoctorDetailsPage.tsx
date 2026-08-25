@@ -17,12 +17,14 @@ import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { doctorDetailsStatisticThunk } from "@/features/statistics/thunk/doctorDetailsStatisticsThunk";
 import { doctorDetailsNavigation } from "@/features/doctors/model/doctorDetailsNavigation";
 import { SmallNavbar } from "./components/SmallNavbar";
+import { getAccess } from "@/premissoons/getAccessPremissions";
 
 export const DoctorDetailsPage = () => {
   const dispatch = useAppDispatch();
   const [aside, setOpenAside] = useState(false);
   const [modal, setOpenModal] = useState(false);
-
+  const user = useAppSelector(state => state.auth.user)
+  const access = getAccess(user);
   const { doctorId } = useParams();
   const navigate = useNavigate();
   const { selectedDoctor, loading } = useAppSelector((state) => state.doctor);
@@ -101,7 +103,7 @@ export const DoctorDetailsPage = () => {
               </span>
             </div>
 
-            <div className="w-[250px] flex gap-3">
+          {access?.canCreateDoctor && < div className="w-[250px] flex gap-3">
               <ButtonPage
                 className={buttonStyles.removeButton}
                 icon={<IoTrash className="mr-2 text-[#DC2626]" />}
@@ -117,7 +119,7 @@ export const DoctorDetailsPage = () => {
               >
                 Edit doctor
               </ButtonPage>
-            </div>
+            </div>}
           </section>
 
           <section className="flex items-center justify-between  rounded-[8px] ">

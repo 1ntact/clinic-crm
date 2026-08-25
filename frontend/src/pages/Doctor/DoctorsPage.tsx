@@ -23,12 +23,14 @@ import { BiPlus } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 
 export const DoctorsPage = () => {
-  const [aside, setOpenAside] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [aside, setOpenAside] = useState(false);  
   const { doctors, total, loading, query } = useAppSelector(
     (state) => state.doctor
   );
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  
+
 
   useEffect(() => {
   return () => {

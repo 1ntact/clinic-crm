@@ -24,10 +24,13 @@ import { patientManagementThunk } from "@/features/statistics/thunk/patientManag
 import { patientManagmentCard } from "@/features/statistics/model/patientManagmentCardStatistics";
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
+import { getAccess } from "@/premissoons/getAccessPremissions";
 
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
+  const user = useAppSelector(state => state.auth.user)
+  const access = getAccess(user);
   const { loading, patients, query, total } = useAppSelector(state => state.patient)
   const cards = useAppSelector(state=>state.statistic.statistics.patientsManagmentCard)
   const dispatch = useAppDispatch();
@@ -76,10 +79,10 @@ dayjs.extend(utc);
       
           <div className="flex  gap-4  ">
          
-            <ButtonPage className={buttonStyles.createButton}
+           {access?.canCreatePatient && <ButtonPage className={buttonStyles.createButton}
                onClick={handleAside}
               
-              icon={<BiPlus className="mr-[8px]" />} >Add patients</ButtonPage>
+              icon={<BiPlus className="mr-[8px]" />} >Add patients</ButtonPage>}
           </div>
            
     </div>
