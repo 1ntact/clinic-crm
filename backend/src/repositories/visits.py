@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from database.models.appointments import AppointmentModel
 from database.models.visits import VisitModel
 from schemas.visits import VisitCreate, VisitUpdate
 
@@ -56,6 +57,38 @@ class VisitRepository:
         )
 
         return await self.session.scalar(statement)
+
+    async def get_by_patient_id(
+            self,
+            patient_id: int,
+    ) -> list[dict]:
+        statement = (
+            select(
+                VisitModel.id.label("visit_id"),
+                VisitModel.appointment_id,
+                VisitModel.description,
+                AppointmentModel.doctor_id,
+                AppointmentModel.date_time.label("visit_date"),
+            )
+            .join(
+                AppointmentModel,
+                VisitModel.appointment_id == AppointmentModel.id,
+            )
+            .where(
+                AppointmentModel.patient_id == patient_id,
+                VisitModel.description.is_not(None),
+            )
+            .order_by(
+                AppointmentModel.date_time.desc(),
+            )
+        )
+
+        result = await self.session.execute(statement)
+
+        return [
+            dict(row._mapping)
+            for row in result.all()
+        ]
 
     def update(
         self,

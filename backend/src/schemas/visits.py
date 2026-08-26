@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -72,3 +73,16 @@ class VisitResponse(BaseModel):
 
     additional_treatment_2: str | None = None
     additional_treatment_2_price: Decimal | None = None
+
+
+class PatientClinicalNoteResponse(BaseModel):
+    visit_id: int
+    appointment_id: int
+    description: str
+    doctor_id: int
+    visit_date: datetime
+
+
+class PatientClinicalNotesResponse(BaseModel):
+    patient_id: int
+    clinical_notes: list[PatientClinicalNoteResponse]

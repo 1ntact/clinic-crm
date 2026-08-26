@@ -1,6 +1,7 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import date
 
 from database.session_postgresql import get_postgresql_db
 from exceptions import DatabaseWriteError
@@ -12,9 +13,10 @@ from schemas.patients import (
     PatientStatisticsResponse,
     PatientUpdate,
 )
+from schemas.visits import PatientClinicalNotesResponse
 from security.permissions import DoctorAdminOrSuperAdminDep
 from services.patients import PatientService
-
+from services.visits import VisitService
 
 router = APIRouter()
 
@@ -76,6 +78,7 @@ async def get_patients(
         page_size=page_size,
     )
 
+
 @router.get(
     "/statistics",
     response_model=PatientStatisticsResponse,
@@ -102,6 +105,30 @@ async def get_patient_card_statistics(
 
     try:
         return await service.get_patient_card_statistics(
+            patient_id=patient_id,
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        ) from error
+
+
+@router.get(
+    "/{patient_id}/clinical-notes/",
+    response_model=PatientClinicalNotesResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_patient_clinical_notes(
+    patient_id: int,
+    current_user: DoctorAdminOrSuperAdminDep,
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> PatientClinicalNotesResponse:
+    service = VisitService(db)
+
+    try:
+        return await service.get_clinical_notes_by_patient_id(
             patient_id=patient_id,
         )
 

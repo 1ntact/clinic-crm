@@ -8,7 +8,7 @@ from repositories.appointments import AppointmentRepository
 from repositories.treatments import TreatmentRepository
 from repositories.visits import VisitRepository
 from schemas.visits import VisitCreate, VisitUpdate
-
+from repositories.patients import PatientRepository
 
 class VisitService:
     def __init__(self, session: AsyncSession) -> None:
@@ -16,6 +16,7 @@ class VisitService:
 
         self.visits = VisitRepository(session)
         self.appointments = AppointmentRepository(session)
+        self.patients = PatientRepository(session)
         self.treatments = TreatmentRepository(session)
 
     async def _get_additional_treatment(
@@ -239,6 +240,26 @@ class VisitService:
         return await self._serialize_visit(
             visit,
         )
+
+    async def get_clinical_notes_by_patient_id(
+            self,
+            patient_id: int,
+    ) -> dict[str, Any]:
+        patient = await self.patients.get_by_id(
+            patient_id=patient_id,
+        )
+
+        if patient is None:
+            raise ValueError("Patient not found.")
+
+        clinical_notes = await self.visits.get_by_patient_id(
+            patient_id=patient_id,
+        )
+
+        return {
+            "patient_id": patient_id,
+            "clinical_notes": clinical_notes,
+        }
 
     async def update(
         self,
