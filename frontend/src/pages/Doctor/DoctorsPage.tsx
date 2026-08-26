@@ -6,6 +6,7 @@ import { Filter } from "@/components/filter/Filter";
 import { Loader } from "@/components/loader/Loader";
 import { PageTitle } from "@/components/pageTitle/PageTitle";
 import { Pagination } from "@/components/pagination/Pagination";
+import { Sort } from "@/components/sorter/Sort";
 
 import { Table } from "@/components/table/Table";
 import { Td } from "@/components/table/Td";
@@ -14,6 +15,8 @@ import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
 import { resetQuery, setQuery } from "@/features/doctors/doctorsSlice";
 import { employmentTypes } from "@/features/doctors/model/employmentTypes";
+import { doctorSortButtons } from "@/features/doctors/model/sortDoctorTypes";
+
 
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
@@ -111,7 +114,7 @@ export const DoctorsPage = () => {
             dispatch(setQuery({ employmentType: value, page: 1 }))
           }
         />
-        {/* <Sort
+       <Sort
           userCount = {doctors.length}
           sortBy={query.sortBy}
           sortOrder={query.sortOrder}
@@ -125,7 +128,7 @@ export const DoctorsPage = () => {
               }),
             )
           }
-        /> */}
+        /> 
       </div>
 
       {loading ? (

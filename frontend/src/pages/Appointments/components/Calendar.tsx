@@ -1,49 +1,71 @@
+import { useEffect, useMemo } from "react";
 import dayjs, { type Dayjs } from "dayjs";
+
 import {
   DateCalendar,
+  DatePicker,
   type PickersCalendarHeaderProps,
 } from "@mui/x-date-pickers";
+
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { PickerDay, type PickerDayProps } from "@mui/x-date-pickers/PickerDay";
+
+import {
+  PickerDay,
+  type PickerDayProps,
+} from "@mui/x-date-pickers/PickerDay";
 
 import {
   setDate,
   setQuery,
 } from "@/features/appointments/appointmentsSlice";
-import { useAppDispatch, useAppSelector } from "@/app/store/hook";
+
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "@/app/store/hook";
 
 type CalendarProps = {
   availableDays: number[];
   bookedDays: number[];
   selectedDate: string | null;
+
+  variant?: "calendar" | "picker";
+
+  onDateChange?: (date: string | null) => void;
+  onMonthChange?: (date: Dayjs) => void;
 };
+
+/* =========================================================
+   DAY
+========================================================= */
 
 function createServerDay(
   availableDays: number[],
   bookedDays: number[],
+  backendMonth: number,
+  backendYear: number,
 ) {
   return function ServerDay({
     day,
     sx,
     ...other
   }: PickerDayProps) {
-    const date = day.date();
+    const dayNumber = day.date();
 
-    const isCurrentMonth =
-      day.month() === dayjs().month() &&
-      day.year() === dayjs().year();
+    const isBackendMonth =
+      day.month() + 1 === backendMonth &&
+      day.year() === backendYear;
+
+    const isAvailable =
+      isBackendMonth &&
+      availableDays.includes(dayNumber);
+
+    const isBooked =
+      isBackendMonth &&
+      bookedDays.includes(dayNumber);
 
     const isPast = day.isBefore(dayjs(), "day");
-
-    const available =
-      isCurrentMonth &&
-      !isPast &&
-      availableDays.includes(date);
-
-    const booked =
-      isCurrentMonth &&
-      bookedDays.includes(date);
 
     return (
       <PickerDay
@@ -51,41 +73,58 @@ function createServerDay(
         day={day}
         sx={[
           {
-            borderRadius: 2,
+            borderRadius: "8px",
 
-            ...(available && {
-              bgcolor: "#FFFFFF",
+            /* Available */
+            ...(isAvailable && {
+              backgroundColor: "#FFFFFF",
               color: "#1F2937",
             }),
 
-            ...(booked && {
-              bgcolor: "#FEE2E2",
+            /* Fully booked */
+            ...(isBooked && {
+              backgroundColor: "#FEE2E2",
               color: "#9CA3AF",
             }),
 
+            /* Past */
             ...(isPast && {
-              bgcolor: "#FFFFFF",
+              backgroundColor: "#FFFFFF",
               color: "#9CA3AF",
             }),
 
+            /* Today */
             "&.MuiPickersDay-today": {
               border: "2px solid #2563EB",
               backgroundColor: "#FFFFFF",
               color: "#1F2937",
             },
 
+            /* Selected */
             "&.Mui-selected": {
-              bgcolor: "#1E3A8A !important",
-              color: "#fff",
+              backgroundColor:
+                "#1E3A8A !important",
+              color: "#FFFFFF !important",
+            },
+
+            "&.Mui-selected:hover": {
+              backgroundColor:
+                "#1E3A8A !important",
             },
           },
 
-          ...(Array.isArray(sx) ? sx : [sx]),
+          ...(Array.isArray(sx)
+            ? sx
+            : [sx]),
         ]}
       />
     );
   };
 }
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 function CustomCalendarHeader(
   props: PickersCalendarHeaderProps,
@@ -95,57 +134,38 @@ function CustomCalendarHeader(
     onMonthChange,
   } = props;
 
+  const previousMonth =
+    currentMonth.subtract(1, "month");
+
+  const nextMonth =
+    currentMonth.add(1, "month");
+
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "8px 12px",
-      }}
+      className="flex items-center justify-between px-3 py-2"
     >
       <button
         type="button"
         onClick={() =>
-          onMonthChange(
-            currentMonth.subtract(1, "month"),
-          )
+          onMonthChange(previousMonth)
         }
-        style={{
-          border: "none",
-          background: "transparent",
-          fontSize: "28px",
-          cursor: "pointer",
-          lineHeight: 1,
-        }}
+        className="flex h-8 w-8 items-center justify-center border-none bg-transparent text-[28px] leading-none cursor-pointer"
+        aria-label="Previous month"
       >
         ‹
       </button>
 
-      <div
-        style={{
-          fontSize: "16px",
-          fontWeight: 600,
-          textTransform: "capitalize",
-        }}
-      >
+      <div className="text-[16px] font-semibold capitalize">
         {currentMonth.format("MMMM YYYY")}
       </div>
 
       <button
         type="button"
         onClick={() =>
-          onMonthChange(
-            currentMonth.add(1, "month"),
-          )
+          onMonthChange(nextMonth)
         }
-        style={{
-          border: "none",
-          background: "transparent",
-          fontSize: "28px",
-          cursor: "pointer",
-          lineHeight: 1,
-        }}
+        className="flex h-8 w-8 items-center justify-center border-none bg-transparent text-[28px] leading-none cursor-pointer"
+        aria-label="Next month"
       >
         ›
       </button>
@@ -153,85 +173,269 @@ function CustomCalendarHeader(
   );
 }
 
+/* =========================================================
+   CALENDAR
+========================================================= */
+
 export default function Calendar({
   availableDays,
   bookedDays,
   selectedDate,
+  variant = "calendar",
+  onDateChange,
+  onMonthChange,
 }: CalendarProps) {
   const dispatch = useAppDispatch();
 
-  const value = useAppSelector(
-    (state) =>
-      state.appointment.calendar.selectedDate,
+  const {
+    currentMonth,
+    currentYears,
+    query,
+  } = useAppSelector(
+    (state) => state.appointment.calendar,
   );
 
-  const ServerDay = createServerDay(
-    availableDays,
-    bookedDays,
+  
+
+  /* =======================================================
+     SELECTED DATE
+  ======================================================= */
+
+  const value = useMemo(() => {
+    if (!selectedDate) {
+      return null;
+    }
+
+    const parsedDate = dayjs(selectedDate);
+
+    return parsedDate.isValid()
+      ? parsedDate
+      : null;
+  }, [selectedDate]);
+
+  /* =======================================================
+     SERVER DAY
+  ======================================================= */
+
+  const ServerDay = useMemo(
+    () =>
+      createServerDay(
+        availableDays,
+        bookedDays,
+        currentMonth,
+        currentYears,
+      ),
+    [
+      availableDays,
+      bookedDays,
+      currentMonth,
+      currentYears,
+    ],
   );
+
+  /* =======================================================
+     MONTH CHANGE
+  ======================================================= */
+
+  const handleMonthChange = (
+    date: Dayjs,
+  ) => {
+    const month = date.month() + 1;
+    const year = date.year();
+
+    
+
+   
+    if (
+      month === query.month &&
+      year === query.year
+    ) {
+      console.log(
+        "⛔ IGNORE — SAME QUERY MONTH",
+      );
+
+      return;
+    }
+
+   
+    if (
+      month === currentMonth &&
+      year === currentYears &&
+      (
+        query.month !== currentMonth ||
+        query.year !== currentYears
+      )
+    ) {
+      console.log(
+        "⛔ IGNORE — STALE BACKEND MONTH",
+        {
+          received: {
+            month,
+            year,
+          },
+
+          query: {
+            month: query.month,
+            year: query.year,
+          },
+
+          backend: {
+            month: currentMonth,
+            year: currentYears,
+          },
+        },
+      );
+
+      return;
+    }
+
+   
+
+    
+    dispatch(
+      setQuery({
+        month,
+        year,
+      }),
+    );
+
+   
+    onMonthChange?.(date);
+  };
+
+  /* =======================================================
+     DATE CHANGE
+  ======================================================= */
+
+  const handleDateChange = (
+    date: Dayjs | null,
+  ) => {
+    const formattedDate = date
+      ? date.format("YYYY-MM-DD")
+      : null;
+
+    
+
+    
+    dispatch(
+      setDate(formattedDate),
+    );
+
+    onDateChange?.(formattedDate);
+  };
+
+  /* =======================================================
+     DISABLE DATE
+  ======================================================= */
+
+  const shouldDisableDate = (
+    day: Dayjs,
+  ) => {
+   
+    const isBackendMonth =
+      day.month() + 1 === currentMonth &&
+      day.year() === currentYears;
+
+    
+    if (!isBackendMonth) {
+      return true;
+    }
+
+    return !availableDays.includes(
+      day.date(),
+    );
+  };
+
+  /* =======================================================
+     COMMON PROPS
+  ======================================================= */
+
+  const commonProps = {
+    value,
+
+    onChange: handleDateChange,
+
+    onMonthChange:
+      handleMonthChange,
+
+    shouldDisableDate,
+
+    slots: {
+      day: ServerDay,
+      calendarHeader:
+        CustomCalendarHeader,
+    },
+  };
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
-   <div
-  className={`rounded-2xl border bg-white p-3 shadow-sm ${
-    selectedDate
-      ? "border-gray-200"
-      : "border-red-500"
-  }`}
->
-      <LocalizationProvider
-        dateAdapter={AdapterDayjs}
-      >
-        <DateCalendar
-          views={["day"]}
-          openTo="day"
-          showDaysOutsideCurrentMonth
-          dayOfWeekFormatter={(date) =>
-            date.format("dd")
-          }
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+    >
+      {variant === "calendar" ? (
+        <div
+          className={`rounded-[8px] border bg-white p-3 shadow-sm ${
+            selectedDate
+              ? "border-gray-200"
+              : "border-red-500"
+          }`}
+        >
+          <DateCalendar
+            {...commonProps}
+            views={["day"]}
+            openTo="day"
+            showDaysOutsideCurrentMonth
+            dayOfWeekFormatter={(date) =>
+              date.format("dd")
+            }
+            sx={{
+              "& .MuiDayCalendar-weekContainer":
+                {
+                  marginBottom: "8px",
+                },
+            }}
+          />
+        </div>
+      ) : (
+  <div className="w-1/2">
+  <label  className="mb-[10px] block font-[Inter] font-medium text-[14px]">
+    Date *
+  </label>
 
-          value={
-            value
-              ? dayjs(value)
-              : null
-          }
+  <DatePicker
+    {...commonProps}
+    format="DD.MM.YYYY"
+    slotProps={{
+      textField: {
+        fullWidth: true,
+        sx: {
+          "& .MuiPickersInputBase-root": {
+            height: "44px",
+            borderRadius: "8px",
+            width: "100%",
+          },
 
-          onMonthChange={(value: Dayjs) => {
-            dispatch(setDate(null));
+          "& .MuiPickersInputBase-sectionsContainer": {
+            padding: "0 12px",
+            flex: 1,
+          },
 
-            dispatch(
-              setQuery({
-                month: value.month() + 1,
-                year: value.year(),
-              }),
-            );
-          }}
+          "& .MuiInputAdornment-root": {
+            marginLeft: "auto",
+          },
 
-          onChange={(value) => {
-            if (!value) return;
-
-            dispatch(
-              setDate(
-                value.format("YYYY-MM-DD"),
-              ),
-            );
-          }}
-
-          shouldDisableDate={(day) => {
-            return (
-              day.isBefore(dayjs(), "day") ||
-              !availableDays.includes(
-                day.date(),
-              )
-            );
-          }}
-
-          slots={{
-            day: ServerDay,
-            calendarHeader:
-              CustomCalendarHeader,
-          }}
-        />
-      </LocalizationProvider>
-    </div>
+          "& .MuiIconButton-root": {
+            padding: "8px",
+          },
+        },
+      },
+    }}
+  />
+</div>
+      )}
+    </LocalizationProvider>
   );
 }

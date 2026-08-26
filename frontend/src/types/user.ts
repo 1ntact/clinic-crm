@@ -1,6 +1,7 @@
 import type { UserRole } from "./userRole";
 
 export type User = {
+  doctorId?: number;
   id: number;
   firstName: string;
   lastName: string;

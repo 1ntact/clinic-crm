@@ -18,7 +18,6 @@ import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { Td } from "@/components/table/Td";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import { statusOptions } from "@/features/appointments/model/statusAppointments";
 import { useNavigate } from "react-router-dom";
 import { getAccess } from "@/premissoons/getAccessPremissions";
@@ -40,7 +39,7 @@ export const DashboardPage = () => {
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  dayjs.extend(utc);
+
   const [aside, setOpenAside] = useState(false);
   const now = new Date();
   const nowTime = now.toLocaleDateString("uk-UA");
@@ -53,6 +52,9 @@ export const DashboardPage = () => {
           appointmentStatus: "scheduled",
           pageSize: 3,
           page: 1,
+          ...(access?.isDoctor && access.doctorId) ? {
+            doctorId:access.doctorId,
+          }:{}
         }),
       );
     };
@@ -72,7 +74,11 @@ export const DashboardPage = () => {
     <>
       <div className="flex justify-between items-center  mb-[26px] h-[57px]">
         <PageTitle
-          text={`Hello,${userData?.firstName}!`}
+      text={
+  userData?.role === "doctor"
+    ? `Hello, Dr. ${userData.firstName}!`
+    : `Hello, ${userData?.firstName}!`
+}
           description={nowTime}
         />
       { access?.canCreateUser && <div className="flex  gap-4  ">
@@ -117,7 +123,7 @@ export const DashboardPage = () => {
         />
       )}
 
-       <><div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+       <>{access.canViewStatistics && <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {cards &&
           dashboardCards.map((card) => (
             <CardStatistics
@@ -130,7 +136,7 @@ export const DashboardPage = () => {
               change={card.change !== null ? Number(card.change) : null}
             />
           ))}
-      </div>
+      </div>}
         
       {access?.canViewStatistics && <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
         {roundedDiagram && (
@@ -151,12 +157,12 @@ export const DashboardPage = () => {
           <span className="text-[14px] font-medium text-[#374151]">
             APPOINTMENTS TODAY
           </span>
-          <span
+        {access?.canViewAllAppointments &&  <span
             className="text-[14px] text-[#2563EB] cursor-pointer"
             onClick={() => navigate("/appointments")}
           >
             View all &gt;
-          </span>
+          </span>}
         </div>
         <Table>
           <thead>

@@ -159,7 +159,7 @@ export const Root: React.FC = () => {
 />
 
 <Route
-  path="/404"
+  path='/*'
   element={
     <ErrorPage
       code={404}
