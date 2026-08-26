@@ -416,15 +416,16 @@ export default function Calendar({
             height: "44px",
             borderRadius: "8px",
             width: "100%",
+            padding: "8px",
           },
 
           "& .MuiPickersInputBase-sectionsContainer": {
-            padding: "0 12px",
+            padding: "0",
             flex: 1,
           },
 
           "& .MuiInputAdornment-root": {
-            marginLeft: "auto",
+            marginLeft: "0px",
           },
 
           "& .MuiIconButton-root": {
