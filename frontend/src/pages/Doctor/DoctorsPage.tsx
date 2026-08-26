@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { ButtonPage } from "@/components/button/ButtonsPage";
+import { EmptyState } from "@/components/emptyState/EmptyState";
 import { Filter } from "@/components/filter/Filter";
 import { Loader } from "@/components/loader/Loader";
 import { PageTitle } from "@/components/pageTitle/PageTitle";
@@ -11,11 +12,12 @@ import { Td } from "@/components/table/Td";
 import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
-import { setQuery } from "@/features/doctors/doctorsSlice";
+import { resetQuery, setQuery } from "@/features/doctors/doctorsSlice";
 import { employmentTypes } from "@/features/doctors/model/employmentTypes";
 
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
+import { capitalizeFirstLetter } from "@/shared/functions/capitalizwFirstLetter";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { useEffect, useState } from "react";
 import { BiPlus } from "react-icons/bi";
@@ -29,6 +31,12 @@ export const DoctorsPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  useEffect(() => {
+  return () => {
+    dispatch(resetQuery());
+  };
+}, [dispatch]);
+  
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -147,19 +155,43 @@ export const DoctorsPage = () => {
                   <Td>
                     <UserContacts
                       avatar = {`doctor.jpg`}
-                      firstName={doctor.firstName}
+                      firstName={`Dr.${doctor.firstName}`}
                       lastName={doctor.lastName}
                       phone={doctor.phoneNumber}
                     />
                   </Td>
 
-                  <Td>{doctor.email}</Td>
+                <Td>
+  <div className="flex items-center gap-2">
+    <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+      <div
+        className={`h-full rounded-full ${
+          doctor.workload < 65
+            ? "bg-[#FB923C]"
+            : doctor.workload < 85
+              ? "bg-[#22C55E]"
+              : "bg-[#EF4444]"
+        }`}
+        style={{ width: `${doctor.workload}%` }}
+      />
+    </div>
 
-                  <Td>{doctor.specialization}</Td>
+    <span className="w-10  text-xs text-gray-600">
+      {doctor.workload}%
+    </span>
+  </div>
+</Td>
+
+                  <Td>{capitalizeFirstLetter(doctor.specialization)}</Td>
 
                   <Td>{"09:00-18:00"}</Td>
 
-                  <Td>{doctor.employmentType}</Td>
+                     <Td>{employmentTypes.map((status) =>
+                        
+                                          status.value === doctor.employmentType && (
+                                            <span className={`text-[12px]  rounded-[8px] px-[15px] py-[6px] ${status.color} ${status.textColor}`}>{status.label}</span>
+                                          ))}
+                                          </Td>
                 </tr>
               ))}
              
@@ -167,15 +199,10 @@ export const DoctorsPage = () => {
               
             </Table>
              {doctors.length === 0 && (
-                <p className="p-3 text-center text-gray-500">
-                  Nothing found
-                </p>
+                <EmptyState description=" No doctors match your current filters. Try adjusting or clearing them."/>
             )}
              
-          </div>
-          
-      )}
-       <Pagination
+              <Pagination
         page={query.page ?? 1}
         pageSize={query.pageSize ?? 5}
         total={total}
@@ -187,6 +214,10 @@ export const DoctorsPage = () => {
           )
         }
       />
+          </div>
+          
+      )}
+     
       
 
    

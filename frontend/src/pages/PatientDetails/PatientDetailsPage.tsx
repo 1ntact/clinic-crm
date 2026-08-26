@@ -8,13 +8,16 @@ import { removePatientThunk } from "@/features/patients/thunk/removePatientThunk
 import { useEffect, useState } from "react";
 import { IoTrash } from "react-icons/io5";
 import { TfiPencil } from "react-icons/tfi";
-import { useNavigate, useParams } from "react-router-dom";
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { UserProfile } from "../../components/userProfile/UserProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
-import { PatientInformation } from "./info/InfoItem";
-import { PatientDocuments } from "./info/medicalRecords";
+import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
+import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
+import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
+
+
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
@@ -26,8 +29,8 @@ export const PatientDetailsPage = () => {
 
   useEffect(() => {
     if (!patientId) return;
-
-    dispatch(getPatientByIdThunk(Number(patientId)));
+    dispatch(getPatientByIdThunk(Number(patientId)))
+      dispatch(patientDetailsStatisticThunk(Number(patientId)));
   }, [dispatch, patientId]);
 
   const handleAside = () => setOpenAside((prev) => !prev);
@@ -76,7 +79,7 @@ export const PatientDetailsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="rounded-xl bg-white p-[16px] shadow-sm">
+        <div className="rounded-xl bg-white p-[16px] shadow-sm mb-[16px]">
           <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span
@@ -112,7 +115,7 @@ export const PatientDetailsPage = () => {
             </div>
           </section>
 
-          <section className="flex items-center justify-between  ">
+          <section className="flex items-center justify-between ">
             {!loading && selectedPatient && (
                 <UserProfile type="patient"
                 avatar='patient.jpg'  
@@ -121,8 +124,12 @@ export const PatientDetailsPage = () => {
           </section>
         </div>
       )}
-      <PatientInformation />
-      <PatientDocuments/>
+       <SmallNavbar
+        arrayNavigation={patientDetailsNavigation} />
+      
+    
+     
+      <Outlet/>
     </>
   );
 };

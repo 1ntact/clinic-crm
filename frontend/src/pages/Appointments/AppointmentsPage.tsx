@@ -16,9 +16,11 @@ import { Td } from "@/components/table/Td";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { LuPencilLine } from "react-icons/lu";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+
 import { ActionModal } from "./components/ActionModal/ActionModal";
 import {
+  resetAppointmentsQuery,
+  resetCalendarQuery,
   setAppointmentsQuery,
   setSelectedAppointment,
 } from "@/features/appointments/appointmentsSlice";
@@ -28,6 +30,9 @@ import { Pagination } from "@/components/pagination/Pagination";
 import { Filter } from "@/components/filter/Filter";
 import { AppointmentsViewToggle } from "./components/AppointmentsViewToogle/AppointmentsViewToogle";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import { EmptyState } from "@/components/emptyState/EmptyState";
+import { dateOptions } from "@/features/doctors/model/dataRange";
+
 
 type ViewMode = "list" | "calendar";
 
@@ -60,6 +65,14 @@ export const AppointmentsPage = () => {
   const { doctors } = useAppSelector((state) => state.doctor);
 
   useEffect(() => {
+    return () => {
+      dispatch(resetCalendarQuery());
+      dispatch(resetAppointmentsQuery());
+    
+  };
+}, [dispatch]);
+  
+  useEffect(() => {
     dispatch(
       getAppointmentsDashboardThunk({
         month: query.month,
@@ -86,12 +99,9 @@ export const AppointmentsPage = () => {
       }),
     );
   }, [selectedDoctor, selectedDate, selectedSpecialization, dispatch]);
-  dayjs.extend(utc);
+  
 
-  const doctorOptions = doctors.map((doctor) => ({
-    value: String(doctor.id),
-    label: `${doctor.firstName} ${doctor.lastName}`,
-  }));
+ 
   const handleAside = () => setOpenAside((prev) => !prev);
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -122,7 +132,8 @@ export const AppointmentsPage = () => {
               {availableDays && (
                 <Calendar
                   availableDays={availableDays}
-                  bookedDays={fullyBookedDays}
+                bookedDays={fullyBookedDays}
+                selectedDate = {selectedDate}
                 />
               )}
             </div>
@@ -143,21 +154,33 @@ export const AppointmentsPage = () => {
           <Filter
             className="mb-[16px]"
             search={appointmentsQuery.search}
-            firstSelect={String(appointmentsQuery.doctorId ?? "")}
-            secondSelect={appointmentsQuery.appointmentStatus ?? ""}
-            firstPlaceholder="All doctors"
-            secondPlaceholder="All statuses"
-            firstSelectOptions={doctorOptions}
-            secondSelectOptions={statusOptions}
-            onSearchChange={handleSearchChange}
-            onFirstSelectChange={(value) =>
+            firstPlaceholder="Date"
+            firstSelectOptions={dateOptions}
+           firstSelect={
+              appointmentsQuery.dateFrom && appointmentsQuery.dateTo
+                ? `${appointmentsQuery.dateFrom}_${appointmentsQuery.dateTo}`
+                : ""
+            }
+            onFirstSelectChange={(value) => {
+              const [dateFrom, dateTo] = value.split("_");
+          
               dispatch(
                 setAppointmentsQuery({
-                  doctorId: value ? Number(value) : null,
+                  dateFrom,
+                  dateTo,
+                  appointmentDate: null,
                   page: 1,
                 }),
-              )
-            }
+              );
+            }} 
+          
+            secondSelect={appointmentsQuery.appointmentStatus ?? ""}
+           
+            secondPlaceholder="All statuses"
+          
+            secondSelectOptions={statusOptions}
+            onSearchChange={handleSearchChange}
+          
             onSecondSelectChange={(value) =>
               dispatch(
                 setAppointmentsQuery({
@@ -209,7 +232,7 @@ export const AppointmentsPage = () => {
                             </div>
                             <div>
                               {dayjs(appointment.dateTime).format("HH:mm")}
-                            </div>
+                             </div>
                           </>
                         }
                       </Td>
@@ -227,8 +250,8 @@ export const AppointmentsPage = () => {
                       <Td className="relative  ">
                         {
                           <>
-                            <LuPencilLine
-                              className="cursor-pointer"
+                            <LuPencilLine 
+                              className="cursor-pointer h-[16px] w-[16px]"
                               onClick={() => {
                                 dispatch(setSelectedAppointment(appointment));
                               }}
@@ -249,13 +272,14 @@ export const AppointmentsPage = () => {
                       </Td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
+            </tbody>
+            
+          </Table>
+          
               {appointments.length === 0 && (
-                <p className="p-3 text-center text-gray-500">Nothing found</p>
-              )}
-</div>
-              <Pagination
+                <EmptyState description=" No Appointments match your current filters. Try adjusting or clearing them."/>
+          )}
+             <Pagination
                 page={appointmentsQuery.page}
                 pageSize={appointmentsQuery.pageSize}
                 total={total}
@@ -267,6 +291,8 @@ export const AppointmentsPage = () => {
                   )
                 }
               />
+</div>
+           
             
           
           </div>
