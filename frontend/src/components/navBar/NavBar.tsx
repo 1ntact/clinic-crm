@@ -5,7 +5,9 @@ import { NavLink } from "react-router-dom";
 
 export const NavBar: React.FC = () => {
   const role = useAppSelector(state=>state.auth.user?.role)
-  const visibleItems = navigation.filter((item)=>item.roles?.includes(role))
+  const visibleItems = navigation.filter(
+  (item) => role !== undefined && item.roles?.includes(role)
+);
   return (
     <>
       <div className=" flex flex-col w-[260px] p-[16px] h-full bottom-0 bg-[#fff]">

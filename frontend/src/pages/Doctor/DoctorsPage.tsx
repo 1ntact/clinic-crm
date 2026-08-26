@@ -114,21 +114,21 @@ export const DoctorsPage = () => {
             dispatch(setQuery({ employmentType: value, page: 1 }))
           }
         />
-       <Sort
-          userCount = {doctors.length}
-          sortBy={query.sortBy}
-          sortOrder={query.sortOrder}
-          buttons={doctorSortButtons}
-          onChange={(sortBy, sortOrder) =>
-            dispatch(
-              setQuery({
-                sortBy,
-                sortOrder,
-                page: 1,
-              }),
-            )
-          }
-        /> 
+      <Sort
+  userCount={doctors.length}
+  sortBy={query.sortBy ?? null}
+  sortOrder={query.sortOrder ?? null}
+  buttons={doctorSortButtons}
+  onChange={(sortBy, sortOrder) =>
+    dispatch(
+      setQuery({
+        sortBy: sortBy ?? undefined,
+        sortOrder: sortOrder ?? undefined,
+        page: 1,
+      }),
+    )
+  }
+/>
       </div>
 
       {loading ? (
