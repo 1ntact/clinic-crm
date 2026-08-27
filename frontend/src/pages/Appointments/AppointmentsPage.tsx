@@ -32,6 +32,7 @@ import { AppointmentsViewToggle } from "./components/AppointmentsViewToogle/Appo
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { EmptyState } from "@/components/emptyState/EmptyState";
 import { dateOptions } from "@/features/doctors/model/dataRange";
+import { useNavigate } from "react-router-dom";
 
 
 type ViewMode = "list" | "calendar";
@@ -40,7 +41,7 @@ export const AppointmentsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const [status, setOpenChangeStatus] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-
+const  navigate = useNavigate()
   const dispatch = useAppDispatch();
   const { appointments, selectedAppointment } = useAppSelector(
     (state) => state.appointment,
@@ -128,7 +129,7 @@ export const AppointmentsPage = () => {
         <div>
           {" "}
           <section className="flex gap-[16px] mb-[24px]">
-            <div className="h-[361px] w-[348px]" >
+            
               {availableDays && (
                 <Calendar
                   availableDays={availableDays}
@@ -136,7 +137,7 @@ export const AppointmentsPage = () => {
                 selectedDate = {selectedDate}
                 />
               )}
-            </div>
+            
             {
               <AvalibleTime
                 bookedCount={fullyBookedTimeCount}
@@ -212,7 +213,7 @@ export const AppointmentsPage = () => {
                       key={appointment.id}
                       
                       className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
-                    >
+                   >
                       <Td>{`#${appointment.id}`}</Td>
 
                       <Td>
@@ -259,7 +260,10 @@ export const AppointmentsPage = () => {
                             {selectedAppointment &&
                               !status &&
                               selectedAppointment.id === appointment.id && (
-                                <ActionModal
+                              <ActionModal
+                               detailsAppointment={() => {
+  navigate(`/appointments/${selectedAppointment.id}`);
+}}
                                   onClose={() => {
                                     dispatch(setSelectedAppointment(null));
                                   }}

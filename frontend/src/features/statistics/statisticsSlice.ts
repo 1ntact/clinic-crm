@@ -129,6 +129,7 @@ const statisticsSlice = createSlice({
       .addCase(patientDetailsStatisticThunk.fulfilled, (state, action) => {
         state.isLoading = false;
         state.statistics.patientDetailsCard = action.payload.patientDetailsCard
+        console.log(action.payload.patientDetailsCard)
         
       })
     .addCase(patientDetailsStatisticThunk.rejected, (state) => {

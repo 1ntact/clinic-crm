@@ -41,6 +41,7 @@ export const DashboardPage = () => {
   const navigate = useNavigate();
 
   const [aside, setOpenAside] = useState(false);
+  
   const now = new Date();
   const nowTime = now.toLocaleDateString("uk-UA");
   useEffect(() => {
@@ -70,6 +71,7 @@ export const DashboardPage = () => {
   });
 
   const handleAside = () => setOpenAside((prev) => !prev);
+  
   return (
     <>
       <div className="flex justify-between items-center  mb-[26px] h-[57px]">
@@ -97,6 +99,7 @@ export const DashboardPage = () => {
           </ButtonPage>
         </div>}
       </div>
+      
       {aside && (
         <AsideMenu
           title={"ADD NEW USER"}
@@ -181,6 +184,9 @@ export const DashboardPage = () => {
               <tr
                 key={appointment.id}
                 className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
+                onClick={() => {
+                  navigate(`/appointments/${appointment.id}`)
+                }}
               >
                 <Td>{`#${appointment.id}`}</Td>
 

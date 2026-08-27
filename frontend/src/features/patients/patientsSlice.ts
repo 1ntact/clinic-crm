@@ -76,6 +76,7 @@ const patientsSlice = createSlice({
         state.loading = false;
         state.patients = action.payload.items
         state.total = action.payload.total
+        console.log(action.payload)
         
         
       })
