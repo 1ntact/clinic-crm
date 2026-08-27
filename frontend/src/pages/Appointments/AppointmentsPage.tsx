@@ -128,7 +128,7 @@ export const AppointmentsPage = () => {
         <div>
           {" "}
           <section className="flex gap-[16px] mb-[24px]">
-            <div className="h-[361px] w-[348px]">
+            <div className="h-[361px] w-[348px]" >
               {availableDays && (
                 <Calendar
                   availableDays={availableDays}

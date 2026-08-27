@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction  } from "@reduxjs/toolkit";
 import { getAppointmentsDashboardThunk } from "./thunk/getAppointmentsDashboardThunk";
 import type { CalendarQuery } from "./model/calendarQuery";
 import { getAvailableTimeSlotsThunk } from "./thunk/getAvailableSlots";
@@ -15,6 +15,9 @@ interface CalendarState {
   fullyBookedTimeCount: number;
   availableTimeCount: number;
   availableDays: number[];
+  currentYears: number;
+  currentMonth: number;
+  dayInMonth: number;
   fullyBookedDays: number[];
   availableTime: AvailableTimeSlot[];
   selectedDate: string | null;
@@ -71,6 +74,9 @@ const initialState: AppointmentsState = {
   appointmentsLoading: false,
 
   calendar: {
+     currentMonth: new Date().getMonth() + 1,
+  currentYears: new Date().getFullYear(),
+    dayInMonth:0,
     availableDays: [],
     fullyBookedDays: [],
     availableTime: [],
@@ -110,9 +116,17 @@ const appointmentsSlice = createSlice({
     },
 
     setQuery(state, action: PayloadAction<Partial<CalendarQuery>>) {
+       console.log(
+    "🔥 SET QUERY DISPATCHED:",
+    action.payload,
+  );
+
+  console.trace("🔥 SET QUERY TRACE");
       state.calendar.query = {
+        
         ...state.calendar.query,
         ...action.payload,
+      
       };
     },
     resetQuery(state) {
@@ -151,8 +165,10 @@ const appointmentsSlice = createSlice({
       })
       .addCase(getAppointmentsDashboardThunk.fulfilled, (state, action) => {
         state.calendar.availableDays = action.payload.calendar.availableDays;
-        state.calendar.fullyBookedDays =
-          action.payload.calendar.fullyBookedDays;
+        state.calendar.fullyBookedDays = action.payload.calendar.fullyBookedDays;
+        state.calendar.currentMonth = action.payload.calendar.month;
+        state.calendar.currentYears = action.payload.calendar.year;
+        state.calendar.dayInMonth = action.payload.calendar.dayInMonth;
         state.statistic = action.payload.statistic;
         state.calendar.calendarLoading = false;
         console.log("забукані дні", action.payload);

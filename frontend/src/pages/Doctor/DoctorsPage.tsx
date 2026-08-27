@@ -6,6 +6,7 @@ import { Filter } from "@/components/filter/Filter";
 import { Loader } from "@/components/loader/Loader";
 import { PageTitle } from "@/components/pageTitle/PageTitle";
 import { Pagination } from "@/components/pagination/Pagination";
+import { Sort } from "@/components/sorter/Sort";
 
 import { Table } from "@/components/table/Table";
 import { Td } from "@/components/table/Td";
@@ -14,6 +15,8 @@ import { UserContacts } from "@/components/userContacts/UserContacts";
 import { DoctorCreteForm } from "@/features/doctors/DoctorCreateForm";
 import { resetQuery, setQuery } from "@/features/doctors/doctorsSlice";
 import { employmentTypes } from "@/features/doctors/model/employmentTypes";
+import { doctorSortButtons } from "@/features/doctors/model/sortDoctorTypes";
+
 
 import { specializations } from "@/features/doctors/model/specialties";
 import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
@@ -24,12 +27,14 @@ import { BiPlus } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 
 export const DoctorsPage = () => {
-  const [aside, setOpenAside] = useState(false);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [aside, setOpenAside] = useState(false);  
   const { doctors, total, loading, query } = useAppSelector(
     (state) => state.doctor
   );
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  
+
 
   useEffect(() => {
   return () => {
@@ -109,21 +114,21 @@ export const DoctorsPage = () => {
             dispatch(setQuery({ employmentType: value, page: 1 }))
           }
         />
-        {/* <Sort
-          userCount = {doctors.length}
-          sortBy={query.sortBy}
-          sortOrder={query.sortOrder}
-          buttons={doctorSortButtons}
-          onChange={(sortBy, sortOrder) =>
-            dispatch(
-              setQuery({
-                sortBy,
-                sortOrder,
-                page: 1,
-              }),
-            )
-          }
-        /> */}
+      <Sort
+  userCount={doctors.length}
+  sortBy={query.sortBy ?? null}
+  sortOrder={query.sortOrder ?? null}
+  buttons={doctorSortButtons}
+  onChange={(sortBy, sortOrder) =>
+    dispatch(
+      setQuery({
+        sortBy: sortBy ?? undefined,
+        sortOrder: sortOrder ?? undefined,
+        page: 1,
+      }),
+    )
+  }
+/>
       </div>
 
       {loading ? (

@@ -9,6 +9,7 @@ import { setAppointmentsQuery } from "@/features/appointments/appointmentsSlice"
 import { statusOptions } from "@/features/appointments/model/statusAppointments"
 import { getAppointmentsThunk } from "@/features/appointments/thunk/getAppointmentsThunk"
 import { dateOptions } from "@/features/doctors/model/dataRange"
+import { getAccess } from "@/premissoons/getAccessPremissions"
 
 import Table from "@mui/material/Table"
 import dayjs from "dayjs"
@@ -21,9 +22,11 @@ export const DoctorVisits = () => {
     appointmentsQuery,
     total,
   } = useAppSelector((state) => state.appointment);
+  const user = useAppSelector(state=>state.auth.user)
+  const access = getAccess(user)
   const dispatch = useAppDispatch();
-   const { doctorId } = useParams();
- 
+   const { doctorId:paramsDoctorId } = useParams();
+ const doctorId = paramsDoctorId ?? access.doctorId?.toString();
 
   useEffect(() => {
     if (!doctorId) {
