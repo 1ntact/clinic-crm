@@ -8,5 +8,7 @@ export const ROUTES = {
   CALENDAR: "calendar",
   ACTIVATE:"accounts/activate",
   DETAILS: 'doctors/:doctorId',
-PATDETAILS:'patients/:patientId',
+  PATDETAILS: 'patients/:patientId',
+ MYDOCTOR: "/my-doctor",
+
 } as const;
