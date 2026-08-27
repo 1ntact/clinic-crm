@@ -142,7 +142,7 @@ function CustomCalendarHeader(
 
   return (
     <div
-      className=" h-[32px] w-[300px] flex items-center justify-between mb-[8px] px-3 py-2"
+      className=" h-[32px] w-[300px] flex items-center justify-between mb-[8px] "
     >
       <button
         type="button"
