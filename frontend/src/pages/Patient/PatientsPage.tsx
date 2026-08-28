@@ -33,7 +33,6 @@ export const PatientsPage = () => {
   const user = useAppSelector(state => state.auth.user)
   const access = getAccess(user);
   const { loading, patients, query, total } = useAppSelector(state => state.patient)
-  console.log("pacientotat", patients)
   const cards = useAppSelector(state=>state.statistic.statistics.patientsManagmentCard)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()

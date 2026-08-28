@@ -117,12 +117,9 @@ const appointmentsSlice = createSlice({
     },
 
     setQuery(state, action: PayloadAction<Partial<CalendarQuery>>) {
-       console.log(
-    "🔥 SET QUERY DISPATCHED:",
-    action.payload,
-  );
+    
 
-  console.trace("🔥 SET QUERY TRACE");
+  
       state.calendar.query = {
         
         ...state.calendar.query,

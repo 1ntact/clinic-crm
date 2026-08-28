@@ -164,8 +164,15 @@ useEffect(() => {
   ))
 )}
       </div>)}
-      
-      <span className= " text-[12px] text-[#6B7280]">Click a free slot to schedule a new appointment</span>
+     <div className="flex items-center  gap-2">
+  <div className="w-4 h-px bg-[#D1D5DB]" />
+
+  <span className="text-[12px] text-[#6B7280] whitespace-nowrap">
+    Click a free slot to schedule a new appointment
+  </span>
+
+  <div className="w-full h-px bg-[#D1D5DB]" />
+</div>
     </div>
 
   </>)

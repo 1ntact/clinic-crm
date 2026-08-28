@@ -1,3 +1,8 @@
+import { useAppDispatch, useAppSelector } from "@/app/store/hook";
+import { ButtonPage } from "@/components/button/ButtonsPage";
+import { getVisits } from "@/features/visits/thunks/getVisitsThunk";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import { useEffect } from "react";
 import {
   FiChevronDown,
   FiChevronLeft,
@@ -9,6 +14,22 @@ import {
 } from "react-icons/fi";
 
 export const PatientDocuments = () => {
+  const {currentVisits, visits} = useAppSelector(state=>state.visit)
+ const dispatch = useAppDispatch()
+ 
+  useEffect(() => {
+    
+    const getAllVisits = async () => {
+      try {
+        await dispatch(getVisits())
+      }
+      catch (e) {
+        console.log(e)
+        
+      }
+    }
+    getAllVisits()
+  },[dispatch])
   const files = [
     {
       name: "Panoramic teeth",
@@ -71,6 +92,127 @@ export const PatientDocuments = () => {
 
   return (
     <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1.45fr_1fr]">
+       {/* ===================== CLINICAL NOTES ===================== */}
+
+      <section className="rounded-lg border border-gray-200 bg-white p-5">
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-[12px] font-semibold uppercase text-gray-700">
+            Clinical Notes (5)
+          </h2>
+
+          <ButtonPage
+            type="button"
+            disabled={!currentVisits}
+            className={buttonStyles.addNote}
+          >
+            <FiPlus size={14} />
+            Add note
+          </ButtonPage>
+        </div>
+
+        {/* Search */}
+        <div className="mb-5 flex h-10 items-center gap-3 rounded-lg border border-gray-200 px-3">
+          <FiSearch
+            size={15}
+            className="shrink-0 text-gray-500"
+          />
+
+          <span className="text-xs text-gray-500">
+            Search notes
+          </span>
+        </div>
+
+        {/* Notes */}
+       {visits.length !==0 && <div>
+          {visits.map((note) => (
+            <div
+              key={note.id}
+              className="border-b border-gray-100 py-3.5"
+            >
+              {/* Date + Status */}
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <span className="text-[10px] font-medium uppercase text-gray-500">
+                  Visit note • {note.mainTreatment}
+                </span>
+
+                <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-[10px] font-medium text-gray-700">
+                  Completed
+                </span>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-sm font-semibold text-gray-900">
+                {note.additionalTreatment_1}
+              </h3>
+
+              {/* Doctor + Details */}
+              <div className="mt-3 flex items-center justify-between">
+                {/* Doctor */}
+                <div className="flex items-center gap-2">
+                  <img
+                    src={note.avatar}
+                    alt=""
+                    className="h-5 w-5 rounded-full object-cover"
+                  />
+
+                  <span className="text-[11px] text-gray-500">
+                    {note.doctor}
+                  </span>
+                </div>
+
+                {/* More details */}
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-xs font-medium text-blue-600 transition hover:text-blue-700"
+                >
+                  More details
+                  <FiChevronDown size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>}
+
+        {/* Notes Pagination */}
+        <div className="mt-4 flex justify-end">
+          <div className="flex items-center gap-1">
+            {/* Previous */}
+            <button
+              type="button"
+              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
+            >
+              <FiChevronLeft size={14} />
+              Previous
+            </button>
+
+            {/* 1 */}
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-xs text-gray-700"
+            >
+              1
+            </button>
+
+            {/* 2 */}
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
+            >
+              2
+            </button>
+
+            {/* Next */}
+            <button
+              type="button"
+              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
+            >
+              Next
+              <FiChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      </section>
       {/* ===================== FILES ===================== */}
 
       <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -229,126 +371,7 @@ export const PatientDocuments = () => {
         </div>
       </section>
 
-      {/* ===================== CLINICAL NOTES ===================== */}
-
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
-        {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[12px] font-semibold uppercase text-gray-700">
-            Clinical Notes (5)
-          </h2>
-
-          <button
-            type="button"
-            className="flex h-8 items-center gap-2 rounded-lg border border-gray-200 px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
-          >
-            <FiPlus size={14} />
-            Add note
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="mb-5 flex h-10 items-center gap-3 rounded-lg border border-gray-200 px-3">
-          <FiSearch
-            size={15}
-            className="shrink-0 text-gray-500"
-          />
-
-          <span className="text-xs text-gray-500">
-            Search notes
-          </span>
-        </div>
-
-        {/* Notes */}
-        <div>
-          {notes.map((note) => (
-            <div
-              key={note.title}
-              className="border-b border-gray-100 py-3.5"
-            >
-              {/* Date + Status */}
-              <div className="mb-1 flex items-center justify-between gap-3">
-                <span className="text-[10px] font-medium uppercase text-gray-500">
-                  Visit note • {note.date}
-                </span>
-
-                <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-[10px] font-medium text-gray-700">
-                  Completed
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-sm font-semibold text-gray-900">
-                {note.title}
-              </h3>
-
-              {/* Doctor + Details */}
-              <div className="mt-3 flex items-center justify-between">
-                {/* Doctor */}
-                <div className="flex items-center gap-2">
-                  <img
-                    src={note.avatar}
-                    alt=""
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-
-                  <span className="text-[11px] text-gray-500">
-                    {note.doctor}
-                  </span>
-                </div>
-
-                {/* More details */}
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-xs font-medium text-blue-600 transition hover:text-blue-700"
-                >
-                  More details
-                  <FiChevronDown size={13} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Notes Pagination */}
-        <div className="mt-4 flex justify-end">
-          <div className="flex items-center gap-1">
-            {/* Previous */}
-            <button
-              type="button"
-              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-            >
-              <FiChevronLeft size={14} />
-              Previous
-            </button>
-
-            {/* 1 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-xs text-gray-700"
-            >
-              1
-            </button>
-
-            {/* 2 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
-            >
-              2
-            </button>
-
-            {/* Next */}
-            <button
-              type="button"
-              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-            >
-              Next
-              <FiChevronRight size={14} />
-            </button>
-          </div>
-        </div>
-      </section>
+     
     </div>
   );
 };

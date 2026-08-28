@@ -262,7 +262,7 @@ const  navigate = useNavigate()
                               selectedAppointment.id === appointment.id && (
                               <ActionModal
                                detailsAppointment={() => {
-  navigate(`/appointments/${selectedAppointment.id}`);
+  navigate(`/patients/${selectedAppointment.patientId}/records`);
 }}
                                   onClose={() => {
                                     dispatch(setSelectedAppointment(null));

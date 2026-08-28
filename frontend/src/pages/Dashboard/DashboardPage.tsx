@@ -22,9 +22,17 @@ import { statusOptions } from "@/features/appointments/model/statusAppointments"
 import { useNavigate } from "react-router-dom";
 import { getAccess } from "@/premissoons/getAccessPremissions";
 import { EmptyState } from "@/components/emptyState/EmptyState";
+import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
+
+import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
+import { createVisitThunk } from "@/features/visits/thunks/createVisitThunk";
+import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
+import { getVisitByAppointmentIdThunk } from "@/features/visits/thunks/getVisitsByAppointmentsId";
 
 
 export const DashboardPage = () => {
+  
+  const {selectedAppointment}=useAppSelector(state=>state.appointment)
   const userData = useAppSelector((state) => state.auth.user);
    const access = getAccess(userData);
   const cards = useAppSelector((state) => state.statistic.statistics?.cards);
@@ -46,6 +54,7 @@ export const DashboardPage = () => {
   const nowTime = now.toLocaleDateString("uk-UA");
   useEffect(() => {
     const getStatistic = async () => {
+      dispatch(setSelectedAppointment(null))
       dispatch(dashboardStatisticsThunk());
       dispatch(
         getAppointmentsThunk({
@@ -62,6 +71,8 @@ export const DashboardPage = () => {
     getStatistic();
   }, []);
 
+
+
   const currentDay = now.toLocaleDateString("en-US", {
     weekday: "short",
   });
@@ -71,6 +82,33 @@ export const DashboardPage = () => {
   });
 
   const handleAside = () => setOpenAside((prev) => !prev);
+
+const handleCreateVisit = async () => {
+  if (!selectedAppointment) return;
+
+  try {
+    await dispatch(
+      createVisitThunk(selectedAppointment.id)
+    ).unwrap();
+   await dispatch(getVisitByAppointmentIdThunk(selectedAppointment.id)).unwrap()
+
+    successToast(
+      <>
+        Visit from
+        <br />
+        Mr. {selectedAppointment.patientFirstName}{" "}
+        {selectedAppointment.patientLastName} opened!
+      </>
+    );
+
+    navigate(`/patients/${selectedAppointment.patientId}/records`);
+  } catch (e) {
+    errorToast(e as string);
+  }
+}
+
+
+   
   
   return (
     <>
@@ -167,6 +205,15 @@ export const DashboardPage = () => {
             View all &gt;
           </span>}
         </div>
+      
+        {selectedAppointment && <ConfirmModal
+          isOpen={selectedAppointment !== null}
+          title={'Start this patient’s visit?'}
+          onCancel={() => (dispatch(setSelectedAppointment(null)))}
+          onConfirm={() => {handleCreateVisit()}}
+          description={'Starting the visit begins the timer and logs the encounter.'}
+          modalClassName="w-[439px] h-[356px]" />
+        }
         <Table>
           <thead>
             <tr className="h-[40px] bg-[#F3F4F6]">
@@ -185,7 +232,9 @@ export const DashboardPage = () => {
                 key={appointment.id}
                 className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
                 onClick={() => {
-                  navigate(`/appointments/${appointment.id}`)
+                  dispatch(setSelectedAppointment(appointment))
+                  
+                  
                 }}
               >
                 <Td>{`#${appointment.id}`}</Td>

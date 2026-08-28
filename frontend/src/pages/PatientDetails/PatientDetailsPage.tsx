@@ -16,7 +16,7 @@ import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
 import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
 import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
-
+import { SiTicktick } from "react-icons/si";
 
 
 export const PatientDetailsPage = () => {
@@ -24,6 +24,7 @@ export const PatientDetailsPage = () => {
   const [modal, setOpenModal] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
+  const {currentVisits, isActiveVisits} = useAppSelector(state=>state.visit)
   const { patientId } = useParams();
   const navigate = useNavigate();
 
@@ -96,23 +97,31 @@ export const PatientDetailsPage = () => {
               </span>
             </div>
 
-            <div className="w-[250px] flex gap-4">
-              <ButtonPage
-                className={buttonStyles.removeButton}
-                icon={<IoTrash className="mr-2 text-[#DC2626]" />}
-                onClick={() => setOpenModal(true)}
-              >
-                Remove 
-              </ButtonPage>
+          {!isActiveVisits && !currentVisits ? <div className="w-[250px] flex gap-4">
+            <ButtonPage
+              className={buttonStyles.removeButton}
+              icon={<IoTrash className="mr-2 text-[#DC2626]" />}
+              onClick={() => setOpenModal(true)}
+            >
+              Remove 
+            </ButtonPage>
 
-              <ButtonPage
-                className={buttonStyles.editButton}
-                icon={<TfiPencil className="mr-2" />}
-                onClick={handleAside}
-              >
-                Edit Patient
-              </ButtonPage>
-            </div>
+            <ButtonPage
+              className={buttonStyles.editButton}
+              icon={<TfiPencil className="mr-2" />}
+              onClick={handleAside}
+            >
+              Edit Patient
+            </ButtonPage>
+              </div> : ( <ButtonPage
+              className={buttonStyles.confirmVisits}
+              icon={<SiTicktick  className="mr-2" />}
+              onClick={()=>{}}
+            >
+              Complete visit
+            </ButtonPage>)
+              }
+              
           </section>
 
           <section className="flex items-center justify-between ">
