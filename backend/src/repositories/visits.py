@@ -1,8 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import aliased, joinedload
 
 from database.models.appointments import AppointmentModel
+from database.models.doctors import DoctorModel
+from database.models.treatments import TreatmentModel
+from database.models.users import UserModel
 from database.models.visits import VisitModel
 from schemas.visits import VisitCreate, VisitUpdate
 
@@ -59,24 +62,66 @@ class VisitRepository:
         return await self.session.scalar(statement)
 
     async def get_by_patient_id(
-            self,
-            patient_id: int,
+        self,
+        patient_id: int,
     ) -> list[dict]:
+        main_treatment = aliased(TreatmentModel)
+        additional_treatment_1 = aliased(TreatmentModel)
+        additional_treatment_2 = aliased(TreatmentModel)
+
         statement = (
             select(
                 VisitModel.id.label("visit_id"),
                 VisitModel.appointment_id,
+                VisitModel.diagnosis,
                 VisitModel.description,
+                VisitModel.recommendation,
+                VisitModel.amount,
                 AppointmentModel.doctor_id,
                 AppointmentModel.date_time.label("visit_date"),
+                UserModel.first_name.label("doctor_first_name"),
+                UserModel.last_name.label("doctor_last_name"),
+                main_treatment.treatment.label("main_treatment"),
+                main_treatment.price.label("main_treatment_price"),
+                additional_treatment_1.treatment.label(
+                    "additional_treatment_1",
+                ),
+                additional_treatment_1.price.label(
+                    "additional_treatment_1_price",
+                ),
+                additional_treatment_2.treatment.label(
+                    "additional_treatment_2",
+                ),
+                additional_treatment_2.price.label(
+                    "additional_treatment_2_price",
+                ),
             )
             .join(
                 AppointmentModel,
                 VisitModel.appointment_id == AppointmentModel.id,
             )
+            .join(
+                DoctorModel,
+                AppointmentModel.doctor_id == DoctorModel.id,
+            )
+            .join(
+                UserModel,
+                DoctorModel.user_id == UserModel.id,
+            )
+            .join(
+                main_treatment,
+                AppointmentModel.treatment_id == main_treatment.id,
+            )
+            .outerjoin(
+                additional_treatment_1,
+                VisitModel.treatment_add1 == additional_treatment_1.id,
+            )
+            .outerjoin(
+                additional_treatment_2,
+                VisitModel.treatment_add2 == additional_treatment_2.id,
+            )
             .where(
                 AppointmentModel.patient_id == patient_id,
-                VisitModel.description.is_not(None),
             )
             .order_by(
                 AppointmentModel.date_time.desc(),
