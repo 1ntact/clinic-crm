@@ -1,8 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { ButtonPage } from "@/components/button/ButtonsPage";
-import { getVisits } from "@/features/visits/thunks/getVisitsThunk";
+import { getPatientNotesThunk } from "@/features/patients/thunk/getPatientNotesVisits";
+
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { useEffect } from "react";
+
 import {
   FiChevronDown,
   FiChevronLeft,
@@ -12,16 +14,19 @@ import {
   FiPrinter,
   FiSearch,
 } from "react-icons/fi";
+import { useParams } from "react-router-dom";
 
 export const PatientDocuments = () => {
-  const {currentVisits, visits} = useAppSelector(state=>state.visit)
+  const { currentVisits, visits } = useAppSelector(state => state.visit)
+  const { patientNotes } = useAppSelector(state => state.patient)
+  const {patientId} = useParams()
  const dispatch = useAppDispatch()
- 
+ console.log("pppppppppppppp",patientNotes)
   useEffect(() => {
     
     const getAllVisits = async () => {
       try {
-        await dispatch(getVisits())
+        await dispatch(getPatientNotesThunk(Number(patientId)))
       }
       catch (e) {
         console.log(e)
@@ -124,16 +129,16 @@ export const PatientDocuments = () => {
         </div>
 
         {/* Notes */}
-       {visits.length !==0 && <div>
-          {visits.map((note) => (
+       {patientNotes && <div>
+          {patientNotes.map((note) => (
             <div
-              key={note.id}
+              key={note.visitId}
               className="border-b border-gray-100 py-3.5"
             >
               {/* Date + Status */}
               <div className="mb-1 flex items-center justify-between gap-3">
                 <span className="text-[10px] font-medium uppercase text-gray-500">
-                  Visit note • {note.mainTreatment}
+                  Visit note • {note.appointmentId}
                 </span>
 
                 <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-[10px] font-medium text-gray-700">
@@ -143,7 +148,7 @@ export const PatientDocuments = () => {
 
               {/* Title */}
               <h3 className="text-sm font-semibold text-gray-900">
-                {note.additionalTreatment_1}
+                {note.description}
               </h3>
 
               {/* Doctor + Details */}

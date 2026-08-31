@@ -142,7 +142,7 @@ function CustomCalendarHeader(
 
   return (
     <div
-      className=" h-[32px] w-[300px] flex items-center justify-between mb-[8px] "
+      className=" h-[36px] w-[300px] flex items-center justify-between mb-[8px] "
     >
       <button
         type="button"
@@ -357,7 +357,7 @@ export default function Calendar({
     >
       {variant === "calendar" ? (
         <div
-          className={` w-[348px] h-[361px] flex rounded-[8px] border bg-white p-[24px] shadow-sm ${
+          className={` w-[348px] h-[389px] flex rounded-[8px] border bg-white p-[24px] shadow-sm ${
             selectedDate
               ? "border-gray-200"
               : "border-red-500"
@@ -367,14 +367,14 @@ export default function Calendar({
   {...commonProps}
   views={["day"]}
   openTo="day"
-  showDaysOutsideCurrentMonth
+            showDaysOutsideCurrentMonth
+            fixedWeekNumber={6}
   dayOfWeekFormatter={(date) => date.format("dd")}
   sx={{
     "& .MuiDayCalendar-root": {
       width: "300px",
-      height: "275px",
-      minHeight: "275px",
-      maxHeight: "275px",
+      height:"340px",
+      
       padding: 0,
       margin: 0,
       overflow: "hidden",
@@ -382,16 +382,16 @@ export default function Calendar({
 
     "& .MuiDayCalendar-header": {
       width: "300px",
-      height: "52px",
-      margin: 0,
-      marginBottom: "8px",
+      height: "36px", 
+      margin: 0,    
+      display:"flex",
       justifyContent: "space-between",
       alignItems:"center"
     },
 
     "& .MuiDayCalendar-weekContainer": {
       width: "300px",
-      height: "36px",
+    
      
       marginBottom: "8px",
        "&:last-child": {
@@ -401,16 +401,19 @@ export default function Calendar({
     },
 
     "& .MuiDayCalendar-slideTransition": {
-      height: "215px",
-      minHeight: "215px",
+      height:"280px",
+     
       overflow: "hidden",
     },
 
     "& .MuiDayCalendar-monthContainer": {
+      height:"280px",
       overflow: "hidden",
     },
     "& .MuiDayCalendar-weekDayLabel": {
+     height:"36px",
       fontSize: "14px",
+      marginBottom:"8px"
       
 },
 
@@ -427,7 +430,8 @@ export default function Calendar({
   </label>
 
   <DatePicker
-    {...commonProps}
+              {...commonProps}
+              showDaysOutsideCurrentMonth
     format="DD.MM.YYYY"
     slotProps={{
       textField: {

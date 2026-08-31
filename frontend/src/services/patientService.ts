@@ -60,6 +60,13 @@ export const patientsService = {
     
 
   },
+ getPatientNotes: async (patientId: number) => {
+  const response = await httpClient.get(
+    `/patients/${patientId}/clinical-notes/`
+  );
+
+  return response.data;
+},
 
   
 };

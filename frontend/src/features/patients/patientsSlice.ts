@@ -6,13 +6,15 @@ import { getPatientByIdThunk } from "./thunk/getPatientByIdThunk";
 import { updatePatientThunk } from "./thunk/updatePatientThunk";
 import { removePatientThunk } from "./thunk/removePatientThunk";
 import type { PatientQuery } from "./model/patientsQuery";
+import type { Notes } from "@/types/patientNotes";
+import { getPatientNotesThunk } from "./thunk/getPatientNotesVisits";
 
 
 
 interface PatientsState {
   patients: Patient[];
   selectedPatient: Patient | null;
-
+  patientNotes: Notes[] | null;
   loading: boolean;
   error: string | null;
 
@@ -24,6 +26,7 @@ interface PatientsState {
 const initialState: PatientsState = {
   patients: [],
   selectedPatient: null,
+  patientNotes:null,
   total: 0,
   loading: false,
   error: null,
@@ -123,6 +126,19 @@ const patientsSlice = createSlice({
           .addCase(removePatientThunk.rejected, state => {
             state.loading = false;
           }) 
+      .addCase(getPatientNotesThunk.pending, (state) => {
+        state.loading = true;
+      
+      })
+      .addCase(getPatientNotesThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.patientNotes = action.payload.clinicalNotes
+      })
+    .addCase(getPatientNotesThunk.rejected, (state) => {
+        state.loading = false;
+      
+      })
+    
    
   }
    
