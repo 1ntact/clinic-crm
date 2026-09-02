@@ -1,79 +1,101 @@
-import type { Appointment } from "@/types/appointment";
+
 import type { Visit } from "@/types/visit";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createVisitThunk } from "./thunks/createVisitThunk";
 import { getVisitByAppointmentIdThunk } from "./thunks/getVisitsByAppointmentsId";
 import { getVisits } from "./thunks/getVisitsThunk";
+import { getTreatmentsThunk } from "../appointments/thunk/getTreatments";
+import type { Treatment } from "@/types/treatment";
+import { updatePatientNoteThunk } from "./thunks/updateVisit";
 
 interface VisitsState {
   visits: Visit[] | [];
-  currentVisits: Visit | null;
+  currentVisit: Visit | null;
   isActiveVisits: boolean;
-  selectedAppointment: Appointment | null;
+  treatment1: Treatment[];
+  treatment2: Treatment[];
+  
   loading: boolean;
-
 }
-const initialState: VisitsState= {
+const initialState: VisitsState = {
   visits: [],
-  currentVisits: null,
+  currentVisit: null,
   isActiveVisits: false,
-  selectedAppointment: null,
-  loading:false,
-
-}
+  treatment1:[],
+treatment2:[],
+  loading: false,
+};
 
 const visitsSlice = createSlice({
   name: "visits",
   initialState,
-  reducers: {},
-  extraReducers:( builder) => {
+  reducers: {
+    setCurrentVisit: (state, action: PayloadAction<Visit | null>) => {
+      state.currentVisit = action.payload;
+    },
+    resetActiveVisits: (state) => {
+      state.isActiveVisits = false;
+    },
+  },
+  extraReducers: (builder) => {
     builder
-      .addCase(createVisitThunk.pending, state => {
-        state.loading = true
+      .addCase(createVisitThunk.pending, (state) => {
+        state.loading = true;
       })
       .addCase(createVisitThunk.fulfilled, (state) => {
-        
         state.loading = false;
       })
-      .addCase(createVisitThunk.rejected, state => {
-         state.isActiveVisits = false;
+      .addCase(createVisitThunk.rejected, (state) => {
+        state.isActiveVisits = false;
         state.loading = false;
-      }
-       
-    )
-    .addCase(getVisitByAppointmentIdThunk.pending, state => {
-        state.loading = true
+      })
+      .addCase(getVisitByAppointmentIdThunk.pending, (state) => {
+        state.loading = true;
       })
       .addCase(getVisitByAppointmentIdThunk.fulfilled, (state, action) => {
-        
-        state.currentVisits = action.payload;
-        state.isActiveVisits = true
+        state.currentVisit = action.payload;
+        state.isActiveVisits = true;
         state.loading = false;
       })
-      .addCase(getVisitByAppointmentIdThunk.rejected, state => {
-         state.isActiveVisits = false;
+      .addCase(getVisitByAppointmentIdThunk.rejected, (state) => {
+        state.isActiveVisits = false;
         state.loading = false;
-      }
-       
-    )
-     
-      .addCase(getVisits.pending, state => {
-        state.loading = true
+      })
+
+      .addCase(getVisits.pending, (state) => {
+        state.loading = true;
       })
       .addCase(getVisits.fulfilled, (state, action) => {
-        
         state.visits = action.payload;
-        
+
         state.loading = false;
       })
-      .addCase(getVisits.rejected, state => {
+      .addCase(getVisits.rejected, (state) => {
+        state.loading = false;
+      })
+
+     .addCase(getTreatmentsThunk.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getTreatmentsThunk.fulfilled, (state, action) => {
+        state.treatment2 = action.payload;
+console.log("treatmentsadditional",action.payload)
+        state.loading = false;
+      })
+      .addCase(getTreatmentsThunk.rejected, (state) => {
+        state.loading = false;
+      })
+     .addCase(updatePatientNoteThunk.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updatePatientNoteThunk.fulfilled, (state) => {
        
         state.loading = false;
-      }
-       
-    )
-   
-  }
-  
-})
-export default visitsSlice.reducer
+      })
+      .addCase(updatePatientNoteThunk.rejected, (state) => {
+        state.loading = false;
+      })
+  },
+});
+export const { setCurrentVisit, resetActiveVisits } = visitsSlice.actions;
+export default visitsSlice.reducer;

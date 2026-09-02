@@ -60,7 +60,7 @@ export const DashboardPage = () => {
         getAppointmentsThunk({
           appointmentDate: now.toISOString().split("T")[0],
           appointmentStatus: "scheduled",
-          pageSize: 3,
+          pageSize: 8,
           page: 1,
           ...(access?.isDoctor && access.doctorId) ? {
             doctorId:access.doctorId,

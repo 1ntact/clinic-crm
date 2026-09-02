@@ -1,15 +1,24 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
+import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { ButtonPage } from "@/components/button/ButtonsPage";
+import { getTreatmentsThunk } from "@/features/appointments/thunk/getTreatments";
 import { getPatientNotesThunk } from "@/features/patients/thunk/getPatientNotesVisits";
-
-import { buttonStyles } from "@/shared/styles/formButtonStyles";
-import { useEffect } from "react";
-
+import { VisitEditForm } from "@/features/visits/visitsEditForm";
 import {
+  resetActiveVisits,
+  setCurrentVisit,
+} from "@/features/visits/visitsSlice";
+import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import {
+  FiCheck,
   FiChevronDown,
   FiChevronLeft,
   FiChevronRight,
+  FiChevronUp,
   FiDownload,
+  FiEdit2,
   FiPlus,
   FiPrinter,
   FiSearch,
@@ -17,24 +26,40 @@ import {
 import { useParams } from "react-router-dom";
 
 export const PatientDocuments = () => {
-  const { currentVisits, visits } = useAppSelector(state => state.visit)
-  const { patientNotes } = useAppSelector(state => state.patient)
-  const {patientId} = useParams()
- const dispatch = useAppDispatch()
- console.log("pppppppppppppp",patientNotes)
+  const [expandedNotes, setExpandedNotes] = useState<number[]>([]);
+  const [editingVisitId, setEditingVisitId] = useState<number | null>(null);
+  const [addNote, setAddNote] = useState(true)
+  const { currentVisit: currentVisits, isActiveVisits,loading } = useAppSelector(
+    (state) => state.visit,
+  );
+  const { patientNotes } = useAppSelector((state) => state.patient);
+  const { patientId } = useParams();
+  const dispatch = useAppDispatch();
+  console.log("Пацієнта записки", patientNotes);
+  console.log("Каррент візіт", currentVisits);
+  console.log("актів стан візіт", isActiveVisits);
   useEffect(() => {
-    
     const getAllVisits = async () => {
       try {
-        await dispatch(getPatientNotesThunk(Number(patientId)))
+        await dispatch(getPatientNotesThunk(Number(patientId)));
+       await dispatch(getTreatmentsThunk(false))
+               
+      } catch (e) {
+        console.log(e);
       }
-      catch (e) {
-        console.log(e)
-        
-      }
-    }
-    getAllVisits()
-  },[dispatch])
+    };
+    getAllVisits();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!currentVisits || !isActiveVisits || !patientNotes?.length) return;
+
+    const createdVisitNote = patientNotes.find(
+      (note) => note.visitId === currentVisits.visitId,
+    );
+
+    if (!createdVisitNote) return;
+  }, [currentVisits, patientNotes]);
   const files = [
     {
       name: "Panoramic teeth",
@@ -74,42 +99,75 @@ export const PatientDocuments = () => {
     },
   ];
 
-  const notes = [
-    {
-      date: "12.03.2024",
-      title: "Initial examination - tooth 36",
-      doctor: "Dr.Linda Brown",
-      avatar: "https://i.pravatar.cc/40?img=47",
-    },
-    {
-      date: "12.06.2024",
-      title: "Endodontic treatment - tooth 24",
-      doctor: "Dr.Linda Brown",
-      avatar: "https://i.pravatar.cc/40?img=32",
-    },
-    {
-      date: "12.03.2024",
-      title: "Root canal treatment - tooth 34",
-      doctor: "Dr.Linda Brown",
-      avatar: "https://i.pravatar.cc/40?img=32",
-    },
-  ];
+  const toogleNotesForm = () => {
+    
+    
+    setAddNote((prev) => !prev)
+  }
+ 
+  const handleEditNote = (visitId: number) => {
+    const visit = patientNotes?.find((visit) => visit.visitId === visitId);
 
+    if (!visit) return;
+    dispatch(resetActiveVisits());
+    dispatch(setCurrentVisit(visit));
+
+    setExpandedNotes([visitId]);
+    setEditingVisitId(visitId);
+  };
+
+  const toggleDetails = (visitId: number) => {
+    setExpandedNotes((prev) =>
+      prev.includes(visitId)
+        ? prev.filter((id) => id !== visitId)
+        : [...prev, visitId],
+    );
+
+    setEditingVisitId(null);
+  };
   return (
     <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1.45fr_1fr]">
-       {/* ===================== CLINICAL NOTES ===================== */}
+        {addNote && (
+             <AsideMenu
+               handleAside={toogleNotesForm}
+               content={<VisitEditForm visit={currentVisits}/>}
+               footer={
+                 <>
+                   <ButtonPage
+                     className={buttonStyles.formCancel}
+                     onClick={toogleNotesForm}
+                   >
+                     <span className=" text-[#172554]">Cancel</span>
+                   </ButtonPage>
+     
+                   <ButtonPage
+                     disabled={loading}
+                     type="submit"
+                     form="visit-edit"
+                     className={buttonStyles.formSubmit}
+                   >
+                    Save note
+                   </ButtonPage>
+                 </>
+               }
+               title={"ADD NOTE"}
+               description={"Add clinical note for this visit"}
+             />
+           )}
+      {/* ===================== CLINICAL NOTES ===================== */}
 
       <section className="rounded-lg border border-gray-200 bg-white p-5">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[12px] font-semibold uppercase text-gray-700">
-            Clinical Notes (5)
+            Clinical Notes ({patientNotes?.length ?? 0})
           </h2>
 
           <ButtonPage
             type="button"
             disabled={!currentVisits}
             className={buttonStyles.addNote}
+            onClick={() => {toogleNotesForm()}}
           >
             <FiPlus size={14} />
             Add note
@@ -118,106 +176,236 @@ export const PatientDocuments = () => {
 
         {/* Search */}
         <div className="mb-5 flex h-10 items-center gap-3 rounded-lg border border-gray-200 px-3">
-          <FiSearch
-            size={15}
-            className="shrink-0 text-gray-500"
-          />
+          <FiSearch size={15} className="shrink-0 text-gray-400" />
 
-          <span className="text-xs text-gray-500">
-            Search notes
-          </span>
+          <input
+            type="text"
+            placeholder="Search notes"
+            className="w-full bg-transparent text-xs text-gray-700 outline-none placeholder:text-gray-400"
+          />
         </div>
 
         {/* Notes */}
-       {patientNotes && <div>
-          {patientNotes.map((note) => (
-            <div
-              key={note.visitId}
-              className="border-b border-gray-100 py-3.5"
-            >
-              {/* Date + Status */}
-              <div className="mb-1 flex items-center justify-between gap-3">
-                <span className="text-[10px] font-medium uppercase text-gray-500">
-                  Visit note • {note.appointmentId}
-                </span>
+        <div>
+          {patientNotes?.map((note) => {
+            const isExpanded = expandedNotes.includes(note.visitId);
 
-                <span className="shrink-0 rounded-full bg-gray-100 px-3 py-1 text-[10px] font-medium text-gray-700">
-                  Completed
-                </span>
-              </div>
+            return (
+              <article
+                key={note.visitId}
+                className="border-b border-gray-100 py-3.5 last:border-b-0"
+              >
+                {/* Date + edit */}
+                <div className="mb-1 flex items-start justify-between">
+                  <div>
+                    <p className="mb-1 text-[9px] font-medium text-gray-400">
+                      {dayjs(note.visitDate).format("DD.MM.YYYY")}
+                    </p>
 
-              {/* Title */}
-              <h3 className="text-sm font-semibold text-gray-900">
-                {note.description}
-              </h3>
+                    <h3 className="text-[16px] font-semibold text-[#030712]">
+                      {note.mainTreatment}
+                    </h3>
+                  </div>
 
-              {/* Doctor + Details */}
-              <div className="mt-3 flex items-center justify-between">
-                {/* Doctor */}
-                <div className="flex items-center gap-2">
-                  <img
-                    src={note.avatar}
-                    alt=""
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-
-                  <span className="text-[11px] text-gray-500">
-                    {note.doctor}
-                  </span>
+                  {/* Edit */}
+                  <ButtonPage
+                    type="button"
+                    onClick={() => handleEditNote(note.visitId)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                    aria-label="Edit note"
+                  >
+                    {editingVisitId === note.visitId ? (
+                      <FiCheck size={13} />
+                    ) : (
+                      <FiEdit2 size={13} />
+                    )}
+                  </ButtonPage>
                 </div>
 
-                {/* More details */}
-                <button
-                  type="button"
-                  className="flex items-center gap-1 text-xs font-medium text-blue-600 transition hover:text-blue-700"
-                >
-                  More details
-                  <FiChevronDown size={13} />
-                </button>
-              </div>
+                {/* Expanded content */}
+
+                {isExpanded && (
+                  <div className="mt-4 space-y-4">
+                    {currentVisits?.visitId === note.visitId && (
+                      
+                       <div className="w-full">
+      {/* Diagnosis */}
+      {note.diagnosis && (
+        <div
+          className="
+            mb-[30px]
+            rounded-[8px]
+            border
+            border-[#DDE1E6]
+            bg-[#F3F4F6]
+            px-[9px]
+            py-[9px]
+          "
+        >
+          <p
+            className="
+              mb-[4px]
+              text-[12px]
+              font-semibold
+              leading-[16px]
+              uppercase
+              text-[#1F2937]
+            "
+          >
+            Diagnosis
+          </p>
+
+          <p
+            className="
+              text-[14px]
+              font-normal
+              leading-[24px]
+              text-[#6B7280]
+            "
+          >
+            {note.diagnosis}
+          </p>
+        </div>
+      )}
+
+      {/* Clinical observation */}
+      {note.description && (
+        <div className="mb-[30px] px-[9px]">
+          <p
+            className="
+              mb-[9px]
+              text-[10px]
+              font-medium
+              leading-[16px]
+              uppercase
+              text-[#6B7280]
+            "
+          >
+            Clinical observation
+          </p>
+
+          <p
+            className="
+              text-[14px]
+              font-normal
+              leading-[24px]
+              text-[#1F2937]
+            "
+          >
+            {note.description}
+          </p>
+        </div>
+      )}
+
+      {/* Recommendation */}
+      {note.recommendation && (
+        <div className="px-[9px]">
+          <p
+            className="
+              mb-[9px]
+              text-[10px]
+              font-medium
+              leading-[16px]
+              uppercase
+              text-[#6B7280]
+            "
+          >
+            Recommendation
+          </p>
+
+          <p
+            className="
+              whitespace-pre-line
+              text-[12px]
+              font-normal
+              leading-[24px]
+              text-[#1F2937]
+            "
+          >
+            {note.recommendation}
+          </p>
+        </div>
+      )}
+    </div> 
+                    )}
+                  </div>
+                )}
+
+                {/* Doctor + More details */}
+                <div className="mt-3 flex items-center justify-between">
+                  {/* Doctor */}
+                  <div className="flex items-center gap-2">
+                    <img
+                      src="/doctor.jpg"
+                      alt=""
+                      className="h-[24px] w-[24px] rounded-full object-cover"
+                    />
+
+                    <span className="text-[12px] text-gray-500">
+                      Dr.{note.doctorFirstName} {note.doctorLastName}
+                    </span>
+                  </div>
+
+                  {/* More / Less details */}
+
+                  <ButtonPage
+                    type="button"
+                    onClick={() => toggleDetails(note.visitId)}
+                    className="flex items-center gap-1 text-[14px] border-0 font-medium text-blue-600 transition hover:text-blue-700"
+                  >
+                    {isExpanded ? "Less details" : "More details"}
+
+                    {isExpanded ? (
+                      <FiChevronUp size={12} />
+                    ) : (
+                      <FiChevronDown size={12} />
+                    )}
+                  </ButtonPage>
+                </div>
+              </article>
+            );
+          })}
+          {/* Notes Pagination */}
+          <div className="mt-4 flex justify-end">
+            <div className="flex items-center gap-1">
+              {/* Previous */}
+              <button
+                type="button"
+                className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
+              >
+                <FiChevronLeft size={14} />
+                Previous
+              </button>
+
+              {/* 1 */}
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-xs text-gray-700"
+              >
+                1
+              </button>
+
+              {/* 2 */}
+              <button
+                type="button"
+                className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
+              >
+                2
+              </button>
+
+              {/* Next */}
+              <button
+                type="button"
+                className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
+              >
+                Next
+                <FiChevronRight size={14} />
+              </button>
             </div>
-          ))}
-        </div>}
-
-        {/* Notes Pagination */}
-        <div className="mt-4 flex justify-end">
-          <div className="flex items-center gap-1">
-            {/* Previous */}
-            <button
-              type="button"
-              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-            >
-              <FiChevronLeft size={14} />
-              Previous
-            </button>
-
-            {/* 1 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-xs text-gray-700"
-            >
-              1
-            </button>
-
-            {/* 2 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
-            >
-              2
-            </button>
-
-            {/* Next */}
-            <button
-              type="button"
-              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-            >
-              Next
-              <FiChevronRight size={14} />
-            </button>
           </div>
         </div>
       </section>
+
       {/* ===================== FILES ===================== */}
 
       <section className="rounded-lg border border-gray-200 bg-white p-5">
@@ -240,9 +428,7 @@ export const PatientDocuments = () => {
             </button>
           </p>
 
-          <p className="mt-1 text-xs text-gray-400">
-            Maximum size: 50MB
-          </p>
+          <p className="mt-1 text-xs text-gray-400">Maximum size: 50MB</p>
         </div>
 
         {/* Table */}
@@ -280,17 +466,11 @@ export const PatientDocuments = () => {
                 {file.name}
               </span>
 
-              <span className="text-[12px] text-gray-500">
-                {file.type}
-              </span>
+              <span className="text-[12px] text-gray-500">{file.type}</span>
 
-              <span className="text-[12px] text-gray-500">
-                {file.date}
-              </span>
+              <span className="text-[12px] text-gray-500">{file.date}</span>
 
-              <span className="text-[12px] text-gray-500">
-                {file.size}
-              </span>
+              <span className="text-[12px] text-gray-500">{file.size}</span>
 
               <div className="flex items-center gap-2">
                 <button
@@ -313,9 +493,7 @@ export const PatientDocuments = () => {
 
         {/* Files Pagination */}
         <div className="mt-4 flex items-center justify-between">
-          <span className="text-[11px] text-gray-500">
-            01 pages of 05
-          </span>
+          <span className="text-[11px] text-gray-500">01 pages of 05</span>
 
           <div className="flex items-center gap-1">
             {/* Previous */}
@@ -375,8 +553,6 @@ export const PatientDocuments = () => {
           </div>
         </div>
       </section>
-
-     
     </div>
   );
 };

@@ -6,8 +6,10 @@ import { getPatientByIdThunk } from "./thunk/getPatientByIdThunk";
 import { updatePatientThunk } from "./thunk/updatePatientThunk";
 import { removePatientThunk } from "./thunk/removePatientThunk";
 import type { PatientQuery } from "./model/patientsQuery";
-import type { Notes } from "@/types/patientNotes";
+
 import { getPatientNotesThunk } from "./thunk/getPatientNotesVisits";
+
+import type { Notes } from "@/types/patientNotes";
 
 
 

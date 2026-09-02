@@ -133,4 +133,15 @@ export const formValidation = {
       message: "Notes cannot exceed 255 characters",
     },
   },
+   tooth:{
+    required: "Tooth is required",
+    min: {
+      value: 1,
+      message: "Enter a valid tooth number",
+    },
+    max: {
+      value: 36,
+      message: "Enter a valid tooth number",
+    },
+  }
 };
