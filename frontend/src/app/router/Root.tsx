@@ -91,7 +91,9 @@ export const Root: React.FC = () => {
   <Route
     path={ROUTES.APPOINTMENTS}
     element={<AppointmentsPage />}
-  />
+            />
+         
+            
   {/* Doctors list */}
   <Route
     path={ROUTES.DOCTORS}
@@ -121,11 +123,13 @@ export const Root: React.FC = () => {
 
 
 <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
-  {/* Current logged-in doctor */}
+            {/* Current logged-in doctor */}
+            
   <Route
     path={ROUTES.MYDOCTOR}
     element={<DoctorDetailsPage />}
-  >
+            >
+              
     <Route
       index
       element={<DoctorOverview />}

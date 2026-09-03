@@ -24,7 +24,7 @@ import { patientManagmentCard } from "@/features/statistics/model/patientManagme
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
 import { getAccess } from "@/premissoons/getAccessPremissions";
-import { statusOptions } from "@/features/appointments/model/statusAppointments";
+import { hygieneStatus } from "@/features/appointments/model/statusPatientHygiene";
 
 
 
@@ -33,7 +33,6 @@ export const PatientsPage = () => {
   const user = useAppSelector(state => state.auth.user)
   const access = getAccess(user);
   const { loading, patients, query, total } = useAppSelector(state => state.patient)
-  console.log("pacientotat", patients)
   const cards = useAppSelector(state=>state.statistic.statistics.patientsManagmentCard)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
@@ -170,7 +169,7 @@ export const PatientsPage = () => {
                     <Td className="font-medium text-[#1F2937]">{`${patient.totalVisits} visits`}</Td>
   
           
-                     <Td>{statusOptions.map((status) =>
+                     <Td>{hygieneStatus.map((status) =>
                           
                                             status.value ===patient.status && (
                                               <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>

@@ -14,6 +14,7 @@ from schemas.visits import (
     VisitCreate,
     VisitResponse,
     VisitUpdate,
+    PatientClinicalNotesResponse,
 )
 from security.permissions import DoctorAdminOrSuperAdminDep
 from services.visits import VisitService
@@ -30,6 +31,7 @@ def raise_http_error(error: ValueError) -> NoReturn:
         "Visit not found.",
         "Visit not found for this appointment.",
         "Appointment not found.",
+        "Patient not found.",
         "Main appointment treatment not found.",
         "Additional treatment not found.",
     }
@@ -83,6 +85,28 @@ async def get_visit_by_appointment(
     try:
         return await service.get_by_appointment_id(
             appointment_id=appointment_id,
+        )
+    except ValueError as error:
+        raise_http_error(error)
+
+
+@router.get(
+    "/by-patient/{patient_id}/clinical-notes/",
+    response_model=PatientClinicalNotesResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_patient_clinical_notes(
+    current_user: DoctorAdminOrSuperAdminDep,
+    patient_id: int = Path(
+        gt=0,
+    ),
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> PatientClinicalNotesResponse:
+    service = VisitService(db)
+
+    try:
+        return await service.get_clinical_notes_by_patient_id(
+            patient_id=patient_id,
         )
     except ValueError as error:
         raise_http_error(error)

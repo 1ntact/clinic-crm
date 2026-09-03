@@ -142,7 +142,7 @@ function CustomCalendarHeader(
 
   return (
     <div
-      className="flex items-center justify-between px-3 py-2"
+      className=" h-[36px] w-[300px] flex items-center justify-between mb-[8px] "
     >
       <button
         type="button"
@@ -250,9 +250,7 @@ export default function Calendar({
       month === query.month &&
       year === query.year
     ) {
-      console.log(
-        "⛔ IGNORE — SAME QUERY MONTH",
-      );
+      
 
       return;
     }
@@ -266,25 +264,7 @@ export default function Calendar({
         query.year !== currentYears
       )
     ) {
-      console.log(
-        "⛔ IGNORE — STALE BACKEND MONTH",
-        {
-          received: {
-            month,
-            year,
-          },
-
-          query: {
-            month: query.month,
-            year: query.year,
-          },
-
-          backend: {
-            month: currentMonth,
-            year: currentYears,
-          },
-        },
-      );
+      
 
       return;
     }
@@ -377,27 +357,71 @@ export default function Calendar({
     >
       {variant === "calendar" ? (
         <div
-          className={`rounded-[8px] border bg-white p-3 shadow-sm ${
+          className={` w-[348px] h-[389px] flex rounded-[8px] border bg-white p-[24px] shadow-sm ${
             selectedDate
               ? "border-gray-200"
               : "border-red-500"
           }`}
         >
-          <DateCalendar
-            {...commonProps}
-            views={["day"]}
-            openTo="day"
+<DateCalendar
+  {...commonProps}
+  views={["day"]}
+  openTo="day"
             showDaysOutsideCurrentMonth
-            dayOfWeekFormatter={(date) =>
-              date.format("dd")
-            }
-            sx={{
-              "& .MuiDayCalendar-weekContainer":
-                {
-                  marginBottom: "8px",
-                },
-            }}
-          />
+            fixedWeekNumber={6}
+  dayOfWeekFormatter={(date) => date.format("dd")}
+  sx={{
+    "& .MuiDayCalendar-root": {
+      width: "300px",
+      height:"340px",
+      
+      padding: 0,
+      margin: 0,
+      overflow: "hidden",
+    },
+
+    "& .MuiDayCalendar-header": {
+      width: "300px",
+      height: "36px", 
+      margin: 0,    
+      display:"flex",
+      justifyContent: "space-between",
+      alignItems:"center"
+    },
+
+    "& .MuiDayCalendar-weekContainer": {
+      width: "300px",
+    
+     
+      marginBottom: "8px",
+       "&:last-child": {
+    marginBottom: 0,
+  },
+      justifyContent: "space-between",
+    },
+
+    "& .MuiDayCalendar-slideTransition": {
+      height:"280px",
+     
+      overflow: "hidden",
+    },
+
+    "& .MuiDayCalendar-monthContainer": {
+      height:"280px",
+      overflow: "hidden",
+    },
+    "& .MuiDayCalendar-weekDayLabel": {
+     height:"36px",
+      fontSize: "14px",
+      marginBottom:"8px"
+      
+},
+
+"& .MuiPickersDay-root": {
+  fontSize: "14px",
+},
+  }}
+/>
         </div>
       ) : (
   <div className="w-1/2">
@@ -406,7 +430,8 @@ export default function Calendar({
   </label>
 
   <DatePicker
-    {...commonProps}
+              {...commonProps}
+              showDaysOutsideCurrentMonth
     format="DD.MM.YYYY"
     slotProps={{
       textField: {

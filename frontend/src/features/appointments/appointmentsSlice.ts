@@ -10,6 +10,7 @@ import type { AppointmentsQuery } from "./model/appointmentQuery";
 import type { Doctor } from "@/types/doctor";
 import type { AvailableTimeSlot } from "./model/avalibleTimeSlots";
 import type { Treatment } from "@/types/treatment";
+import { getAppointmentByIdThunk } from "./thunk/getAppointmentByIdThunk";
 
 interface CalendarState {
   fullyBookedTimeCount: number;
@@ -116,12 +117,9 @@ const appointmentsSlice = createSlice({
     },
 
     setQuery(state, action: PayloadAction<Partial<CalendarQuery>>) {
-       console.log(
-    "🔥 SET QUERY DISPATCHED:",
-    action.payload,
-  );
+    
 
-  console.trace("🔥 SET QUERY TRACE");
+  
       state.calendar.query = {
         
         ...state.calendar.query,
@@ -221,7 +219,18 @@ const appointmentsSlice = createSlice({
       })
       .addCase(getAppointmentsThunk.rejected, (state) => {
         state.appointmentsLoading = false;
-      });
+      })
+      .addCase(getAppointmentByIdThunk.pending, (state => {
+        state.appointmentsLoading = true
+      }))
+    .addCase(getAppointmentByIdThunk.fulfilled, (state, action) => {
+      state.appointmentsLoading = false;
+      state.selectedAppointment = action.payload;
+    })
+     .addCase(getAppointmentByIdThunk.rejected, (state => {
+       state.appointmentsLoading = false;
+      }))
+    
   },
 });
 export const {

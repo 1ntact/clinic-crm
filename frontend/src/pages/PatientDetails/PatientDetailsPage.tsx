@@ -16,21 +16,24 @@ import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
 import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
 import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
-
-
+import { SiTicktick } from "react-icons/si";
+import { resetActiveVisits } from "@/features/visits/visitsSlice";
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const [modal, setOpenModal] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
+  const {  isActiveVisit } =
+    useAppSelector((state) => state.visit);
   const { patientId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!patientId) return;
-    dispatch(getPatientByIdThunk(Number(patientId)))
-      dispatch(patientDetailsStatisticThunk(Number(patientId)));
+    dispatch(getPatientByIdThunk(Number(patientId)));
+
+    dispatch(patientDetailsStatisticThunk(Number(patientId)));
   }, [dispatch, patientId]);
 
   const handleAside = () => setOpenAside((prev) => !prev);
@@ -59,18 +62,25 @@ export const PatientDetailsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<PatientEditForm  />}
-          footer={<>
-                <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
-                 <span className=" text-[#172554]">Cancel</span>
-                </ButtonPage>
+          content={<PatientEditForm />}
+          footer={
+            <>
+              <ButtonPage
+                className={buttonStyles.formCancel}
+                onClick={handleAside}
+              >
+                <span className=" text-[#172554]">Cancel</span>
+              </ButtonPage>
 
-            <ButtonPage type="submit"
-              form="patient-edit"
-              className={buttonStyles.formSubmit}>
-                  Update patient
-            </ButtonPage>
-                </>}
+              <ButtonPage
+                type="submit"
+                form="patient-edit"
+                className={buttonStyles.formSubmit}
+              >
+                Update patient
+              </ButtonPage>
+            </>
+          }
           title={"EDIT PATIENT"}
           description={"Fill in the details below"}
         />
@@ -92,44 +102,56 @@ export const PatientDetailsPage = () => {
               <span className="mx-2">/</span>
 
               <span className="font-medium text-gray-900">
-                 {selectedPatient?.firstName} {selectedPatient?.lastName}
+                {selectedPatient?.firstName} {selectedPatient?.lastName}
               </span>
             </div>
 
-            <div className="w-[250px] flex gap-4">
-              <ButtonPage
-                className={buttonStyles.removeButton}
-                icon={<IoTrash className="mr-2 text-[#DC2626]" />}
-                onClick={() => setOpenModal(true)}
-              >
-                Remove 
-              </ButtonPage>
+            {!isActiveVisit ? (
+              <div className="w-[250px] flex gap-4">
+                <ButtonPage
+                  className={buttonStyles.removeButton}
+                  icon={<IoTrash className="mr-2 text-[#DC2626]" />}
+                  onClick={() => setOpenModal(true)}
+                >
+                  Remove
+                </ButtonPage>
 
+                <ButtonPage
+                  className={buttonStyles.editButton}
+                  icon={<TfiPencil className="mr-2" />}
+                  onClick={handleAside}
+                >
+                  Edit Patient
+                </ButtonPage>
+              </div>
+            ) : (
               <ButtonPage
-                className={buttonStyles.editButton}
-                icon={<TfiPencil className="mr-2" />}
-                onClick={handleAside}
+                className={buttonStyles.confirmVisits}
+                icon={<SiTicktick className="mr-2" />}
+                    onClick={() => {
+                  
+                     dispatch( resetActiveVisits())
+                    }}
               >
-                Edit Patient
+                Complete visit
               </ButtonPage>
-            </div>
+            )}
           </section>
 
           <section className="flex items-center justify-between ">
             {!loading && selectedPatient && (
-                <UserProfile type="patient"
-                avatar='patient.jpg'  
-                  selectedUser={selectedPatient} />
+              <UserProfile
+                type="patient"
+                avatar="patient.jpg"
+                selectedUser={selectedPatient}
+              />
             )}
           </section>
         </div>
       )}
-       <SmallNavbar
-        arrayNavigation={patientDetailsNavigation} />
-      
-    
-     
-      <Outlet/>
+      <SmallNavbar arrayNavigation={patientDetailsNavigation} />
+
+      <Outlet />
     </>
   );
 };
