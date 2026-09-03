@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction  } from "@reduxjs/toolkit";
 import { getAppointmentsDashboardThunk } from "./thunk/getAppointmentsDashboardThunk";
 import type { CalendarQuery } from "./model/calendarQuery";
 import { getAvailableTimeSlotsThunk } from "./thunk/getAvailableSlots";
@@ -10,11 +10,15 @@ import type { AppointmentsQuery } from "./model/appointmentQuery";
 import type { Doctor } from "@/types/doctor";
 import type { AvailableTimeSlot } from "./model/avalibleTimeSlots";
 import type { Treatment } from "@/types/treatment";
+import { getAppointmentByIdThunk } from "./thunk/getAppointmentByIdThunk";
 
 interface CalendarState {
   fullyBookedTimeCount: number;
   availableTimeCount: number;
   availableDays: number[];
+  currentYears: number;
+  currentMonth: number;
+  dayInMonth: number;
   fullyBookedDays: number[];
   availableTime: AvailableTimeSlot[];
   selectedDate: string | null;
@@ -71,6 +75,9 @@ const initialState: AppointmentsState = {
   appointmentsLoading: false,
 
   calendar: {
+     currentMonth: new Date().getMonth() + 1,
+  currentYears: new Date().getFullYear(),
+    dayInMonth:0,
     availableDays: [],
     fullyBookedDays: [],
     availableTime: [],
@@ -110,9 +117,14 @@ const appointmentsSlice = createSlice({
     },
 
     setQuery(state, action: PayloadAction<Partial<CalendarQuery>>) {
+    
+
+  
       state.calendar.query = {
+        
         ...state.calendar.query,
         ...action.payload,
+      
       };
     },
     resetQuery(state) {
@@ -151,8 +163,10 @@ const appointmentsSlice = createSlice({
       })
       .addCase(getAppointmentsDashboardThunk.fulfilled, (state, action) => {
         state.calendar.availableDays = action.payload.calendar.availableDays;
-        state.calendar.fullyBookedDays =
-          action.payload.calendar.fullyBookedDays;
+        state.calendar.fullyBookedDays = action.payload.calendar.fullyBookedDays;
+        state.calendar.currentMonth = action.payload.calendar.month;
+        state.calendar.currentYears = action.payload.calendar.year;
+        state.calendar.dayInMonth = action.payload.calendar.dayInMonth;
         state.statistic = action.payload.statistic;
         state.calendar.calendarLoading = false;
         console.log("забукані дні", action.payload);
@@ -205,7 +219,18 @@ const appointmentsSlice = createSlice({
       })
       .addCase(getAppointmentsThunk.rejected, (state) => {
         state.appointmentsLoading = false;
-      });
+      })
+      .addCase(getAppointmentByIdThunk.pending, (state => {
+        state.appointmentsLoading = true
+      }))
+    .addCase(getAppointmentByIdThunk.fulfilled, (state, action) => {
+      state.appointmentsLoading = false;
+      state.selectedAppointment = action.payload;
+    })
+     .addCase(getAppointmentByIdThunk.rejected, (state => {
+       state.appointmentsLoading = false;
+      }))
+    
   },
 });
 export const {

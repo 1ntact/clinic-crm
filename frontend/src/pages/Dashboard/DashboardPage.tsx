@@ -18,13 +18,23 @@ import { Th } from "@/components/table/Th";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { Td } from "@/components/table/Td";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import { statusOptions } from "@/features/appointments/model/statusAppointments";
 import { useNavigate } from "react-router-dom";
+import { getAccess } from "@/premissoons/getAccessPremissions";
 import { EmptyState } from "@/components/emptyState/EmptyState";
+import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
+
+import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
+import { createVisitThunk } from "@/features/visits/thunks/createVisitThunk";
+import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
+import { getVisitByAppointmentIdThunk } from "@/features/visits/thunks/getVisitsByAppointmentsId";
+
 
 export const DashboardPage = () => {
+  
+  const {selectedAppointment}=useAppSelector(state=>state.appointment)
   const userData = useAppSelector((state) => state.auth.user);
+   const access = getAccess(userData);
   const cards = useAppSelector((state) => state.statistic.statistics?.cards);
   const revenue = useAppSelector(
     (state) => state.statistic.statistics?.weeklyRevenue,
@@ -37,24 +47,31 @@ export const DashboardPage = () => {
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  dayjs.extend(utc);
+
   const [aside, setOpenAside] = useState(false);
+  
   const now = new Date();
   const nowTime = now.toLocaleDateString("uk-UA");
   useEffect(() => {
     const getStatistic = async () => {
+      dispatch(setSelectedAppointment(null))
       dispatch(dashboardStatisticsThunk());
       dispatch(
         getAppointmentsThunk({
           appointmentDate: now.toISOString().split("T")[0],
           appointmentStatus: "scheduled",
-          pageSize: 3,
+          pageSize: 8,
           page: 1,
+          ...(access?.isDoctor && access.doctorId) ? {
+            doctorId:access.doctorId,
+          }:{}
         }),
       );
     };
     getStatistic();
   }, []);
+
+
 
   const currentDay = now.toLocaleDateString("en-US", {
     weekday: "short",
@@ -65,14 +82,46 @@ export const DashboardPage = () => {
   });
 
   const handleAside = () => setOpenAside((prev) => !prev);
+
+const handleCreateVisit = async () => {
+  if (!selectedAppointment) return;
+
+  try {
+    await dispatch(
+      createVisitThunk(selectedAppointment.id)
+    ).unwrap();
+   await dispatch(getVisitByAppointmentIdThunk(selectedAppointment.id)).unwrap()
+
+    successToast(
+      <>
+        Visit from
+        <br />
+        Mr. {selectedAppointment.patientFirstName}{" "}
+        {selectedAppointment.patientLastName} opened!
+      </>
+    );
+
+    navigate(`/patients/${selectedAppointment.patientId}/records`);
+  } catch (e) {
+    errorToast(e as string);
+  }
+}
+
+
+   
+  
   return (
     <>
       <div className="flex justify-between items-center  mb-[26px] h-[57px]">
         <PageTitle
-          text={`Hello,${userData?.firstName}!`}
+      text={
+  userData?.role === "doctor"
+    ? `Hello, Dr. ${userData.firstName}!`
+    : `Hello, ${userData?.firstName}!`
+}
           description={nowTime}
         />
-        <div className="flex  gap-4  ">
+      { access?.canCreateUser && <div className="flex  gap-4  ">
           <ButtonPage
             className={buttonStyles.editButton}
             icon={<BiShield className="mr-[8px]" />}
@@ -86,8 +135,9 @@ export const DashboardPage = () => {
           >
             Invite a member
           </ButtonPage>
-        </div>
+        </div>}
       </div>
+      
       {aside && (
         <AsideMenu
           title={"ADD NEW USER"}
@@ -114,7 +164,7 @@ export const DashboardPage = () => {
         />
       )}
 
-      <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+       <>{access.canViewStatistics && <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {cards &&
           dashboardCards.map((card) => (
             <CardStatistics
@@ -127,8 +177,9 @@ export const DashboardPage = () => {
               change={card.change !== null ? Number(card.change) : null}
             />
           ))}
-      </div>
-      <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
+      </div>}
+        
+      {access?.canViewStatistics && <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
         {roundedDiagram && (
           <RoundedDiagram info={roundedDiagram} currentMonth={currentMonth} />
         )}
@@ -141,19 +192,28 @@ export const DashboardPage = () => {
             data={revenue.data}
           />
         )}
-      </div>
+      </div>}</>
       <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
         <div className="flex justify-between mb-[16px]">
           <span className="text-[14px] font-medium text-[#374151]">
             APPOINTMENTS TODAY
           </span>
-          <span
+        {access?.canViewAllAppointments &&  <span
             className="text-[14px] text-[#2563EB] cursor-pointer"
             onClick={() => navigate("/appointments")}
           >
             View all &gt;
-          </span>
+          </span>}
         </div>
+      
+        {selectedAppointment && <ConfirmModal
+          isOpen={selectedAppointment !== null}
+          title={'Start this patient’s visit?'}
+          onCancel={() => (dispatch(setSelectedAppointment(null)))}
+          onConfirm={() => {handleCreateVisit()}}
+          description={'Starting the visit begins the timer and logs the encounter.'}
+          modalClassName="w-[439px] h-[356px]" />
+        }
         <Table>
           <thead>
             <tr className="h-[40px] bg-[#F3F4F6]">
@@ -171,6 +231,11 @@ export const DashboardPage = () => {
               <tr
                 key={appointment.id}
                 className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
+                onClick={() => {
+                  dispatch(setSelectedAppointment(appointment))
+                  
+                  
+                }}
               >
                 <Td>{`#${appointment.id}`}</Td>
 

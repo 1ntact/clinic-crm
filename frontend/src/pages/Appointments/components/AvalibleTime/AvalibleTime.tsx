@@ -45,7 +45,7 @@ useEffect(() => {
   
   return (<>
     
-    <div className=" flex flex-col bg-[#FFFFFF] w-full h-[361px] rounded-[8px] px-[24px] py-[16px]">
+    <div className=" flex flex-col bg-[#FFFFFF] w-full h-[389px] rounded-[8px] px-[24px] py-[16px]">
      
       <div className="mb-[24px]">
         <h1 className="text-[14px] text-[#6B7280]">AVALIBLE TIME SLOTS</h1>
@@ -76,7 +76,7 @@ useEffect(() => {
       </div>
       
       
-      <div className=" flex justify-between mb-[45px]">
+      <div className=" flex justify-between mb-[32px]">
         <div className="flex h-[36px]">
         <BaseSelect
           name={"specializationSelect"}
@@ -133,7 +133,7 @@ useEffect(() => {
       </div>
      
       
-      {loading ? <Loader /> : (<div className="grid grid-cols-7 gap-2 mb-[45px]">
+      {loading ? <Loader /> : (<div className="grid grid-cols-7 gap-2 mb-[85px]">
        {availableTime?.length > 0 ? (
   availableTime.map((slot) => (
     <ButtonPage
@@ -164,8 +164,15 @@ useEffect(() => {
   ))
 )}
       </div>)}
-      
-      <span className= " text-[12px] text-[#6B7280]">Click a free slot to schedule a new appointment</span>
+     <div className="flex items-center  gap-2">
+  <div className="w-4 h-px bg-[#D1D5DB]" />
+
+  <span className="text-[12px] text-[#6B7280] whitespace-nowrap">
+    Click a free slot to schedule a new appointment
+  </span>
+
+  <div className="w-full h-px bg-[#D1D5DB]" />
+</div>
     </div>
 
   </>)

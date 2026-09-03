@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import exists, func, or_, select, text
+from sqlalchemy import case, exists, func, or_, select, text, union_all
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models.appointments import (
@@ -250,6 +250,80 @@ class PatientRepository:
         )
 
     @staticmethod
+    def _get_last_hygiene_visit_subquery():
+        hygiene_treatments = [
+            "Professional Cleaning",
+            "Periodontal Cleaning",
+        ]
+
+        main_hygiene_visits = (
+            select(
+                AppointmentModel.patient_id.label("patient_id"),
+                AppointmentModel.date_time.label("hygiene_date"),
+            )
+            .join(
+                TreatmentModel,
+                AppointmentModel.treatment_id == TreatmentModel.id,
+            )
+            .where(
+                AppointmentModel.status == AppointmentStatusEnum.COMPLETED,
+                AppointmentModel.date_time <= func.now(),
+                TreatmentModel.treatment.in_(
+                    hygiene_treatments,
+                ),
+            )
+        )
+
+        hygiene_treatment_ids_subquery = select(
+            TreatmentModel.id
+        ).where(
+            TreatmentModel.treatment.in_(
+                hygiene_treatments,
+            )
+        )
+
+        additional_hygiene_visits = (
+            select(
+                AppointmentModel.patient_id.label("patient_id"),
+                AppointmentModel.date_time.label("hygiene_date"),
+            )
+            .join(
+                VisitModel,
+                VisitModel.appointment_id == AppointmentModel.id,
+            )
+            .where(
+                AppointmentModel.status == AppointmentStatusEnum.COMPLETED,
+                AppointmentModel.date_time <= func.now(),
+                or_(
+                    VisitModel.treatment_add1.in_(
+                        hygiene_treatment_ids_subquery,
+                    ),
+                    VisitModel.treatment_add2.in_(
+                        hygiene_treatment_ids_subquery,
+                    ),
+                ),
+            )
+        )
+
+        hygiene_visits = union_all(
+            main_hygiene_visits,
+            additional_hygiene_visits,
+        ).subquery()
+
+        return (
+            select(
+                hygiene_visits.c.patient_id,
+                func.max(
+                    hygiene_visits.c.hygiene_date,
+                ).label("last_hygiene_visit"),
+            )
+            .group_by(
+                hygiene_visits.c.patient_id,
+            )
+            .subquery()
+        )
+
+    @staticmethod
     def _apply_filters(
         statement,
         last_visit_subquery,
@@ -374,23 +448,24 @@ class PatientRepository:
         last_visit_subquery = self._get_last_visit_subquery()
         total_visits_subquery = self._get_total_visits_subquery()
         last_treatment_subquery = self._get_last_treatment_subquery()
-
-        next_status_subquery = (
-            self._get_next_appointment_status_subquery()
-        )
-        last_status_subquery = (
-            self._get_last_appointment_status_subquery()
-        )
+        last_hygiene_subquery = self._get_last_hygiene_visit_subquery()
 
         total_visits_expression = func.coalesce(
             total_visits_subquery.c.total_visits,
             0,
         )
 
-        status_expression = func.coalesce(
-            next_status_subquery.c.status,
-            last_status_subquery.c.last_status,
-            "new",
+        status_expression = case(
+            (
+                last_hygiene_subquery.c.last_hygiene_visit.is_(None),
+                "no_history",
+            ),
+            (
+                last_hygiene_subquery.c.last_hygiene_visit
+                <= func.now() - text("INTERVAL '6 months'"),
+                "overdue",
+            ),
+            else_="up_to_date",
         )
 
         statement = (
@@ -424,12 +499,8 @@ class PatientRepository:
                 last_treatment_subquery.c.patient_id == PatientModel.id,
             )
             .outerjoin(
-                next_status_subquery,
-                next_status_subquery.c.patient_id == PatientModel.id,
-            )
-            .outerjoin(
-                last_status_subquery,
-                last_status_subquery.c.patient_id == PatientModel.id,
+                last_hygiene_subquery,
+                last_hygiene_subquery.c.patient_id == PatientModel.id,
             )
         )
 

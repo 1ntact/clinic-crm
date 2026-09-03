@@ -17,16 +17,20 @@ import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { doctorDetailsStatisticThunk } from "@/features/statistics/thunk/doctorDetailsStatisticsThunk";
 import { doctorDetailsNavigation } from "@/features/doctors/model/doctorDetailsNavigation";
 import { SmallNavbar } from "./components/SmallNavbar";
+import { getAccess } from "@/premissoons/getAccessPremissions";
 
 export const DoctorDetailsPage = () => {
   const dispatch = useAppDispatch();
   const [aside, setOpenAside] = useState(false);
   const [modal, setOpenModal] = useState(false);
-
-  const { doctorId } = useParams();
+  const user = useAppSelector(state => state.auth.user)
+  const access = getAccess(user);
+  const { doctorId: paramsDoctorId } = useParams();
   const navigate = useNavigate();
   const { selectedDoctor, loading } = useAppSelector((state) => state.doctor);
   const cards = useAppSelector(state => state.statistic.statistics.doctorDetailsCard)
+  
+const doctorId = paramsDoctorId ?? access.doctorId?.toString();
   
   useEffect(() => {
     if (!doctorId) return;
@@ -85,7 +89,7 @@ export const DoctorDetailsPage = () => {
         <Loader />
       ) : (
         <div className="rounded-xl bg-white p-[16px] mb-[16px] shadow-sm">
-          <section className="mb-[16px] flex items-center justify-between">
+         {access.canViewAllDoctors && <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span
                 className="cursor-pointer hover:text-blue-600"
@@ -101,7 +105,7 @@ export const DoctorDetailsPage = () => {
               </span>
             </div>
 
-            <div className="w-[250px] flex gap-3">
+          {access?.canCreateDoctor && < div className="w-[250px] flex gap-3">
               <ButtonPage
                 className={buttonStyles.removeButton}
                 icon={<IoTrash className="mr-2 text-[#DC2626]" />}
@@ -117,8 +121,8 @@ export const DoctorDetailsPage = () => {
               >
                 Edit doctor
               </ButtonPage>
-            </div>
-          </section>
+            </div>}
+          </section>}
 
           <section className="flex items-center justify-between  rounded-[8px] ">
             {!loading && selectedDoctor && (

@@ -14,23 +14,25 @@ import { UserContacts } from "@/components/userContacts/UserContacts";
 import { getAllPatientThunk } from "@/features/patients/thunk/getAllPacientThunk";
 import { Filter } from "@/components/filter/Filter";
 import { setQuery } from "@/features/patients/patientsSlice";
-import { specializations } from "@/features/doctors/model/specialties";
-import { employmentTypes } from "@/features/doctors/model/employmentTypes";
+
 import { Pagination } from "@/components/pagination/Pagination";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+
 import { patientManagementThunk } from "@/features/statistics/thunk/patientManagementThunk";
 import { patientManagmentCard } from "@/features/statistics/model/patientManagmentCardStatistics";
 import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
-import { statusOptions } from "@/features/appointments/model/statusAppointments";
+import { getAccess } from "@/premissoons/getAccessPremissions";
+import { hygieneStatus } from "@/features/appointments/model/statusPatientHygiene";
+
 
 
 export const PatientsPage = () => {
   const [aside, setOpenAside] = useState(false)
+  const user = useAppSelector(state => state.auth.user)
+  const access = getAccess(user);
   const { loading, patients, query, total } = useAppSelector(state => state.patient)
-  console.log("pacientotat", patients)
   const cards = useAppSelector(state=>state.statistic.statistics.patientsManagmentCard)
   const dispatch = useAppDispatch();
   const navigate = useNavigate()
@@ -50,7 +52,7 @@ export const PatientsPage = () => {
     }
     fetchPatient()
   },[dispatch, query])
-dayjs.extend(utc);
+
   return <>
     {aside && (<AsideMenu
       handleAside={handleAside}
@@ -78,10 +80,10 @@ dayjs.extend(utc);
       
           <div className="flex  gap-4  ">
          
-            <ButtonPage className={buttonStyles.createButton}
+           {access?.canCreatePatient && <ButtonPage className={buttonStyles.createButton}
                onClick={handleAside}
               
-              icon={<BiPlus className="mr-[8px]" />} >Add patients</ButtonPage>
+              icon={<BiPlus className="mr-[8px]" />} >Add patients</ButtonPage>}
           </div>
            
     </div>
@@ -102,33 +104,18 @@ dayjs.extend(utc);
     
      <div className="flex  justify-between">
             <Filter
-        className="mb-[16px]"
+        className="mb-[16px] w-full"
         search={query.search}
        
         
-        firstSelectOptions={specializations}
-        secondSelectOptions={employmentTypes}
+     
       onSearchChange={(value) =>
       dispatch(setQuery({ search: value, page: 1 }))
                      }
                   
                      
                    />
-      {/* <Sort
-        userCount={patients.length}
-              sortBy={query.sortBy}
-        sortOrder={query.sortOrder}
-        buttons={sortButtons}
-              onChange={(sortBy, sortOrder) =>
-                dispatch(
-                  setQuery({
-                    sortBy,
-                    sortOrder,
-                    page: 1,
-                  }),
-                )
-              }
-            />  */}
+    
           </div>
    {loading ? (
           <Loader />
@@ -168,22 +155,21 @@ dayjs.extend(utc);
                     </Td>
   
                     <Td>  {
-                                              <>
-                                                <div>
+                                 patient.lastVisitDate? (<> <div>
                                                   {dayjs(patient.lastVisitDate).format("YYYY-MM-DD")}
                                                 </div>
                                                 <div className="font-medium text-[#1F2937]">
-                                                  {dayjs.utc(patient.lastVisitDate).format("HH:mm")}
-                                                </div>
-                                              </>
+                                                  {dayjs(patient.lastVisitDate).format("HH:mm")}
+                                                </div></>) : "New Patient"
+                                              
                                             }</Td>
   
-                    <Td>{patient.treatment}</Td>
+                    <Td>{patient.treatment? patient.treatment : 'Advice'}</Td>
   
                     <Td className="font-medium text-[#1F2937]">{`${patient.totalVisits} visits`}</Td>
   
           
-                     <Td>{statusOptions.map((status) =>
+                     <Td>{hygieneStatus.map((status) =>
                           
                                             status.value ===patient.status && (
                                               <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
