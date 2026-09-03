@@ -6,17 +6,15 @@ import { getPatientByIdThunk } from "./thunk/getPatientByIdThunk";
 import { updatePatientThunk } from "./thunk/updatePatientThunk";
 import { removePatientThunk } from "./thunk/removePatientThunk";
 import type { PatientQuery } from "./model/patientsQuery";
-
 import { getPatientNotesThunk } from "./thunk/getPatientNotesVisits";
-
-import type { Notes } from "@/types/patientNotes";
+import type { Visit } from "@/types/visit";
 
 
 
 interface PatientsState {
   patients: Patient[];
   selectedPatient: Patient | null;
-  patientNotes: Notes[] | null;
+  patientNotes: Visit[] | null;
   loading: boolean;
   error: string | null;
 

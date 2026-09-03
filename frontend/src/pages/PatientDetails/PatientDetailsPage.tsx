@@ -17,15 +17,15 @@ import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patien
 import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
 import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
 import { SiTicktick } from "react-icons/si";
+import { resetActiveVisits } from "@/features/visits/visitsSlice";
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const [modal, setOpenModal] = useState(false);
   const dispatch = useAppDispatch();
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
-  const { currentVisit: currentVisit, isActiveVisits } = useAppSelector(
-    (state) => state.visit,
-  );
+  const {  isActiveVisit } =
+    useAppSelector((state) => state.visit);
   const { patientId } = useParams();
   const navigate = useNavigate();
 
@@ -106,7 +106,7 @@ export const PatientDetailsPage = () => {
               </span>
             </div>
 
-            {!isActiveVisits ? (
+            {!isActiveVisit ? (
               <div className="w-[250px] flex gap-4">
                 <ButtonPage
                   className={buttonStyles.removeButton}
@@ -128,7 +128,10 @@ export const PatientDetailsPage = () => {
               <ButtonPage
                 className={buttonStyles.confirmVisits}
                 icon={<SiTicktick className="mr-2" />}
-                onClick={() => {}}
+                    onClick={() => {
+                  
+                     dispatch( resetActiveVisits())
+                    }}
               >
                 Complete visit
               </ButtonPage>

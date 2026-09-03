@@ -3,7 +3,7 @@ import type { VisitsFormData } from "@/types/visitsFormData";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { updatePatientNoteThunk } from "./thunks/updateVisit";
-import { useAppDispatch } from "@/app/store/hook";
+import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import type { Visit } from "@/types/visit";
 import { getPatientNotesThunk } from "../patients/thunk/getPatientNotesVisits";
 import { useParams } from "react-router-dom";
@@ -11,10 +11,13 @@ import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 
 
 type Props = {
-  visit: Visit  ;
+  visit: Visit | null ;
 }
 
 export const VisitEditForm: React.FC<Props> = ({ visit }) => {
+   const treatments = useAppSelector(
+      (state) => state.visit.treatment2
+    );
   const methods = useForm<VisitsFormData>({
     defaultValues: {
       mainTreatment: "",
@@ -32,24 +35,30 @@ export const VisitEditForm: React.FC<Props> = ({ visit }) => {
   const {patientId} = useParams()
 
   useEffect(() => {
-    if (!visit) return;
+  if (!visit) return;
 
-    reset({
-      // readonly Title
-      mainTreatment: visit.mainTreatment ?? "",
+  const treatment1 = treatments.find(
+    (treatment) => treatment.treatment === visit.additionalTreatment1
+  );
 
-      // additional treatments
-      treatmentAdd1: visit.treatmentAdd1 ?? "",
-      treatmentAdd2: visit.treatmentAdd2 ?? "",
+  const treatment2 = treatments.find(
+    (treatment) => treatment.treatment === visit.additionalTreatment2
+  );
 
-      // visit information
-      diagnosis: visit.diagnosis ?? "",
-      description: visit.description ?? "",
-      recommendation: visit.recommendation ?? "",
-    });
-  }, [visit, reset]);
+  reset({
+    mainTreatment: visit.mainTreatment ?? "",
+
+    treatmentAdd1: treatment1 ? String(treatment1.id) : "",
+    treatmentAdd2: treatment2 ? String(treatment2.id) : "",
+
+    diagnosis: visit.diagnosis ?? "",
+    description: visit.description ?? "",
+    recommendation: visit.recommendation ?? "",
+  });
+}, [visit, treatments, reset]);
 
   const onSubmit = async (data: VisitsFormData) => {
+    if (!visit) return;
     try {
       await dispatch(
         updatePatientNoteThunk({
@@ -58,8 +67,8 @@ export const VisitEditForm: React.FC<Props> = ({ visit }) => {
         })
       ).unwrap();
       await dispatch(getPatientNotesThunk(Number(patientId)))
-      reset();
       
+
       successToast('Note added successfully')
     } catch (e) {
       errorToast(e as string);

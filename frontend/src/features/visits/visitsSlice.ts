@@ -1,4 +1,3 @@
-
 import type { Visit } from "@/types/visit";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createVisitThunk } from "./thunks/createVisitThunk";
@@ -11,18 +10,18 @@ import { updatePatientNoteThunk } from "./thunks/updateVisit";
 interface VisitsState {
   visits: Visit[] | [];
   currentVisit: Visit | null;
-  isActiveVisits: boolean;
+  isActiveVisit: boolean;
   treatment1: Treatment[];
   treatment2: Treatment[];
-  
+
   loading: boolean;
 }
 const initialState: VisitsState = {
   visits: [],
   currentVisit: null,
-  isActiveVisits: false,
-  treatment1:[],
-treatment2:[],
+  isActiveVisit: false,
+  treatment1: [],
+  treatment2: [],
   loading: false,
 };
 
@@ -34,7 +33,7 @@ const visitsSlice = createSlice({
       state.currentVisit = action.payload;
     },
     resetActiveVisits: (state) => {
-      state.isActiveVisits = false;
+      state.isActiveVisit = false;
     },
   },
   extraReducers: (builder) => {
@@ -46,7 +45,7 @@ const visitsSlice = createSlice({
         state.loading = false;
       })
       .addCase(createVisitThunk.rejected, (state) => {
-        state.isActiveVisits = false;
+        state.isActiveVisit = false;
         state.loading = false;
       })
       .addCase(getVisitByAppointmentIdThunk.pending, (state) => {
@@ -54,11 +53,11 @@ const visitsSlice = createSlice({
       })
       .addCase(getVisitByAppointmentIdThunk.fulfilled, (state, action) => {
         state.currentVisit = action.payload;
-        state.isActiveVisits = true;
+        state.isActiveVisit = true;
         state.loading = false;
       })
       .addCase(getVisitByAppointmentIdThunk.rejected, (state) => {
-        state.isActiveVisits = false;
+        state.isActiveVisit = false;
         state.loading = false;
       })
 
@@ -74,27 +73,26 @@ const visitsSlice = createSlice({
         state.loading = false;
       })
 
-     .addCase(getTreatmentsThunk.pending, (state) => {
+      .addCase(getTreatmentsThunk.pending, (state) => {
         state.loading = true;
       })
       .addCase(getTreatmentsThunk.fulfilled, (state, action) => {
         state.treatment2 = action.payload;
-console.log("treatmentsadditional",action.payload)
+        console.log("treatmentsadditional", action.payload);
         state.loading = false;
       })
       .addCase(getTreatmentsThunk.rejected, (state) => {
         state.loading = false;
       })
-     .addCase(updatePatientNoteThunk.pending, (state) => {
+      .addCase(updatePatientNoteThunk.pending, (state) => {
         state.loading = true;
       })
       .addCase(updatePatientNoteThunk.fulfilled, (state) => {
-       
         state.loading = false;
       })
       .addCase(updatePatientNoteThunk.rejected, (state) => {
         state.loading = false;
-      })
+      });
   },
 });
 export const { setCurrentVisit, resetActiveVisits } = visitsSlice.actions;

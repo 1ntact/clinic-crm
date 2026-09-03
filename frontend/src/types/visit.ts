@@ -14,6 +14,8 @@ export type Visit = {
     "additionalTreatment1Price"?: string,
     "additionalTreatment2"?: string,
     "additionalTreatment2Price"?: number
-
+  "visitDate"?: string,
+  doctorFirstName: string,
+doctorLastName:string,
 
 }

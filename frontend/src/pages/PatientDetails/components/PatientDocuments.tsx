@@ -5,14 +5,14 @@ import { getTreatmentsThunk } from "@/features/appointments/thunk/getTreatments"
 import { getPatientNotesThunk } from "@/features/patients/thunk/getPatientNotesVisits";
 import { VisitEditForm } from "@/features/visits/visitsEditForm";
 import {
-  resetActiveVisits,
+  
   setCurrentVisit,
 } from "@/features/visits/visitsSlice";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import {
-  FiCheck,
+  
   FiChevronDown,
   FiChevronLeft,
   FiChevronRight,
@@ -26,18 +26,18 @@ import {
 import { useParams } from "react-router-dom";
 
 export const PatientDocuments = () => {
+  const [aside, setActiveAside] = useState(false)
   const [expandedNotes, setExpandedNotes] = useState<number[]>([]);
-  const [editingVisitId, setEditingVisitId] = useState<number | null>(null);
-  const [addNote, setAddNote] = useState(true)
-  const { currentVisit: currentVisits, isActiveVisits,loading } = useAppSelector(
+  
+  
+  const { currentVisit, isActiveVisit,loading } = useAppSelector(
     (state) => state.visit,
   );
   const { patientNotes } = useAppSelector((state) => state.patient);
   const { patientId } = useParams();
   const dispatch = useAppDispatch();
-  console.log("Пацієнта записки", patientNotes);
-  console.log("Каррент візіт", currentVisits);
-  console.log("актів стан візіт", isActiveVisits);
+
+  
   useEffect(() => {
     const getAllVisits = async () => {
       try {
@@ -52,14 +52,14 @@ export const PatientDocuments = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!currentVisits || !isActiveVisits || !patientNotes?.length) return;
+    if (!currentVisit || !isActiveVisit || !patientNotes?.length) return;
 
     const createdVisitNote = patientNotes.find(
-      (note) => note.visitId === currentVisits.visitId,
+      (note) => note.visitId === currentVisit.visitId,
     );
 
     if (!createdVisitNote) return;
-  }, [currentVisits, patientNotes]);
+  }, [currentVisit, patientNotes]);
   const files = [
     {
       name: "Panoramic teeth",
@@ -100,37 +100,38 @@ export const PatientDocuments = () => {
   ];
 
   const toogleNotesForm = () => {
-    
-    
-    setAddNote((prev) => !prev)
+
+    setActiveAside((prev) => !prev)
   }
  
   const handleEditNote = (visitId: number) => {
     const visit = patientNotes?.find((visit) => visit.visitId === visitId);
 
     if (!visit) return;
-    dispatch(resetActiveVisits());
+    
     dispatch(setCurrentVisit(visit));
 
-    setExpandedNotes([visitId]);
-    setEditingVisitId(visitId);
+   
+  
+    setActiveAside(true)
   };
 
   const toggleDetails = (visitId: number) => {
+    
     setExpandedNotes((prev) =>
       prev.includes(visitId)
         ? prev.filter((id) => id !== visitId)
         : [...prev, visitId],
     );
 
-    setEditingVisitId(null);
+   
   };
   return (
     <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1.45fr_1fr]">
-        {addNote && (
+        {aside && (
              <AsideMenu
                handleAside={toogleNotesForm}
-               content={<VisitEditForm visit={currentVisits}/>}
+               content={<VisitEditForm visit={currentVisit}/>}
                footer={
                  <>
                    <ButtonPage
@@ -165,9 +166,13 @@ export const PatientDocuments = () => {
 
           <ButtonPage
             type="button"
-            disabled={!currentVisits}
+            disabled={!isActiveVisit }
             className={buttonStyles.addNote}
-            onClick={() => {toogleNotesForm()}}
+             onClick={() => {
+    if (!currentVisit) return;
+
+    handleEditNote(currentVisit.visitId);
+  }}
           >
             <FiPlus size={14} />
             Add note
@@ -209,127 +214,62 @@ export const PatientDocuments = () => {
 
                   {/* Edit */}
                   <ButtonPage
+                    disabled={isActiveVisit}
                     type="button"
                     onClick={() => handleEditNote(note.visitId)}
                     className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
                     aria-label="Edit note"
                   >
-                    {editingVisitId === note.visitId ? (
-                      <FiCheck size={13} />
-                    ) : (
+                   
+                    
                       <FiEdit2 size={13} />
-                    )}
+                   
                   </ButtonPage>
                 </div>
 
                 {/* Expanded content */}
 
-                {isExpanded && (
-                  <div className="mt-4 space-y-4">
-                    {currentVisits?.visitId === note.visitId && (
-                      
-                       <div className="w-full">
-      {/* Diagnosis */}
-      {note.diagnosis && (
-        <div
-          className="
-            mb-[30px]
-            rounded-[8px]
-            border
-            border-[#DDE1E6]
-            bg-[#F3F4F6]
-            px-[9px]
-            py-[9px]
-          "
-        >
-          <p
-            className="
-              mb-[4px]
-              text-[12px]
-              font-semibold
-              leading-[16px]
-              uppercase
-              text-[#1F2937]
-            "
-          >
-            Diagnosis
-          </p>
+               {isExpanded && (
+  <div className="mt-4 space-y-4">
 
-          <p
-            className="
-              text-[14px]
-              font-normal
-              leading-[24px]
-              text-[#6B7280]
-            "
-          >
-            {note.diagnosis}
-          </p>
-        </div>
-      )}
+    {note.diagnosis && (
+      <div className="mb-[30px] rounded-[8px] border border-[#DDE1E6] bg-[#F3F4F6] px-[9px] py-[9px]">
+        <p className="mb-[4px] text-[12px] font-semibold uppercase leading-[16px] text-[#1F2937]">
+          Diagnosis
+        </p>
 
-      {/* Clinical observation */}
-      {note.description && (
-        <div className="mb-[30px] px-[9px]">
-          <p
-            className="
-              mb-[9px]
-              text-[10px]
-              font-medium
-              leading-[16px]
-              uppercase
-              text-[#6B7280]
-            "
-          >
-            Clinical observation
-          </p>
+        <p className="text-[14px] font-normal leading-[24px] text-[#6B7280]">
+          {note.diagnosis}
+        </p>
+      </div>
+    )}
 
-          <p
-            className="
-              text-[14px]
-              font-normal
-              leading-[24px]
-              text-[#1F2937]
-            "
-          >
-            {note.description}
-          </p>
-        </div>
-      )}
+    {note.description && (
+      <div className="mb-[30px] px-[9px]">
+        <p className="mb-[9px] text-[10px] font-medium uppercase leading-[16px] text-[#6B7280]">
+          Clinical observation
+        </p>
 
-      {/* Recommendation */}
-      {note.recommendation && (
-        <div className="px-[9px]">
-          <p
-            className="
-              mb-[9px]
-              text-[10px]
-              font-medium
-              leading-[16px]
-              uppercase
-              text-[#6B7280]
-            "
-          >
-            Recommendation
-          </p>
+        <p className="text-[14px] font-normal leading-[24px] text-[#1F2937]">
+          {note.description}
+        </p>
+      </div>
+    )}
 
-          <p
-            className="
-              whitespace-pre-line
-              text-[12px]
-              font-normal
-              leading-[24px]
-              text-[#1F2937]
-            "
-          >
-            {note.recommendation}
-          </p>
-        </div>
-      )}
-    </div> 
-                    )}
-                  </div>
-                )}
+    {note.recommendation && (
+      <div className="px-[9px]">
+        <p className="mb-[9px] text-[10px] font-medium uppercase leading-[16px] text-[#6B7280]">
+          Recommendation
+        </p>
+
+        <p className="whitespace-pre-line text-[12px] font-normal leading-[24px] text-[#1F2937]">
+          {note.recommendation}
+        </p>
+      </div>
+    )}
+
+  </div>
+)}
 
                 {/* Doctor + More details */}
                 <div className="mt-3 flex items-center justify-between">
@@ -365,6 +305,8 @@ export const PatientDocuments = () => {
               </article>
             );
           })}
+
+          
           {/* Notes Pagination */}
           <div className="mt-4 flex justify-end">
             <div className="flex items-center gap-1">
