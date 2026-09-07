@@ -320,7 +320,7 @@ const  navigate = useNavigate()
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<AppointmentCreateForm />}
+          content={<AppointmentCreateForm handleAside={handleAside} />}
           footer={
             <>
               <ButtonPage

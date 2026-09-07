@@ -138,7 +138,7 @@ const appointmentsSlice = createSlice({
     },
     setDate(state, action) {
       state.calendar.selectedDate = action.payload;
-      console.log("calendar data", action.payload);
+     
     },
     setSpecialization(state, action) {
       state.calendar.selectedSpecialization = action.payload;
@@ -150,17 +150,27 @@ const appointmentsSlice = createSlice({
     },
     setTime(state, action) {
       state.calendar.selectedSlotsTime = action.payload;
-      console.log("calendar time", action.payload);
+      
     },
     setTreatment(state, action) {
       state.calendar.selectedTreatment = action.payload;
     },
+    resetAppointmentsState() {
+  return initialState;
+},
   },
   extraReducers: (builder) => {
     builder
       .addCase(getAppointmentsDashboardThunk.pending, (state) => {
-        state.calendar.calendarLoading = true;
-      })
+  state.calendar.calendarLoading = true;
+
+  state.calendar.availableDays = [];
+  state.calendar.fullyBookedDays = [];
+  state.calendar.availableTime = [];
+
+  state.calendar.availableTimeCount = 0;
+  state.calendar.fullyBookedTimeCount = 0;
+})
       .addCase(getAppointmentsDashboardThunk.fulfilled, (state, action) => {
         state.calendar.availableDays = action.payload.calendar.availableDays;
         state.calendar.fullyBookedDays = action.payload.calendar.fullyBookedDays;
@@ -245,6 +255,7 @@ export const {
   setDate,
   setDoctor,
   setTreatment,
+  resetAppointmentsState,
 
 } = appointmentsSlice.actions;
 export default appointmentsSlice.reducer;

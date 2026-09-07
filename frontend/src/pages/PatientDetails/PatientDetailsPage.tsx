@@ -7,7 +7,7 @@ import { getPatientByIdThunk } from "@/features/patients/thunk/getPatientByIdThu
 import { removePatientThunk } from "@/features/patients/thunk/removePatientThunk";
 import { useEffect, useState } from "react";
 import { IoTrash } from "react-icons/io5";
-import { TfiPencil } from "react-icons/tfi";
+
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { UserProfile } from "../../components/userProfile/UserProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
@@ -20,7 +20,7 @@ import { SiTicktick } from "react-icons/si";
 import { resetActiveVisits } from "@/features/visits/visitsSlice";
 import { getAccess } from "@/premissoons/getAccessPremissions";
 import { LuPencilLine } from "react-icons/lu";
-import { capitalizeFirstLetter } from "@/shared/functions/capitalizwFirstLetter";
+
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
