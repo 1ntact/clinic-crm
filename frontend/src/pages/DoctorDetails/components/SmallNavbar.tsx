@@ -8,7 +8,7 @@ import { NavLink } from "react-router-dom";
    
 }
 type Props = {
-  arrayNavigation: Navigation[]
+  arrayNavigation: Navigation[];
   
  
   }
@@ -35,7 +35,7 @@ export const SmallNavbar: React.FC<Props> = ({ arrayNavigation }) => {
           >
             {({ isActive }) => (
               <>
-                {`${item.label}  `}
+                {`${item.label} `}
   
 
                 {isActive && (

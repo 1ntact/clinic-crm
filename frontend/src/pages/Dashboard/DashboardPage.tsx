@@ -40,6 +40,7 @@ export const DashboardPage = () => {
   const revenue = useAppSelector(
     (state) => state.statistic.statistics?.weeklyRevenue,
   );
+  console.log("revenueeeeee", revenue)
   const roundedDiagram = useAppSelector(
     (state) => state.statistic.statistics?.appointmentOutcomes,
   );

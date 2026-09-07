@@ -103,7 +103,9 @@ const  navigate = useNavigate()
   
 
  
-  const handleAside = () => setOpenAside((prev) => !prev);
+  const handleAside = () => {
+    setOpenAside((prev) => !prev)
+  };
   const handleSearchChange = useCallback(
     (value: string) => {
       dispatch(

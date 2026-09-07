@@ -34,7 +34,7 @@ const yAxis = Array.from(
         {/* Header */}
 
         <h2 className="text-[13px] font-semibold text-gray-500">
-          WEEKLY REVENUE
+          EXPECTED WEEKLY REVENUE
         </h2>
 
         <div className="mt-2 flex items-center gap-4">

@@ -3,7 +3,6 @@ import { PiChatDotsLight } from "react-icons/pi";
 import { FiUsers } from "react-icons/fi";
 import { ROUTES } from "./routes";
 import { Stethoscope } from 'lucide-react';
-import { PiHandshakeLight } from "react-icons/pi";
 import { CiCalendar } from "react-icons/ci";
 import { LuDock } from "react-icons/lu";
 export const navigation = [

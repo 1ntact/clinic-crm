@@ -58,7 +58,7 @@ export const PatientHistory = () => {
                               
                               className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
                             >
-                              <Td>{`#${appointment.id}`}</Td>
+                              <Td className="text-[#4B5563]">{`#${appointment.id}`}</Td>
         
                               <Td>
                                 <UserContacts
@@ -71,10 +71,10 @@ export const PatientHistory = () => {
         
                               <Td>  {
                                        <>
-                                         <div>
+                                         <div className="text-[#4B5563]">
                                             {dayjs(appointment.dateTime).format("YYYY-MM-DD")}
                                          </div>
-                                          <div>
+                                          <div className="text-[#1F2937]">
                                            {dayjs(appointment.dateTime).format("HH:mm")}
                                           </div>
                                        </>

@@ -1,6 +1,6 @@
 
 import { PiCalendarCheckLight } from "react-icons/pi";
-import { PiVaultLight } from "react-icons/pi";
+import { LuVault } from "react-icons/lu";
 import { TbAlertOctagon } from "react-icons/tb";
 import { PiStethoscope } from "react-icons/pi";
 type PatientDetailsCardKey =
@@ -34,8 +34,8 @@ export const detailsPatientCardStatistics: Card[] = [
       value: 200,
       change: 5,
     prefix:'+$',
-      icon: PiVaultLight,
-      iconClass: "bg-green-100 text-green-600",
+      icon: LuVault,
+      iconClass: "bg-[#DCFCE7] text-[#166534]",
     },
     {key: 'noShow',
       title: "NO-SHOW",
@@ -43,7 +43,7 @@ export const detailsPatientCardStatistics: Card[] = [
       change: 0,
      
       icon: TbAlertOctagon,
-      iconClass: "bg-orange-100 text-orange-600",
+      iconClass: "bg-[#FFEDD5] text-[#9A3412]",
     },
     {key: 'hygiene',
       title: "HYGIENE",
@@ -52,6 +52,6 @@ export const detailsPatientCardStatistics: Card[] = [
       
     
       icon: PiStethoscope,
-      iconClass: "bg-purple-100 text-purple-600",
+      iconClass: "bg-[#FEE2E2] text-[#991B1B]",
     },
   ];

@@ -43,7 +43,7 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
             </h1>
 
             <span className="rounded-md bg-teal-100 px-[7px] py-[4px] text-[12px] font-medium text-teal-700">
-              {type === "patient" ? "active" :capitalizeFirstLetter( selectedUser.employmentType)}
+              {type === "patient" ? capitalizeFirstLetter("active") :capitalizeFirstLetter( selectedUser.employmentType)}
             </span>
           </div>
 

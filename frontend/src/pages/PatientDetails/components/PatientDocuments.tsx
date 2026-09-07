@@ -29,7 +29,7 @@ export const PatientDocuments = () => {
   const [aside, setActiveAside] = useState(false)
   const [expandedNotes, setExpandedNotes] = useState<number[]>([]);
   
-  
+  const user = useAppSelector(state=>state.auth.user)
   const { currentVisit, isActiveVisit,loading } = useAppSelector(
     (state) => state.visit,
   );
@@ -127,7 +127,7 @@ export const PatientDocuments = () => {
    
   };
   return (
-    <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1.45fr_1fr]">
+    <div className="flex flex-col gap-2 lg:flex-row">
         {aside && (
              <AsideMenu
                handleAside={toogleNotesForm}
@@ -157,7 +157,12 @@ export const PatientDocuments = () => {
            )}
       {/* ===================== CLINICAL NOTES ===================== */}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+    
+      <section className={`rounded-lg border border-gray-200 bg-white p-5 ${
+      user?.role === "admin"
+        ?  "lg:order-1 lg:flex-[1.45]"
+        : "lg:order-2 lg:flex-[1.45]"
+    }`}>
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[12px] font-semibold uppercase text-gray-700">
@@ -350,7 +355,11 @@ export const PatientDocuments = () => {
 
       {/* ===================== FILES ===================== */}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <section className={`rounded-lg border border-gray-200 bg-white p-5 ${
+      user?.role === "admin"
+        ?"lg:order-2 lg:flex-1"
+        :   "lg:order-1 lg:flex-1"
+    }`}>
         {/* Header */}
         <div className="mb-4">
           <h2 className="text-[12px] font-semibold uppercase text-gray-700">
@@ -495,6 +504,7 @@ export const PatientDocuments = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    
   );
 };
