@@ -7,5 +7,7 @@ export const buttonStyles = {
   confirmButton: "h-[44px] flex-1 text-[#FFFFFF] bg-[#172554]",
   notConfirmButton: "h-[44px] flex-1 text-[#172554] ",
   confirmVisits: "h-[36px] w-[144px]  text-[#FFFFFF] bg-[#16A34A]",
-  addNote:" h-[36px]  px-[12px] py-[8px] text-[#FFFFFF] bg-[#172554] font-medium  text-[14px] "
+  addNote: " h-[36px]  px-[12px] py-[8px] text-[#FFFFFF] bg-[#172554] font-medium  text-[14px] ",
+  deleteButton:"flex-1 bg-[#EF4444] text-[#FFFFFF] h-[44px]  px-[12px] py-[8px] "
+
 };

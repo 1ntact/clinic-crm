@@ -103,7 +103,9 @@ const  navigate = useNavigate()
   
 
  
-  const handleAside = () => setOpenAside((prev) => !prev);
+  const handleAside = () => {
+    setOpenAside((prev) => !prev)
+  };
   const handleSearchChange = useCallback(
     (value: string) => {
       dispatch(
@@ -214,10 +216,11 @@ const  navigate = useNavigate()
                       
                       className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
                    >
-                      <Td>{`#${appointment.id}`}</Td>
+                      <Td className="text-[#4B5563]">{`#${appointment.id}`}</Td>
 
                       <Td>
                         <UserContacts
+                          
                           avatar={"patient.jpg"}
                           firstName={appointment.patientFirstName}
                           lastName={appointment.patientLastName}
@@ -228,7 +231,7 @@ const  navigate = useNavigate()
                       <Td>
                         {
                           <>
-                            <div>
+                            <div className="text-[#4B5563]">
                               {dayjs(appointment.dateTime).format("YYYY-MM-DD")}
                             </div>
                             <div>
@@ -245,7 +248,7 @@ const  navigate = useNavigate()
                       <Td>{statusOptions.map((status) =>
       
                         status.value === appointment.status && (
-                          <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                          <span key={`${status.value}${status.color}`} className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
                         ))}
                         </Td>
                       <Td className="relative  ">
@@ -317,7 +320,7 @@ const  navigate = useNavigate()
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<AppointmentCreateForm />}
+          content={<AppointmentCreateForm handleAside={handleAside} />}
           footer={
             <>
               <ButtonPage

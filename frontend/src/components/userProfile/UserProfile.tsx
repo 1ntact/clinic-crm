@@ -4,6 +4,7 @@ import type { Doctor } from "@/types/doctor";
 import type { Patient } from "@/types/patient";
 import { PiPhoneCallThin, PiEnvelopeSimpleLight } from "react-icons/pi";
 
+
 type BaseProps = {
   avatar?: string;
   patients?: number | null;
@@ -42,13 +43,13 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
             </h1>
 
             <span className="rounded-md bg-teal-100 px-[7px] py-[4px] text-[12px] font-medium text-teal-700">
-              {type === "patient" ? "active" :capitalizeFirstLetter( selectedUser.employmentType)}
+              {type === "patient" ? capitalizeFirstLetter("active") :capitalizeFirstLetter( selectedUser.employmentType)}
             </span>
           </div>
 
           <div className=" flex items-center justify-between text-[14px] text-gray-500">
             
-            <div className="flex gap-[4px]">
+            <div className="flex gap-[4px] font-medium text-[#4B5563]">
               <span>
                 {type === "patient"
                   ? `ID: #${selectedUser.id}`
@@ -63,7 +64,7 @@ export const UserProfile: React.FC<Props> = ({ avatar,selectedUser, type }) => {
             </div>
 
             
-         {  type ==='doctor' && <div className="flex gap-6">
+         {  type ==='doctor' && <div className="flex gap-6 font-medium">
               <div className="flex items-center gap-2">
                 <PiPhoneCallThin className="text-lg" />
                 <span>{selectedUser.phoneNumber}</span>
