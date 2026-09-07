@@ -102,7 +102,7 @@ export const DoctorVisits = () => {
                               
                               className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
                             >
-                              <Td>{`#${appointment.id}`}</Td>
+                              <Td className="text-[#4B5563]">{`#${appointment.id}`}</Td>
         
                               <Td>
                                 <UserContacts
@@ -123,7 +123,7 @@ export const DoctorVisits = () => {
                                   </>
                                 }
                               </Td>
-                              <Td>
+                              <Td className="text-[#4B5563]">
                                 {
                                   <>
                                    
@@ -134,14 +134,14 @@ export const DoctorVisits = () => {
                                 }
                               </Td>
         
-                              <Td className="font-[Inter]  text-[#1F2937] font-semibold">{`$${appointment.treatmentPrice}`}</Td>
+                              <Td className="font-[Inter]  text-[#1F2937] font-semibold">{`$ ${appointment.treatmentPrice}`}</Td>
         
                               <Td>{`${appointment.treatment}`}</Td>
         
                               <Td>{statusOptions.map((status) =>
               
                                 status.value === appointment.status && (
-                                  <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                                  <span  key={`${status.value}${status.color}`} className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
                                 ))}
                                 </Td>
                             

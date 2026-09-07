@@ -6,7 +6,7 @@ export type SortButton<T extends string = string> = {
   descLabel: string;
 };
 
-export type SortProps<T extends string> = {
+export type SortProps<T extends string = string> = {
   userCount: number;
   className?: string;
   sortBy: T | null;
