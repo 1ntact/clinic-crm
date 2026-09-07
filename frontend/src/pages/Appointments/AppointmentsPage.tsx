@@ -16,9 +16,11 @@ import { Td } from "@/components/table/Td";
 import { UserContacts } from "@/components/userContacts/UserContacts";
 import { LuPencilLine } from "react-icons/lu";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+
 import { ActionModal } from "./components/ActionModal/ActionModal";
 import {
+  resetAppointmentsQuery,
+  resetCalendarQuery,
   setAppointmentsQuery,
   setSelectedAppointment,
 } from "@/features/appointments/appointmentsSlice";
@@ -28,6 +30,10 @@ import { Pagination } from "@/components/pagination/Pagination";
 import { Filter } from "@/components/filter/Filter";
 import { AppointmentsViewToggle } from "./components/AppointmentsViewToogle/AppointmentsViewToogle";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
+import { EmptyState } from "@/components/emptyState/EmptyState";
+import { dateOptions } from "@/features/doctors/model/dataRange";
+import { useNavigate } from "react-router-dom";
+
 
 type ViewMode = "list" | "calendar";
 
@@ -35,7 +41,7 @@ export const AppointmentsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const [status, setOpenChangeStatus] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-
+const  navigate = useNavigate()
   const dispatch = useAppDispatch();
   const { appointments, selectedAppointment } = useAppSelector(
     (state) => state.appointment,
@@ -59,6 +65,14 @@ export const AppointmentsPage = () => {
   } = useAppSelector((state) => state.appointment);
   const { doctors } = useAppSelector((state) => state.doctor);
 
+  useEffect(() => {
+    return () => {
+      dispatch(resetCalendarQuery());
+      dispatch(resetAppointmentsQuery());
+    
+  };
+}, [dispatch]);
+  
   useEffect(() => {
     dispatch(
       getAppointmentsDashboardThunk({
@@ -86,13 +100,12 @@ export const AppointmentsPage = () => {
       }),
     );
   }, [selectedDoctor, selectedDate, selectedSpecialization, dispatch]);
-  dayjs.extend(utc);
+  
 
-  const doctorOptions = doctors.map((doctor) => ({
-    value: String(doctor.id),
-    label: `${doctor.firstName} ${doctor.lastName}`,
-  }));
-  const handleAside = () => setOpenAside((prev) => !prev);
+ 
+  const handleAside = () => {
+    setOpenAside((prev) => !prev)
+  };
   const handleSearchChange = useCallback(
     (value: string) => {
       dispatch(
@@ -118,14 +131,15 @@ export const AppointmentsPage = () => {
         <div>
           {" "}
           <section className="flex gap-[16px] mb-[24px]">
-            <div className="h-[361px] w-[348px]">
+            
               {availableDays && (
                 <Calendar
                   availableDays={availableDays}
-                  bookedDays={fullyBookedDays}
+                bookedDays={fullyBookedDays}
+                selectedDate = {selectedDate}
                 />
               )}
-            </div>
+            
             {
               <AvalibleTime
                 bookedCount={fullyBookedTimeCount}
@@ -143,21 +157,33 @@ export const AppointmentsPage = () => {
           <Filter
             className="mb-[16px]"
             search={appointmentsQuery.search}
-            firstSelect={String(appointmentsQuery.doctorId ?? "")}
-            secondSelect={appointmentsQuery.appointmentStatus ?? ""}
-            firstPlaceholder="All doctors"
-            secondPlaceholder="All statuses"
-            firstSelectOptions={doctorOptions}
-            secondSelectOptions={statusOptions}
-            onSearchChange={handleSearchChange}
-            onFirstSelectChange={(value) =>
+            firstPlaceholder="Date"
+            firstSelectOptions={dateOptions}
+           firstSelect={
+              appointmentsQuery.dateFrom && appointmentsQuery.dateTo
+                ? `${appointmentsQuery.dateFrom}_${appointmentsQuery.dateTo}`
+                : ""
+            }
+            onFirstSelectChange={(value) => {
+              const [dateFrom, dateTo] = value.split("_");
+          
               dispatch(
                 setAppointmentsQuery({
-                  doctorId: value ? Number(value) : null,
+                  dateFrom,
+                  dateTo,
+                  appointmentDate: null,
                   page: 1,
                 }),
-              )
-            }
+              );
+            }} 
+          
+            secondSelect={appointmentsQuery.appointmentStatus ?? ""}
+           
+            secondPlaceholder="All statuses"
+          
+            secondSelectOptions={statusOptions}
+            onSearchChange={handleSearchChange}
+          
             onSecondSelectChange={(value) =>
               dispatch(
                 setAppointmentsQuery({
@@ -189,11 +215,12 @@ export const AppointmentsPage = () => {
                       key={appointment.id}
                       
                       className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
-                    >
-                      <Td>{`#${appointment.id}`}</Td>
+                   >
+                      <Td className="text-[#4B5563]">{`#${appointment.id}`}</Td>
 
                       <Td>
                         <UserContacts
+                          
                           avatar={"patient.jpg"}
                           firstName={appointment.patientFirstName}
                           lastName={appointment.patientLastName}
@@ -204,12 +231,12 @@ export const AppointmentsPage = () => {
                       <Td>
                         {
                           <>
-                            <div>
+                            <div className="text-[#4B5563]">
                               {dayjs(appointment.dateTime).format("YYYY-MM-DD")}
                             </div>
                             <div>
                               {dayjs(appointment.dateTime).format("HH:mm")}
-                            </div>
+                             </div>
                           </>
                         }
                       </Td>
@@ -221,14 +248,14 @@ export const AppointmentsPage = () => {
                       <Td>{statusOptions.map((status) =>
       
                         status.value === appointment.status && (
-                          <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                          <span key={`${status.value}${status.color}`} className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
                         ))}
                         </Td>
                       <Td className="relative  ">
                         {
                           <>
-                            <LuPencilLine
-                              className="cursor-pointer"
+                            <LuPencilLine 
+                              className="cursor-pointer h-[16px] w-[16px]"
                               onClick={() => {
                                 dispatch(setSelectedAppointment(appointment));
                               }}
@@ -236,7 +263,10 @@ export const AppointmentsPage = () => {
                             {selectedAppointment &&
                               !status &&
                               selectedAppointment.id === appointment.id && (
-                                <ActionModal
+                              <ActionModal
+                               detailsAppointment={() => {
+  navigate(`/patients/${selectedAppointment.patientId}/records`);
+}}
                                   onClose={() => {
                                     dispatch(setSelectedAppointment(null));
                                   }}
@@ -249,13 +279,14 @@ export const AppointmentsPage = () => {
                       </Td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
+            </tbody>
+            
+          </Table>
+          
               {appointments.length === 0 && (
-                <p className="p-3 text-center text-gray-500">Nothing found</p>
-              )}
-</div>
-              <Pagination
+                <EmptyState description=" No Appointments match your current filters. Try adjusting or clearing them."/>
+          )}
+             <Pagination
                 page={appointmentsQuery.page}
                 pageSize={appointmentsQuery.pageSize}
                 total={total}
@@ -267,6 +298,8 @@ export const AppointmentsPage = () => {
                   )
                 }
               />
+</div>
+           
             
           
           </div>
@@ -287,7 +320,7 @@ export const AppointmentsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<AppointmentCreateForm />}
+          content={<AppointmentCreateForm handleAside={handleAside} />}
           footer={
             <>
               <ButtonPage

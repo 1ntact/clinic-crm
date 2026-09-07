@@ -7,27 +7,38 @@ import { getPatientByIdThunk } from "@/features/patients/thunk/getPatientByIdThu
 import { removePatientThunk } from "@/features/patients/thunk/removePatientThunk";
 import { useEffect, useState } from "react";
 import { IoTrash } from "react-icons/io5";
-import { TfiPencil } from "react-icons/tfi";
-import { useNavigate, useParams } from "react-router-dom";
+
+import { Outlet, useNavigate, useParams } from "react-router-dom";
 import { UserProfile } from "../../components/userProfile/UserProfile";
 import { PatientEditForm } from "@/features/patients/PatientEditForm";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
-import { PatientInformation } from "./info/InfoItem";
-import { PatientDocuments } from "./info/medicalRecords";
+import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
+import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
+import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
+import { SiTicktick } from "react-icons/si";
+import { resetActiveVisits } from "@/features/visits/visitsSlice";
+import { getAccess } from "@/premissoons/getAccessPremissions";
+import { LuPencilLine } from "react-icons/lu";
+
 
 export const PatientDetailsPage = () => {
   const [aside, setOpenAside] = useState(false);
   const [modal, setOpenModal] = useState(false);
+   const user = useAppSelector(state => state.auth.user)
   const dispatch = useAppDispatch();
+  const access = getAccess(user);
   const { loading, selectedPatient } = useAppSelector((state) => state.patient);
+  const {  isActiveVisit } =
+    useAppSelector((state) => state.visit);
   const { patientId } = useParams();
   const navigate = useNavigate();
-
+console.log("couuuuuuuuunt",selectedPatient)
   useEffect(() => {
     if (!patientId) return;
-
     dispatch(getPatientByIdThunk(Number(patientId)));
+
+    dispatch(patientDetailsStatisticThunk(Number(patientId)));
   }, [dispatch, patientId]);
 
   const handleAside = () => setOpenAside((prev) => !prev);
@@ -45,10 +56,12 @@ export const PatientDetailsPage = () => {
   return (
     <>
       <ConfirmModal
+        modalClassName="w-[439px] h-[356px]"
+        confirmButtonClassName={buttonStyles.deleteButton}
         loading={loading}
         isOpen={modal}
-        title="Is the patient healthy?"
-        description="This action cannot be undone."
+        title="Delete patient?"
+        description={`Are you sure you want to delete ${(selectedPatient?.firstName)} ${selectedPatient?.lastName}? This action cannot be undone.`}
         confirmText="Delete"
         onCancel={() => setOpenModal(false)}
         onConfirm={handleRemove}
@@ -56,18 +69,25 @@ export const PatientDetailsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<PatientEditForm  />}
-          footer={<>
-                <ButtonPage className={buttonStyles.formCancel} onClick={handleAside}>
-                 <span className=" text-[#172554]">Cancel</span>
-                </ButtonPage>
+          content={<PatientEditForm />}
+          footer={
+            <>
+              <ButtonPage
+                className={buttonStyles.formCancel}
+                onClick={handleAside}
+              >
+                <span className=" text-[#172554]">Cancel</span>
+              </ButtonPage>
 
-            <ButtonPage type="submit"
-              form="patient-edit"
-              className={buttonStyles.formSubmit}>
-                  Update patient
-            </ButtonPage>
-                </>}
+              <ButtonPage
+                type="submit"
+                form="patient-edit"
+                className={buttonStyles.formSubmit}
+              >
+                Update patient
+              </ButtonPage>
+            </>
+          }
           title={"EDIT PATIENT"}
           description={"Fill in the details below"}
         />
@@ -76,7 +96,7 @@ export const PatientDetailsPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="rounded-xl bg-white p-[16px] shadow-sm">
+        <div className="rounded-xl bg-white p-[16px] shadow-sm mb-[16px]">
           <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
               <span
@@ -89,40 +109,58 @@ export const PatientDetailsPage = () => {
               <span className="mx-2">/</span>
 
               <span className="font-medium text-gray-900">
-                 {selectedPatient?.firstName} {selectedPatient?.lastName}
+                {selectedPatient?.firstName} {selectedPatient?.lastName}
               </span>
             </div>
 
-            <div className="w-[250px] flex gap-4">
-              <ButtonPage
-                className={buttonStyles.removeButton}
-                icon={<IoTrash className="mr-2 text-[#DC2626]" />}
-                onClick={() => setOpenModal(true)}
-              >
-                Remove 
-              </ButtonPage>
+            {!isActiveVisit && access.canCreatePatient ? (
+              <div className="w-[250px] flex gap-4">
+                <ButtonPage
+                  className={buttonStyles.removeButton}
+                  icon={<IoTrash className="mr-2 text-[#DC2626]" />}
+                  onClick={() => setOpenModal(true)}
+                >
+                  Remove
+                </ButtonPage>
 
+                <ButtonPage
+                  className={buttonStyles.editButton}
+                  icon={<LuPencilLine className="mr-2" />}
+                  onClick={handleAside}
+                >
+                  Edit Patient
+                </ButtonPage>
+              </div>
+            ) : (
               <ButtonPage
-                className={buttonStyles.editButton}
-                icon={<TfiPencil className="mr-2" />}
-                onClick={handleAside}
+                className={buttonStyles.confirmVisits}
+                icon={<SiTicktick className="mr-2" />}
+                    onClick={() => {
+                  
+                     dispatch( resetActiveVisits())
+                    }}
               >
-                Edit Patient
+                Complete visit
               </ButtonPage>
-            </div>
+            )}
           </section>
 
-          <section className="flex items-center justify-between  ">
+          <section className="flex items-center justify-between ">
             {!loading && selectedPatient && (
-                <UserProfile type="patient"
-                avatar='patient.jpg'  
-                  selectedUser={selectedPatient} />
+              <UserProfile
+                type="patient"
+                avatar="patient.jpg"
+                selectedUser={selectedPatient}
+              />
             )}
           </section>
         </div>
       )}
-      <PatientInformation />
-      <PatientDocuments/>
+      <SmallNavbar arrayNavigation={patientDetailsNavigation}
+       
+      />
+
+      <Outlet />
     </>
   );
 };

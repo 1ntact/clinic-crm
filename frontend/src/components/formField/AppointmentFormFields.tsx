@@ -10,8 +10,9 @@ import {
   setTime,
   setTreatment,
 } from "@/features/appointments/appointmentsSlice";
-import { FormDatePicker } from "@/pages/Appointments/components/FormDataPicker/FormDataPicker";
+
 import { TextArea } from "../textArea/TextArea";
+import Calendar from "@/pages/Appointments/components/Calendar";
 
 type Props = {
   type: "create" | "update";
@@ -20,7 +21,7 @@ type Props = {
 export const AppointmentFormFields: React.FC<Props> = ({ type }) => {
   const { doctors } = useAppSelector((state) => state.doctor);
   const { treatments } = useAppSelector((state) => state.appointment);
-  const { availableDays, availableTime } = useAppSelector(
+  const { availableDays, availableTime, fullyBookedDays,selectedDate } = useAppSelector(
     (state) => state.appointment.calendar,
   );
   const dispatch = useAppDispatch();
@@ -111,21 +112,29 @@ export const AppointmentFormFields: React.FC<Props> = ({ type }) => {
         />
       </div>
       <div className="flex  gap-4 mb-[16px]">
-        <FormDatePicker
-          setValue={setValue}
-          name="appointmentDate"
-          label="Date*"
-          control={control}
-          error={errors.appointmentDate?.message}
-          availableDays={availableDays}
-        />
+      <Calendar
+  variant="picker"
+  availableDays={availableDays}
+  bookedDays={fullyBookedDays}
+  selectedDate={selectedDate}
+  onDateChange={(date) => {
+    setValue(
+      "appointmentDate",
+      date ?? "",
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      },
+    );
+  }}
+/>
         <Select
           className="flex-1"
           name="appointmentTime"
           label="Time *"
           placeholder="Choose Time"
           options={availableTime.map((time) => ({
-            disabled: time.status === "booked",
+            disabled: time.status === "expired",
             value: String(time.time),
             label: `${time.time.slice(0, -3)}  `,
           }))}

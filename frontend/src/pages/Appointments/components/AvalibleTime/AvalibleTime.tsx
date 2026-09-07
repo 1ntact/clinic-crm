@@ -9,6 +9,8 @@ import type { Doctor } from "@/types/doctor"
 import { useEffect } from "react"
 import { placeholderTimes } from "./playsholderTime"
 import type { AvailableTimeSlot } from "@/features/appointments/model/avalibleTimeSlots"
+import dayjs from "dayjs"
+
 
 
 type Props = {
@@ -31,6 +33,7 @@ export const AvalibleTime:React.FC<Props> = ({
   selectedDoctorId,
   doctors,bookedCount,availableCount }) => {
   const dispatch = useAppDispatch()
+ 
 useEffect(() => {
   if (!selectedSpecialization) return;
   dispatch(
@@ -39,25 +42,46 @@ useEffect(() => {
     })
   );
 }, [selectedSpecialization, dispatch]);
- 
+  
   return (<>
     
-    <div className=" flex flex-col bg-[#FFFFFF] w-full h-[361px] rounded-[8px] px-[24px] py-[16px]">
+    <div className=" flex flex-col bg-[#FFFFFF] w-full h-[389px] rounded-[8px] px-[24px] py-[16px]">
      
       <div className="mb-[24px]">
-        <h1 className="text-[14px] text-[#6B7280]">AVALIBLE TIME SLOTS</h1>
-        {<span className="text-[12px]">
-          <span className="text-[#6B7280]">20 Aug 2026 - </span>
-          <span className="text-[#15803D]">{`${availableCount} available `}</span>
-        <span className="text-[#B91C1C]">{`· ${bookedCount} booked`}</span></span>}
+        <h1 className="text-[14px] text-[#6B7280] font-semibold">AVALIBLE TIME SLOTS</h1>
+      {selectedDate ? (
+  <span className="text-[12px]">
+    <span className="text-[#6B7280]">
+      {dayjs(selectedDate).format("D MMMM YYYY")} {" "}
+    </span>
+
+           
+    {selectedDoctorId && (
+      <>
+        <span className="text-[#15803D]">
+          - {availableCount} available{" "}
+        </span>
+
+        <span className="text-[#B91C1C]">
+          · {bookedCount} booked
+        </span>
+      </>
+    )}
+  </span>
+) : (
+  <span className="text-[14px] text-[#B91C1C]">
+    Select a date for the appointment.
+  </span>
+)}
       </div>
       
       
-      <div className=" flex justify-between mb-[45px]">
+      <div className=" flex justify-between mb-[32px]">
         <div className="flex h-[36px]">
         <BaseSelect
           name={"specializationSelect"}
-          classNames="mr-[8px] h-[36px] w-[218px]"
+            classNames={`mr-[8px] h-[36px] w-[218px] `}
+             error={!selectedSpecialization && !!selectedDate}
         placeholder={"Select a speciality"}
         value={selectedSpecialization ?? ""}
         options={specializations}
@@ -68,13 +92,15 @@ useEffect(() => {
         }} />
       
           <BaseSelect
+            error={!!selectedSpecialization && !!selectedDate && !selectedDoctorId}
+            disabled={!selectedSpecialization}
             classNames="h-[36px] w-[218px]"
           name={'doctorSelect'}
         placeholder={"Select a doctor"}
   value={selectedDoctorId?.id ?? ""}
   options={doctors.map((doctor:Doctor) => ({
     value: String(doctor.id),
-    label: `${doctor.firstName} ${doctor.lastName}`,
+    label: `Dr. ${doctor.firstName} ${doctor.lastName}`,
   }))}
    onChange={(value) => {
     if (!value) {
@@ -93,7 +119,7 @@ useEffect(() => {
   
           />
         </div>
-      <div className="flex items-center gap-6 text-sm">
+      <div className="flex items-center gap-6 font-medium">
   <div className="flex items-center gap-2">
     <span className="h-2.5 w-2.5 rounded-full bg-blue-600"></span>
     <span className="text-[14px] text-[#6B7280]">Free</span>
@@ -107,7 +133,7 @@ useEffect(() => {
       </div>
      
       
-      {loading ? <Loader /> : (<div className="grid grid-cols-7 gap-2 mb-[45px]">
+      {loading ? <Loader /> : (<div className="grid grid-cols-7 gap-2 mb-[85px]">
        {availableTime?.length > 0 ? (
   availableTime.map((slot) => (
     <ButtonPage
@@ -138,8 +164,15 @@ useEffect(() => {
   ))
 )}
       </div>)}
-      
-      <span className= " text-[12px] text-[#6B7280]">Click a free slot to schedule a new appointment</span>
+     <div className="flex items-center  gap-2">
+  <div className="w-4 h-px bg-[#D1D5DB]" />
+
+  <span className="text-[12px] text-[#6B7280] whitespace-nowrap">
+    Click a free slot to schedule a new appointment
+  </span>
+
+  <div className="w-full h-px bg-[#D1D5DB]" />
+</div>
     </div>
 
   </>)

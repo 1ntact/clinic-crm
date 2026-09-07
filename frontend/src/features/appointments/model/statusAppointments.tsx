@@ -30,8 +30,8 @@ export const statusOptions:StatusOptions[] = [
     value: "completed",
     label: "Completed",
     description: "Visit is done and recorded",
-    color: "bg-[#4ADE80]",
-    textColor:"text-[#115E59]"
+    color: "bg-[#E5E7EB]",
+    textColor:"text-[#1F2937]"
   },
   {
     value: "no_show",

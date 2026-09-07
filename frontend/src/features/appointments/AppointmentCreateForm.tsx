@@ -12,8 +12,13 @@ import { getAppointmentsThunk } from "./thunk/getAppointmentsThunk";
 import { getAvailableTimeSlotsThunk } from "./thunk/getAvailableSlots";
 import { Loader } from "@/components/loader/Loader";
 import type { Patient } from "@/types/patient";
+import { UserContacts } from "@/components/userContacts/UserContacts";
 
-export const AppointmentCreateForm: React.FC = () => {
+type Props={
+  handleAside:(arg:boolean)=>void
+}
+
+export const AppointmentCreateForm: React.FC<Props> = ({handleAside}) => {
   const methods = useForm<AppointmentFormData>();
   const { reset, setValue, handleSubmit } = methods;
   const [selectedUser, setSelectedUser] = useState<Patient | null>(null);
@@ -26,19 +31,24 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
  
 
   useEffect(() => {
-    if (selectedDoctor && selectedSlotsTime && selectedDate) {
-      setValue("doctorId", String(selectedDoctor.id))
-      setValue("appointmentDate", selectedDate)
-      setValue("appointmentTime",selectedSlotsTime)
+  if (selectedDoctor && selectedDate && selectedSlotsTime) {
+    setValue("doctorId", String(selectedDoctor.id));
+    setValue("appointmentDate", selectedDate);
+    setValue("appointmentTime", selectedSlotsTime);
   }
-    if (!selectedUser) return;
-    
+
+  if (selectedUser) {
     setValue("firstName", selectedUser.firstName);
     setValue("lastName", selectedUser.lastName);
     setValue("phoneNumber", selectedUser.phoneNumber);
-    
-    
-}, [selectedUser, selectedDoctor, setValue]);
+  }
+}, [
+  selectedUser,
+  selectedDoctor,
+  selectedDate,
+  selectedSlotsTime,
+  setValue,
+]);
 
    const onSubmit = async () => {
      if (!selectedUser ||
@@ -63,15 +73,17 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
         
       
       })).unwrap();
-
+  
       await dispatch(getAppointmentsThunk(appointmentsQuery)).unwrap()
+  
       await dispatch(getAvailableTimeSlotsThunk({
         doctorId: selectedDoctor.id,
         date: selectedDate,
       }))
 
       reset();
-
+      
+handleAside(false)
       successToast(
         <>
           Appointments created successfully
@@ -108,10 +120,13 @@ const {selectedDoctor,selectedDate,selectedSlotsTime,selectedTreatment} = useApp
               getValue={(user) => `${user.firstName} ${user.lastName}`}
               renderItem={(user) => (
                 <>
-                  <div>
-                    {user.firstName} {user.lastName}
-                  </div>
-                  <div>{user.email}</div>
+                  <UserContacts
+                    
+                                            avatar={"patient.jpg"}
+                                            firstName={user.firstName}
+                                            lastName={user.lastName}
+                                            phone={user.phoneNumber}
+                                          />
                 </>
               )}
             />
