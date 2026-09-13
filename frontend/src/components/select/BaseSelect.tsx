@@ -99,7 +99,7 @@ export const BaseSelect = ({
             rounded-[8px]
             border
             bg-white
-           
+           text-[14px]
             px-[12px]
             py-[8px]
             text-left
@@ -178,7 +178,7 @@ export const BaseSelect = ({
                 ${isOpen ? "rotate-180" : ""}
               `}
             >
-              {<MdKeyboardArrowDown/>}
+              {<MdKeyboardArrowDown className="h-[16px] w-[16px]"/>}
             </span>}
           </div>
         </button>

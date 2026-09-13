@@ -13,6 +13,7 @@ import {
 } from "@/features/visits/visitsSlice";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import dayjs from "dayjs";
+import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   
@@ -31,10 +32,10 @@ export const PatientDocuments = () => {
   const [expandedNotes, setExpandedNotes] = useState<number[]>([]);
   
   const user = useAppSelector(state=>state.auth.user)
-  const { currentVisit, isActiveVisit,loading } = useAppSelector(
+  const { currentVisit, isActiveVisit } = useAppSelector(
     (state) => state.visit,
   );
-  const { patientNotes ,patientNotesQuery,patientNotesTotal} = useAppSelector((state) => state.patient);
+  const { patientNotes ,patientNotesQuery,patientNotesTotal,loading} = useAppSelector((state) => state.patient);
   const { patientId } = useParams();
   const dispatch = useAppDispatch();
 
@@ -204,14 +205,18 @@ useEffect(() => {
         </div>
 
         {/* Notes */}
-        <div>
+        {<div className="mb-[24px] relative">
+           {loading && (
+                      <div className="absolute inset-0 z-10">
+                        <Loader />
+                      </div>)}
           {patientNotes?.map((note) => {
             const isExpanded = expandedNotes.includes(note.visitId);
 
             return (
               <article
                 key={note.visitId}
-                className="border-b border-gray-100 py-3.5 last:border-b-0"
+                className="border-b border-gray-100 py-3.5 last:border-b-0 mb-[16px]"
               >
                 {/* Date + edit */}
                 <div className="mb-1 flex items-start justify-between">
@@ -323,7 +328,7 @@ useEffect(() => {
          
                
         
-        </div>
+        </div>}
         <Pagination
   page={patientNotesQuery.page}
   pageSize={patientNotesQuery.pageSize}
@@ -364,7 +369,7 @@ useEffect(() => {
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden">
+        <div className="overflow-hidden mb-[24px]">
           {/* Table Header */}
           <div className="grid grid-cols-[2fr_1.5fr_1.2fr_1fr_55px] items-center bg-gray-100 px-2 py-2.5">
             <span className="text-[10px] font-medium uppercase text-gray-500">

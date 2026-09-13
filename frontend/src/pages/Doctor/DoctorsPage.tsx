@@ -131,10 +131,12 @@ export const DoctorsPage = () => {
 />
       </div>
 
-      {loading ? (
-        <Loader />
-      ) : (
-        <div className="w-full min-h-[380px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
+      {(
+        <div className=" relative w-full min-h-[380px] p-[16px] rounded-[8px] border border-[#E5E7EB] bg-[#FFFFFF] ">
+          {loading && (
+            <div className="absolute inset-0 z-10">
+              <Loader />
+            </div>)}
           <Table>
             <thead>
               <tr className="h-[40px] bg-[#F3F4F6]">
@@ -153,7 +155,7 @@ export const DoctorsPage = () => {
                   onClick={() => {
                     navigate(`/doctors/${doctor.id}`);
                   }}
-                  className=" h-[40px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
+                  className=" h-[40px] cursor-pointer hover:bg-[#F8FAFC] transition-colors"
                 >
                   <Td className="text-[#4B5563] text-[14px]">{`#${doctor.doctorCode}`}</Td>
 
@@ -162,7 +164,7 @@ export const DoctorsPage = () => {
                       avatar = {`doctor.jpg`}
                       firstName={`Dr.${doctor.firstName}`}
                       lastName={doctor.lastName}
-                      phone={doctor.phoneNumber}
+                      phone={(doctor.phoneNumber).toString()}
                     />
                   </Td>
 
@@ -194,7 +196,7 @@ export const DoctorsPage = () => {
                      <Td>{employmentTypes.map((status) =>
                         
                                           status.value === doctor.employmentType && (
-                                            <span  key={`${status.value}${status.color}`} className={`text-[12px]  rounded-[8px] px-[15px] py-[6px] ${status.color} ${status.textColor}`}>{status.label}</span>
+                                            <span  key={`${status.value}${status.color}`} className={`text-[12px]   rounded-[16px] px-[17px] py-[6px] ${status.color} ${status.textColor}`}>{status.label}</span>
                                           ))}
                                           </Td>
                 </tr>

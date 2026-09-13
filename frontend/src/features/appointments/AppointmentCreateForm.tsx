@@ -117,7 +117,7 @@ handleAside(false)
               selectedUser={selectedUser}
               onSelect={setSelectedUser}
               getKey={(user) => user.id}
-              getValue={(user) => `${user.firstName} ${user.lastName}`}
+            
               renderItem={(user) => (
                 <>
                   <UserContacts

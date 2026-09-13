@@ -38,7 +38,7 @@ const initialState: PatientsState = {
 
    patientNotesQuery: {
     page: 1,
-    pageSize: 2,
+    pageSize: 3,
   },
   total: 0,
   loading: false,

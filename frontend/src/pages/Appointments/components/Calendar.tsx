@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import dayjs, { type Dayjs } from "dayjs";
-
+import { GoChevronLeft } from "react-icons/go";
+import { GoChevronRight } from "react-icons/go";
 import {
   DateCalendar,
   DatePicker,
@@ -173,16 +174,17 @@ function CustomCalendarHeader(
     currentMonth.add(1, "month");
 
   return (
-    <div className="mb-[8px] flex h-[36px] w-full items-center justify-between">
+    <div className="mb-[16px] flex h-[36px] w-full items-center justify-between">
       <button
         type="button"
         onClick={() =>
           onMonthChange(previousMonth)
         }
-        className="flex h-8 w-8 cursor-pointer items-center justify-center border-none bg-transparent text-[28px] leading-none"
+        className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center border-none text-[#1F2937] text-[28px] "
         aria-label="Previous month"
       >
-        ‹
+        <GoChevronLeft/>
+        
       </button>
 
       <div className="font-medium capitalize text-[16px] text-[#1F2937]">
@@ -194,10 +196,10 @@ function CustomCalendarHeader(
         onClick={() =>
           onMonthChange(nextMonth)
         }
-        className="flex h-8 w-8 cursor-pointer items-center justify-center border-none bg-transparent text-[28px] leading-none"
+        className="flex  h-[24px] w-[24px] cursor-pointer items-center justify-center border-none  text-[28px] "
         aria-label="Next month"
       >
-        ›
+        <GoChevronRight/>
       </button>
     </div>
   );
@@ -470,7 +472,7 @@ export default function Calendar({
         =================================================== */
 
         <div
-          className={`flex h-[389px] w-[348px] rounded-[8px] border bg-white p-[24px] shadow-sm ${
+          className={`flex h-[389px] w-[348px] rounded-[8px] border bg-white p-[20px] shadow-sm ${
             selectedDate
               ? "border-gray-200"
               : "border-red-500"

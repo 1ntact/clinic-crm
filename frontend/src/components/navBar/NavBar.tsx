@@ -67,7 +67,7 @@ export const NavBar: React.FC = () => {
                   {nav.icon}
                 </span>
 
-                <span className="font-[Inter] font-medium text-[16px] text-[#374151]">
+                <span className={`font-[Inter] font-medium text-[16px] ${nav.title==="Dashboard"?"rext-[#1F2937]":"text-[#374151]"}`}>
                   {nav.title}
                 </span>
               </NavLink>
