@@ -6,7 +6,7 @@ type Props = {
   firstName: string;
   lastName: string;
   
-  phone?: number | string;
+  phone: string;
 
   
 

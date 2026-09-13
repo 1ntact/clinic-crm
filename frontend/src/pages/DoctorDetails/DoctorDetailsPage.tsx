@@ -75,6 +75,8 @@ const doctorId = paramsDoctorId ?? access.doctorId?.toString();
       )}
 
       <ConfirmModal
+         modalClassName="w-[439px] h-[356px]"
+        confirmButtonClassName={buttonStyles.deleteButton}
         loading={loading}
         isOpen={modal}
         title="Delete doctor?"

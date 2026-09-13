@@ -1,4 +1,4 @@
-import { CiHome } from "react-icons/ci";
+import { FiHome } from "react-icons/fi";
 import { PiChatDotsLight } from "react-icons/pi";
 import { FiUsers } from "react-icons/fi";
 import { ROUTES } from "./routes";
@@ -9,7 +9,7 @@ export const navigation = [
   {
     title: "Dashboard",
     path: ROUTES.DASHBOARD,
-    icon: <CiHome strokeWidth={0.1} className="h-[20px] w-[20px]" />,
+    icon: <FiHome strokeWidth={1} className="h-[20px] w-[20px]" />,
     roles:['admin','superadmin','doctor']
   },
   {

@@ -164,7 +164,7 @@ export const DoctorsPage = () => {
                       avatar = {`doctor.jpg`}
                       firstName={`Dr.${doctor.firstName}`}
                       lastName={doctor.lastName}
-                      phone={doctor.phoneNumber}
+                      phone={(doctor.phoneNumber).toString()}
                     />
                   </Td>
 
