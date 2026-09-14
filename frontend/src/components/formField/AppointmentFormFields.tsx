@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dayjs, { type Dayjs } from "dayjs";
 import type { AppointmentFormData } from "@/types/appointmentFormData";
 
@@ -43,7 +43,11 @@ console.log("TIMEEEEEEEEEEER",availableTime)
     formState: { errors },
   } = useFormContext<AppointmentFormData>();
 
- 
+  /**
+   * =====================================================
+   * FORM VALUES
+   * =====================================================
+   */
 
   const doctorId = watch("doctorId");
 const appointmentDate = watch("appointmentDate");
@@ -54,7 +58,19 @@ const [formDisplayedMonth, setFormDisplayedMonth] = useState<Dayjs>(() =>
     : dayjs().startOf("month"),
 );
 
-  
+/**
+ * Selecting a date in the calendar closes the popup in the same
+ * tick. `watch("appointmentDate")` may not have re-rendered yet
+ * by the time `onClose` fires, so we can't rely on it to know
+ * "was a date just picked?". Track it synchronously instead.
+ */
+const justSelectedDateRef = useRef(false);
+
+  /**
+   * =====================================================
+   * LOAD AVAILABLE DAYS
+   * =====================================================
+   */
 
   useEffect(() => {
     dispatch(
@@ -65,7 +81,13 @@ const [formDisplayedMonth, setFormDisplayedMonth] = useState<Dayjs>(() =>
     );
   }, [dispatch, formDisplayedMonth]);
 
-  
+  /**
+   * =====================================================
+   * LOAD AVAILABLE TIME SLOTS
+   * =====================================================
+   *
+   * Depends ONLY on form values.
+   */
   useEffect(() => {
     if (!doctorId || !appointmentDate) {
       return;
@@ -79,7 +101,11 @@ const [formDisplayedMonth, setFormDisplayedMonth] = useState<Dayjs>(() =>
     );
   }, [dispatch, doctorId, appointmentDate]);
 
-  
+  /**
+   * =====================================================
+   * DOCTOR
+   * =====================================================
+   */
 
   const handleDoctorChange = (id: string) => {
     setValue("doctorId", id, {
@@ -87,14 +113,21 @@ const [formDisplayedMonth, setFormDisplayedMonth] = useState<Dayjs>(() =>
       shouldDirty: true,
     });
 
-    
+    /**
+     * New doctor means previous selected time
+     * may no longer be valid.
+     */
     setValue("appointmentTime", "", {
       shouldValidate: true,
       shouldDirty: true,
     });
   };
 
-  
+  /**
+   * =====================================================
+   * TREATMENT
+   * =====================================================
+   */
 
   const handleTreatmentChange = (value: string) => {
     setValue("treatmentId", value, {
@@ -103,23 +136,54 @@ const [formDisplayedMonth, setFormDisplayedMonth] = useState<Dayjs>(() =>
     });
   };
 
-
+  /**
+   * =====================================================
+   * DATE
+   * =====================================================
+   */
 
   const handleDateChange = (date: string | null) => {
+    justSelectedDateRef.current = date !== null;
+
     setValue("appointmentDate", date ?? "", {
       shouldValidate: true,
       shouldDirty: true,
     });
 
-    
+    /**
+     * Date changed -> old time may no longer be valid.
+     */
     setValue("appointmentTime", "", {
       shouldValidate: true,
       shouldDirty: true,
     });
   };
 
-  
+  /**
+   * =====================================================
+   * CALENDAR CLOSE
+   * =====================================================
+   *
+   * If the popup closes without a date being picked,
+   * bring the displayed month back in sync with the
+   * actual selected date (or today), instead of leaving
+   * it pointed at whatever month the user last browsed to.
+   * Without this, `availableDays` stays fetched for the
+   * stale browsed month next time the popup opens.
+   *
+   * IMPORTANT: when a date WAS just picked, MUI closes the
+   * popup in the same tick as onChange, before this component
+   * re-renders with the new `appointmentDate`. In that case
+   * `formDisplayedMonth` is already correct (it's the month
+   * the user was browsing when they picked the date) -> leave
+   * it alone, don't recompute from the stale watched value.
+   */
   const handleCalendarClose = () => {
+    if (justSelectedDateRef.current) {
+      justSelectedDateRef.current = false;
+      return;
+    }
+
     const resetMonth = appointmentDate
       ? dayjs(appointmentDate).startOf("month")
       : dayjs().startOf("month");
