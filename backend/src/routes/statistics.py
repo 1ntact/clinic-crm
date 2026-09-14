@@ -287,3 +287,36 @@ async def get_doctor_weekly_revenue_statistics(
     return await service.get_doctor_weekly_revenue_statistics(
         doctor_id=doctor_id,
     )
+
+@router.get(
+    "/doctors/{doctor_id}/daily-appointments",
+    response_model=StatisticCardResponse,
+)
+async def get_doctor_daily_appointments_statistics(
+    doctor_id: int,
+    current_user: DoctorAdminOrSuperAdminDep,
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> StatisticCardResponse:
+    repository = StatisticsRepository(db)
+    service = StatisticsService(repository)
+
+    return await service.get_doctor_daily_appointments_statistics(
+        doctor_id=doctor_id,
+    )
+
+
+@router.get(
+    "/doctors/{doctor_id}/daily-revenue",
+    response_model=DailyRevenueResponse,
+)
+async def get_doctor_daily_revenue_statistics(
+    doctor_id: int,
+    current_user: DoctorAdminOrSuperAdminDep,
+    db: AsyncSession = Depends(get_postgresql_db),
+) -> DailyRevenueResponse:
+    repository = StatisticsRepository(db)
+    service = StatisticsService(repository)
+
+    return await service.get_doctor_daily_revenue_statistics(
+        doctor_id=doctor_id,
+    )

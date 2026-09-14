@@ -1023,3 +1023,59 @@ class StatisticsService:
             total=total,
             change=change,
         )
+
+    async def get_doctor_daily_appointments_statistics(
+            self,
+            doctor_id: int,
+    ) -> StatisticCardResponse:
+        now_local = datetime.now(CLINIC_TIMEZONE)
+
+        today_start_local = datetime(
+            year=now_local.year,
+            month=now_local.month,
+            day=now_local.day,
+            tzinfo=CLINIC_TIMEZONE,
+        )
+        tomorrow_start_local = today_start_local + timedelta(days=1)
+
+        today_start = today_start_local.astimezone(timezone.utc)
+        tomorrow_start = tomorrow_start_local.astimezone(timezone.utc)
+
+        total = await self.repository.get_daily_appointments_count(
+            start_date=today_start,
+            end_date=tomorrow_start,
+            doctor_id=doctor_id,
+        )
+
+        return StatisticCardResponse(
+            total=total,
+            change=None,
+        )
+
+    async def get_doctor_daily_revenue_statistics(
+            self,
+            doctor_id: int,
+    ) -> DailyRevenueResponse:
+        now_local = datetime.now(CLINIC_TIMEZONE)
+
+        today_start_local = datetime(
+            year=now_local.year,
+            month=now_local.month,
+            day=now_local.day,
+            tzinfo=CLINIC_TIMEZONE,
+        )
+        tomorrow_start_local = today_start_local + timedelta(days=1)
+
+        today_start = today_start_local.astimezone(timezone.utc)
+        tomorrow_start = tomorrow_start_local.astimezone(timezone.utc)
+
+        total = await self.repository.get_daily_revenue(
+            start_date=today_start,
+            end_date=tomorrow_start,
+            doctor_id=doctor_id,
+        )
+
+        return DailyRevenueResponse(
+            total=total,
+            change=None,
+        )
