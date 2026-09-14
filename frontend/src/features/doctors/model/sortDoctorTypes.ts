@@ -20,7 +20,7 @@ export type SortProps<T extends string = string> = {
 export type DoctorSortBy =
   | "name"
   | "specialization"
-  | "created_at";
+  | "workload";
 
 
 export const doctorSortButtons: SortButton<DoctorSortBy>[] = [
@@ -29,15 +29,16 @@ export const doctorSortButtons: SortButton<DoctorSortBy>[] = [
     ascLabel: "Name A→Z",
     descLabel: "Name Z→A",
   },
+   {
+    value: "workload",
+    ascLabel: "Workload ↑",
+    descLabel: "Workload ↓",
+  },
   {
     value: "specialization",
     ascLabel: "Specialization A→Z",
     descLabel: "Specialization Z→A",
   },
   
-  {
-    value: "created_at",
-    ascLabel: "Oldest ↑",
-    descLabel: "Newest ↓",
-  },
+ 
 ];

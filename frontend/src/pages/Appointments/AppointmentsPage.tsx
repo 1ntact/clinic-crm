@@ -22,6 +22,8 @@ import {
   resetAppointmentsQuery,
   resetCalendarQuery,
   setAppointmentsQuery,
+  setDate,
+  setQuery,
   setSelectedAppointment,
 } from "@/features/appointments/appointmentsSlice";
 import { ChangeStatusModal } from "./components/ChangeStatusModal/ChangeStatusModal";
@@ -126,11 +128,26 @@ export const AppointmentsPage = () => {
         {" "}
         <section className="flex gap-[16px] mb-[24px]">
           {availableDays && (
-            <Calendar
-              availableDays={availableDays}
-              bookedDays={fullyBookedDays}
-              selectedDate={selectedDate}
-            />
+           <Calendar
+  availableDays={availableDays}
+  bookedDays={fullyBookedDays}
+  selectedDate={selectedDate}
+  displayedMonth={dayjs()
+    .year(query.year)
+    .month(query.month - 1)
+    .startOf("month")}
+  onDateChange={(date) => {
+    dispatch(setDate(date));
+  }}
+  onMonthChange={(date) => {
+    dispatch(
+      setQuery({
+        month: date.month() + 1,
+        year: date.year(),
+      }),
+    );
+  }}
+/>
           )}
           {
             <AvailableTime

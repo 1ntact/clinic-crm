@@ -93,7 +93,7 @@ useEffect(() => {
            
     </div>
    
-    <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
+ { access.canViewStatistics &&  <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
        {cards &&
               patientManagmentCard.map((card) => (
                 <CardStatistics         
@@ -105,7 +105,7 @@ useEffect(() => {
                   change={card.change !== null ? Number(card.change) : null}
                 />
               ))} 
-    </div>
+    </div>}
     
      <div className="flex  justify-between">
             <Filter

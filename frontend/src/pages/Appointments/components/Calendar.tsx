@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import dayjs, { type Dayjs } from "dayjs";
-import { GoChevronLeft } from "react-icons/go";
-import { GoChevronRight } from "react-icons/go";
+import { GoChevronLeft, GoChevronRight } from "react-icons/go";
+
 import {
   DateCalendar,
   DatePicker,
@@ -16,48 +16,33 @@ import {
   type PickerDayProps,
 } from "@mui/x-date-pickers/PickerDay";
 
-import {
-  setDate,
-  setQuery,
-} from "@/features/appointments/appointmentsSlice";
-
-import {
-  useAppDispatch,
-  useAppSelector,
-} from "@/app/store/hook";
-
-/* =========================================================
-   TYPES
-========================================================= */
-
 type CalendarProps = {
-  /*
-   * IMPORTANT:
-   * Optional on purpose.
-   *
-   * If availableDays are passed -> appointment mode.
-   * If they are not passed -> normal date picker mode.
-   */
   availableDays?: number[];
   bookedDays?: number[];
-  error?: string;
+
   selectedDate: string | null;
+
+  displayedMonth?: Dayjs;
+
+  error?: string;
 
   variant?: "calendar" | "picker";
 
+  minDate?: Dayjs;
+
   onDateChange?: (date: string | null) => void;
+
   onMonthChange?: (date: Dayjs) => void;
+
+  
+  onClose?: () => void;
 };
 
-/* =========================================================
-   DAY
-========================================================= */
 
 function createServerDay(
   availableDays: number[],
   bookedDays: number[],
-  backendMonth: number,
-  backendYear: number,
+  displayedMonth: Dayjs,
 ) {
   return function ServerDay({
     day,
@@ -66,16 +51,16 @@ function createServerDay(
   }: PickerDayProps) {
     const dayNumber = day.date();
 
-    const isBackendMonth =
-      day.month() + 1 === backendMonth &&
-      day.year() === backendYear;
+    const isDisplayedMonth =
+      day.month() === displayedMonth.month() &&
+      day.year() === displayedMonth.year();
 
     const isAvailable =
-      isBackendMonth &&
+      isDisplayedMonth &&
       availableDays.includes(dayNumber);
 
     const isBooked =
-      isBackendMonth &&
+      isDisplayedMonth &&
       bookedDays.includes(dayNumber);
 
     const isPast = day.isBefore(dayjs(), "day");
@@ -89,10 +74,6 @@ function createServerDay(
             fontWeight: 500,
             borderRadius: "8px",
 
-            /* =================================================
-               AVAILABLE
-            ================================================= */
-
             ...(isAvailable && {
               fontFamily: "Inter, sans-serif",
               fontWeight: 500,
@@ -100,27 +81,15 @@ function createServerDay(
               color: "#1F2937",
             }),
 
-            /* =================================================
-               FULLY BOOKED
-            ================================================= */
-
             ...(isBooked && {
               backgroundColor: "#FEE2E2",
               color: "#9CA3AF",
             }),
 
-            /* =================================================
-               PAST
-            ================================================= */
-
             ...(isPast && {
               backgroundColor: "#FFFFFF",
               color: "#9CA3AF",
             }),
-
-            /* =================================================
-               TODAY
-            ================================================= */
 
             "&.MuiPickerDay-today": {
               backgroundColor: "#2563EB",
@@ -128,19 +97,11 @@ function createServerDay(
               border: "none",
             },
 
-            /* =================================================
-               SELECTED
-            ================================================= */
-
             "&.Mui-selected": {
               backgroundColor: "#FFFFFF",
               color: "#2563EB",
               border: "2px solid #2563EB",
             },
-
-            /* =================================================
-               SELECTED HOVER
-            ================================================= */
 
             "&.Mui-selected:hover": {
               backgroundColor: "#FFFFFF",
@@ -155,9 +116,6 @@ function createServerDay(
   };
 }
 
-/* =========================================================
-   HEADER
-========================================================= */
 
 function CustomCalendarHeader(
   props: PickersCalendarHeaderProps,
@@ -180,11 +138,10 @@ function CustomCalendarHeader(
         onClick={() =>
           onMonthChange(previousMonth)
         }
-        className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center border-none text-[#1F2937] text-[28px] "
+        className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center border-none text-[28px] text-[#1F2937]"
         aria-label="Previous month"
       >
-        <GoChevronLeft/>
-        
+        <GoChevronLeft />
       </button>
 
       <div className="font-medium capitalize text-[16px] text-[#1F2937]">
@@ -196,56 +153,38 @@ function CustomCalendarHeader(
         onClick={() =>
           onMonthChange(nextMonth)
         }
-        className="flex  h-[24px] w-[24px] cursor-pointer items-center justify-center border-none  text-[28px] "
+        className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center border-none text-[28px] text-[#1F2937]"
         aria-label="Next month"
       >
-        <GoChevronRight/>
+        <GoChevronRight />
       </button>
     </div>
   );
 }
-
-/* =========================================================
-   CALENDAR
-========================================================= */
 
 export default function Calendar({
   error,
   availableDays,
   bookedDays,
   selectedDate,
+  displayedMonth,
   variant = "calendar",
+  minDate,
   onDateChange,
   onMonthChange,
+  onClose,
 }: CalendarProps) {
-  const dispatch = useAppDispatch();
-
-  const {
-    currentMonth,
-    currentYears,
-    query,
-  } = useAppSelector(
-    (state) => state.appointment.calendar,
-  );
-
-  /*
-   * =======================================================
-   * MODE
-   * =======================================================
-   *
-   * availableDays !== undefined means that this Calendar
-   * is connected to Appointment availability.
-   *
-   * availableDays === undefined means ordinary form usage.
-   *
-   * IMPORTANT:
-   * [] is still appointment mode.
-   * This is important because backend can legitimately
-   * return an empty array.
-   */
-
   const isAppointmentMode =
     availableDays !== undefined;
+
+  
+  const [instanceKey, setInstanceKey] = useState(0);
+
+  const handleClose = () => {
+  
+    setInstanceKey((k) => k + 1);
+    onClose?.();
+  };
 
   const safeAvailableDays =
     availableDays ?? [];
@@ -253,10 +192,29 @@ export default function Calendar({
   const safeBookedDays =
     bookedDays ?? [];
 
-  /* =======================================================
-     SELECTED DATE
-  ======================================================= */
+ 
+   
+  const currentDisplayedMonth = useMemo(() => {
+    if (displayedMonth) {
+      return displayedMonth.startOf("month");
+    }
 
+    if (selectedDate) {
+      const parsedDate = dayjs(selectedDate);
+
+      if (parsedDate.isValid()) {
+        return parsedDate.startOf("month");
+      }
+    }
+
+    return dayjs().startOf("month");
+  }, [displayedMonth, selectedDate]);
+
+  /**
+   * =========================================================
+   * SELECTED VALUE
+   * =========================================================
+   */
   const value = useMemo(() => {
     if (!selectedDate) {
       return null;
@@ -269,17 +227,8 @@ export default function Calendar({
       : null;
   }, [selectedDate]);
 
-  /* =======================================================
-     SERVER DAY
-  ======================================================= */
-
+  
   const ServerDay = useMemo(() => {
-    /*
-     * Normal picker does NOT need ServerDay.
-     *
-     * MUI will use its default PickerDay.
-     */
-
     if (!isAppointmentMode) {
       return undefined;
     }
@@ -287,81 +236,26 @@ export default function Calendar({
     return createServerDay(
       safeAvailableDays,
       safeBookedDays,
-      currentMonth,
-      currentYears,
+      currentDisplayedMonth,
     );
   }, [
     isAppointmentMode,
     safeAvailableDays,
     safeBookedDays,
-    currentMonth,
-    currentYears,
+    currentDisplayedMonth,
   ]);
 
-  /* =======================================================
-     MONTH CHANGE
-  ======================================================= */
+  
+  const handleMonthChange = (
+    date: Dayjs,
+  ) => {
+    const month =
+      date.startOf("month");
 
-  const handleMonthChange = (date: Dayjs) => {
-    /*
-     * =====================================================
-     * NORMAL FORM
-     * =====================================================
-     *
-     * Do NOT touch appointment Redux.
-     *
-     * MUI can change the displayed month itself.
-     * We only notify parent if parent needs it.
-     */
-
-    if (!isAppointmentMode) {
-      onMonthChange?.(date);
-      return;
-    }
-
-    /*
-     * =====================================================
-     * APPOINTMENT
-     * =====================================================
-     *
-     * Original logic stays here.
-     */
-
-    const month = date.month() + 1;
-    const year = date.year();
-
-    if (
-      month === query.month &&
-      year === query.year
-    ) {
-      return;
-    }
-
-    if (
-      month === currentMonth &&
-      year === currentYears &&
-      (
-        query.month !== currentMonth ||
-        query.year !== currentYears
-      )
-    ) {
-      return;
-    }
-
-    dispatch(
-      setQuery({
-        month,
-        year,
-      }),
-    );
-
-    onMonthChange?.(date);
+    onMonthChange?.(month);
   };
 
-  /* =======================================================
-     DATE CHANGE
-  ======================================================= */
-
+ 
   const handleDateChange = (
     date: Dayjs | null,
   ) => {
@@ -369,50 +263,24 @@ export default function Calendar({
       ? date.format("YYYY-MM-DD")
       : null;
 
-    /*
-     * IMPORTANT:
-     *
-     * Only Appointment calendar changes
-     * appointment Redux state.
-     *
-     * Normal form only gets onDateChange().
-     */
-
-    if (isAppointmentMode) {
-      dispatch(
-        setDate(formattedDate),
-      );
-    }
-
     onDateChange?.(formattedDate);
   };
 
-  /* =======================================================
-     DISABLE DATE
-  ======================================================= */
-
+  
   const shouldDisableDate = (
     day: Dayjs,
   ) => {
-    /*
-     * Normal form:
-     * absolutely nothing is disabled.
-     */
-
     if (!isAppointmentMode) {
       return false;
     }
 
-    /*
-     * Appointment:
-     * original availability logic.
-     */
+    const isDisplayedMonth =
+      day.month() ===
+        currentDisplayedMonth.month() &&
+      day.year() ===
+        currentDisplayedMonth.year();
 
-    const isBackendMonth =
-      day.month() + 1 === currentMonth &&
-      day.year() === currentYears;
-
-    if (!isBackendMonth) {
+    if (!isDisplayedMonth) {
       return true;
     }
 
@@ -421,34 +289,18 @@ export default function Calendar({
     );
   };
 
-  /* =======================================================
-     COMMON PROPS
-  ======================================================= */
-
+ 
   const commonProps = {
     value,
 
     onChange: handleDateChange,
 
-    /*
-     * In normal mode this only calls parent's callback.
-     *
-     * In appointment mode it also updates Redux.
-     */
-    onMonthChange: handleMonthChange,
+    onMonthChange:
+      handleMonthChange,
 
-    /*
-     * Normal mode -> always false.
-     * Appointment mode -> availableDays logic.
-     */
     shouldDisableDate,
 
     slots: {
-      /*
-       * Only appointment calendar gets ServerDay.
-       *
-       * Normal DatePicker gets MUI default day.
-       */
       ...(ServerDay
         ? { day: ServerDay }
         : {}),
@@ -458,19 +310,11 @@ export default function Calendar({
     },
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
-
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
     >
       {variant === "calendar" ? (
-        /* ===================================================
-           APPOINTMENT MAIN CALENDAR
-        =================================================== */
-
         <div
           className={`flex h-[389px] w-[348px] rounded-[8px] border bg-white p-[20px] shadow-sm ${
             selectedDate
@@ -480,6 +324,9 @@ export default function Calendar({
         >
           <DateCalendar
             {...commonProps}
+            referenceDate={
+              currentDisplayedMonth
+            }
             views={["day"]}
             openTo="day"
             showDaysOutsideCurrentMonth
@@ -545,38 +392,30 @@ export default function Calendar({
           />
         </div>
       ) : (
-        /* ===================================================
-           PICKER
-           
-           Works both:
-           
-           1. Appointment form
-              availableDays passed
-           
-           2. Normal form
-              availableDays NOT passed
-        =================================================== */
-
         <div className="w-1/2">
           <label className="mb-[10px] block font-[Inter] font-medium text-[14px]">
             Date *
           </label>
 
           <DatePicker
-              {...commonProps}
-              
-              showDaysOutsideCurrentMonth
-               
+            key={instanceKey}
+            {...commonProps}
+            onClose={handleClose}
+            referenceDate={
+              currentDisplayedMonth
+            }
+            minDate={minDate}
+            showDaysOutsideCurrentMonth
             dayOfWeekFormatter={(date) =>
               date.format("dd")
             }
             fixedWeekNumber={6}
             format="DD.MM.YYYY"
             slotProps={{
-               textField: {
-      fullWidth: true,
-      error: !!error,
-      helperText: error,
+              textField: {
+                fullWidth: true,
+                error: !!error,
+                helperText: error,
 
                 sx: {
                   "& .MuiPickersInputBase-root": {
@@ -616,10 +455,12 @@ export default function Calendar({
                     boxSizing: "border-box",
                     padding: "16px",
                     display: "flex",
-                    flexDirection: "column",
+                    flexDirection:
+                      "column",
                     justifyContent:
                       "flex-start",
-                    alignItems: "stretch",
+                    alignItems:
+                      "stretch",
                   },
 
                   "& .MuiDayCalendar-root": {
@@ -642,7 +483,8 @@ export default function Calendar({
                     display: "flex",
                     justifyContent:
                       "space-between",
-                    alignItems: "center",
+                    alignItems:
+                      "center",
                     margin: 0,
                     marginBottom: "4px",
                   },

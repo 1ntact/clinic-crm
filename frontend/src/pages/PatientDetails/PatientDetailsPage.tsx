@@ -14,7 +14,7 @@ import { PatientEditForm } from "@/features/patients/PatientEditForm";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import { patientDetailsStatisticThunk } from "@/features/statistics/thunk/patientDetailsStatisticsThunk";
-import { patientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
+import { getPatientDetailsNavigation } from "@/features/patients/model/patientDetailsNavigation";
 import { SmallNavbar } from "../DoctorDetails/components/SmallNavbar";
 import { SiTicktick } from "react-icons/si";
 import { resetActiveVisits } from "@/features/visits/visitsSlice";
@@ -33,7 +33,7 @@ export const PatientDetailsPage = () => {
     useAppSelector((state) => state.visit);
   const { patientId } = useParams();
   const navigate = useNavigate();
-console.log("couuuuuuuuunt",selectedPatient)
+console.log("couuuuuuuuunt",user)
   useEffect(() => {
     if (!patientId) return;
     dispatch(getPatientByIdThunk(Number(patientId)));
@@ -113,26 +113,27 @@ console.log("couuuuuuuuunt",selectedPatient)
               </span>
             </div>
 
-            {!isActiveVisit && access.canCreatePatient ? (
-              <div className="w-[250px] flex gap-4">
-                <ButtonPage
-                  className={buttonStyles.removeButton}
-                  icon={<IoTrash className="mr-2 text-[#DC2626]" />}
-                  onClick={() => setOpenModal(true)}
-                >
-                  Remove
-                </ButtonPage>
+              {access.canCreatePatient && (
+                <div className="w-[250px] flex gap-4">
+                  <ButtonPage
+                    className={buttonStyles.removeButton}
+                    icon={<IoTrash className="mr-2 text-[#DC2626]" />}
+                    onClick={() => setOpenModal(true)}
+                  >
+                    Remove
+                  </ButtonPage>
 
-                <ButtonPage
-                  className={buttonStyles.editButton}
-                  icon={<LuPencilLine className="mr-2" />}
-                  onClick={handleAside}
-                >
-                  Edit Patient
-                </ButtonPage>
-              </div>
-            ) : (
-              <ButtonPage
+                  <ButtonPage
+                    className={buttonStyles.editButton}
+                    icon={<LuPencilLine className="mr-2" />}
+                    onClick={handleAside}
+                  >
+                    Edit Patient
+                  </ButtonPage>
+                </div>
+              )}
+                
+             {isActiveVisit && <ButtonPage
                 className={buttonStyles.confirmVisits}
                 icon={<SiTicktick className="mr-2" />}
                     onClick={() => {
@@ -141,8 +142,8 @@ console.log("couuuuuuuuunt",selectedPatient)
                     }}
               >
                 Complete visit
-              </ButtonPage>
-            )}
+              </ButtonPage>}
+            
           </section>
 
           <section className="flex items-center justify-between ">
@@ -156,9 +157,12 @@ console.log("couuuuuuuuunt",selectedPatient)
           </section>
         </div>
       )}
-      <SmallNavbar arrayNavigation={patientDetailsNavigation}
+    { selectedPatient &&  <SmallNavbar   arrayNavigation={getPatientDetailsNavigation(
+    selectedPatient.completedAppointmentsCount,
+    selectedPatient.visitsCount
+  )}
        
-      />
+      />}
 
       <Outlet />
     </>

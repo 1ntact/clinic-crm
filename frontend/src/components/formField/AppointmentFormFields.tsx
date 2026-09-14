@@ -1,17 +1,19 @@
+import { useEffect, useState } from "react";
+import dayjs, { type Dayjs } from "dayjs";
 import type { AppointmentFormData } from "@/types/appointmentFormData";
+
 import { Input } from "../input/Input";
+import { Select } from "../select/Select";
+import { TextArea } from "../textArea/TextArea";
+
 import { formValidation } from "@/features/auth/model/form.validation";
 import { useFormContext } from "react-hook-form";
 
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
-import { Select } from "../select/Select";
-import {
-  setDoctor,
-  setTime,
-  setTreatment,
-} from "@/features/appointments/appointmentsSlice";
 
-import { TextArea } from "../textArea/TextArea";
+import { getFormAppointmentsDashboardThunk } from "@/features/appointments/thunk/getFormAppointmentsDashboardThunk";
+import { getFormAvailableTimeSlotsThunk } from "@/features/appointments/thunk/getFormAvailableTimeSlotsThunk";
+
 import Calendar from "@/pages/Appointments/components/Calendar";
 
 type Props = {
@@ -19,23 +21,119 @@ type Props = {
 };
 
 export const AppointmentFormFields: React.FC<Props> = ({ type }) => {
-  const { doctors } = useAppSelector((state) => state.doctor);
-  const { treatments } = useAppSelector((state) => state.appointment);
-  const { availableDays, availableTime, fullyBookedDays,selectedDate } = useAppSelector(
-    (state) => state.appointment.calendar,
-  );
   const dispatch = useAppDispatch();
 
+  const { doctors } = useAppSelector((state) => state.doctor);
+
+  const { treatments } = useAppSelector((state) => state.appointment);
+
+  
+  const {
+    availableDays,
+    fullyBookedDays,
+    availableTime,
+    calendarLoading,
+  } = useAppSelector((state) => state.appointment.formCalendar);
+console.log("TIMEEEEEEEEEEER",availableTime)
   const {
     control,
     setValue,
     register,
+    watch,
     formState: { errors },
   } = useFormContext<AppointmentFormData>();
+
+ 
+
+  const doctorId = watch("doctorId");
+const appointmentDate = watch("appointmentDate");
+
+const [formDisplayedMonth, setFormDisplayedMonth] = useState<Dayjs>(() =>
+  appointmentDate
+    ? dayjs(appointmentDate).startOf("month")
+    : dayjs().startOf("month"),
+);
+
+  
+
+  useEffect(() => {
+    dispatch(
+      getFormAppointmentsDashboardThunk({
+        month: formDisplayedMonth.month() + 1,
+        year: formDisplayedMonth.year(),
+      }),
+    );
+  }, [dispatch, formDisplayedMonth]);
+
+  
+  useEffect(() => {
+    if (!doctorId || !appointmentDate) {
+      return;
+    }
+
+    dispatch(
+      getFormAvailableTimeSlotsThunk({
+        doctorId: Number(doctorId),
+        date: appointmentDate,
+      }),
+    );
+  }, [dispatch, doctorId, appointmentDate]);
+
+  
+
+  const handleDoctorChange = (id: string) => {
+    setValue("doctorId", id, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
+    
+    setValue("appointmentTime", "", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  
+
+  const handleTreatmentChange = (value: string) => {
+    setValue("treatmentId", value, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+
+
+  const handleDateChange = (date: string | null) => {
+    setValue("appointmentDate", date ?? "", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
+    
+    setValue("appointmentTime", "", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  
+  const handleCalendarClose = () => {
+    const resetMonth = appointmentDate
+      ? dayjs(appointmentDate).startOf("month")
+      : dayjs().startOf("month");
+
+    setFormDisplayedMonth(resetMonth);
+  };
+
   return (
     <>
-      <p className="mb-[24px] text-xs text-[#6B7280]">PERSONAL INFO</p>
-      <div className="flex gap-4 mb-[16px]">
+      <p className="mb-[24px] text-xs text-[#6B7280]">
+        PERSONAL INFO
+      </p>
+
+      <div className="mb-[16px] flex gap-4">
         <Input
           inputClassName="h-[44px]"
           className="flex-1"
@@ -70,9 +168,12 @@ export const AppointmentFormFields: React.FC<Props> = ({ type }) => {
         register={register}
         rules={formValidation.phoneNumber}
       />
-      <p className="mb-[24px] text-xs text-[#6B7280]">APPOINTMENT</p>
 
-      <div className="flex gap-4 mb-[16px]">
+      <p className="mb-[24px] text-xs text-[#6B7280]">
+        APPOINTMENT
+      </p>
+
+      <div className="mb-[16px] flex gap-4">
         <Select
           className="flex-1"
           name="doctorId"
@@ -82,13 +183,7 @@ export const AppointmentFormFields: React.FC<Props> = ({ type }) => {
             value: String(doctor.id),
             label: `Dr. ${doctor.firstName} ${doctor.lastName}`,
           }))}
-          onChange={(id) => {
-            const doctor = doctors.find((d) => String(d.id) === id);
-
-            if (doctor) {
-              dispatch(setDoctor(doctor));
-            }
-          }}
+          onChange={handleDoctorChange}
           control={control}
           rules={formValidation.doctor}
           error={errors.doctorId?.message}
@@ -101,51 +196,57 @@ export const AppointmentFormFields: React.FC<Props> = ({ type }) => {
           placeholder="Choose Treatments"
           options={treatments.map((treatment) => ({
             value: String(treatment.id),
-            label: `${treatment.treatment} - ${treatment.price.toString().slice(0, -3)}$ `,
+            label: `${treatment.treatment} - ${treatment.price
+              .toString()
+              .slice(0, -3)}$`,
           }))}
-          onChange={(value) => {
-            dispatch(setTreatment(value));
-          }}
+          onChange={handleTreatmentChange}
           control={control}
           rules={formValidation.treatments}
           error={errors.treatmentId?.message}
         />
       </div>
-      <div className="flex  gap-4 mb-[16px]">
-      <Calendar
-  variant="picker"
-  availableDays={availableDays}
-  bookedDays={fullyBookedDays}
-  selectedDate={selectedDate}
-  onDateChange={(date) => {
-    setValue(
-      "appointmentDate",
-      date ?? "",
-      {
-        shouldValidate: true,
-        shouldDirty: true,
-      },
-    );
-  }}
-/>
+
+      <div className="mb-[16px] flex gap-4">
+        <Calendar
+          variant="picker"
+          availableDays={availableDays}
+          bookedDays={fullyBookedDays}
+          selectedDate={appointmentDate || null}
+          displayedMonth={formDisplayedMonth}
+          onMonthChange={(date) => {
+            setFormDisplayedMonth(date.startOf("month"));
+          }}
+          onDateChange={handleDateChange}
+          onClose={handleCalendarClose}
+          error={errors.appointmentDate?.message}
+          minDate={dayjs()}
+        />
+
         <Select
           className="flex-1"
           name="appointmentTime"
           label="Time *"
-          placeholder="Choose Time"
+          placeholder={
+            !doctorId
+              ? "Choose a doctor first"
+              : !appointmentDate
+                ? "Choose a date first"
+                : calendarLoading
+                  ? "Loading..."
+                  : "Choose Time"
+          }
           options={availableTime.map((time) => ({
-            disabled: time.status === "expired",
-            value: String(time.time),
-            label: `${time.time.slice(0, -3)}  `,
+            disabled: time.status !== "free",
+            value: time.time,
+            label: time.time.slice(0, -3),
           }))}
-          onChange={(value) => {
-            dispatch(setTime(value));
-          }}
           control={control}
-          rules={formValidation.date}
+          rules={formValidation.requireField}
           error={errors.appointmentTime?.message}
         />
       </div>
+
       <TextArea
         name="notes"
         label="Notes"

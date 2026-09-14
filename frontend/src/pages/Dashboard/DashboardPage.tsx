@@ -28,14 +28,17 @@ import { setSelectedAppointment } from "@/features/appointments/appointmentsSlic
 import { createVisitThunk } from "@/features/visits/thunks/createVisitThunk";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { getVisitByAppointmentIdThunk } from "@/features/visits/thunks/getVisitsByAppointmentsId";
+import { doctorDashboardCards } from "@/features/statistics/model/doctorDashboardCardStatistics";
+import { doctorDashboardStatisticThunk } from "@/features/statistics/thunk/doctorDashboardStatisticsThunk";
 
 
 export const DashboardPage = () => {
   
-  const {selectedAppointment}=useAppSelector(state=>state.appointment)
+  const {selectedAppointment} = useAppSelector(state=>state.appointment)
   const{user,loading} = useAppSelector((state) => state.auth);
    const access = getAccess(user);
   const cards = useAppSelector((state) => state.statistic.statistics?.cards);
+  const doctorCards = useAppSelector((state)=>state.statistic.statistics.doctorDashboardCard)
   
   const revenue = useAppSelector(
     (state) => state.statistic.statistics?.weeklyRevenue,
@@ -54,24 +57,33 @@ export const DashboardPage = () => {
   
   const now = new Date();
   const nowTime = now.toLocaleDateString("uk-UA");
-  useEffect(() => {
-    const getStatistic = async () => {
-      dispatch(setSelectedAppointment(null))
+ useEffect(() => {
+  const getStatistic = async () => {
+    dispatch(setSelectedAppointment(null));
+
+    if (user?.role === "doctor" && user.doctorId) {
+      dispatch(doctorDashboardStatisticThunk(user.doctorId));
+    } else {
       dispatch(dashboardStatisticsThunk());
-      dispatch(
-        getAppointmentsThunk({
-          appointmentDate: now.toISOString().split("T")[0],
-          appointmentStatus: "scheduled",
-          pageSize: 10,
-          page: 1,
-          ...(access?.isDoctor && access.doctorId) ? {
-            doctorId:access.doctorId,
-          }:{}
-        }),
-      );
-    };
-    getStatistic();
-  }, []);
+    }
+
+    dispatch(
+      getAppointmentsThunk({
+        appointmentDate: now.toISOString().split("T")[0],
+        appointmentStatus: "scheduled",
+        pageSize: 10,
+        page: 1,
+        ...(access?.isDoctor && access.doctorId
+          ? {
+              doctorId: access.doctorId,
+            }
+          : {}),
+      }),
+    );
+  };
+
+  getStatistic();
+}, []);
 
 
 
@@ -181,7 +193,20 @@ const handleCreateVisit = async () => {
             />
           ))}
       </div>}
-        
+        {access.isDoctor && <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {doctorCards &&
+          doctorDashboardCards.map((card) => (
+            <CardStatistics
+              prefix={card.prefix}
+              key={card.key}
+              title={card.title}
+              icon={card.icon}
+              iconClass={card.iconClass}
+              value={doctorCards[card.key].total}
+              change={card.change !== null ? Number(card.change) : null}
+            />
+          ))}
+      </div>}
       {access?.canViewStatistics && <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
         {roundedDiagram && (
           <RoundedDiagram info={roundedDiagram} currentMonth={currentMonth} />
