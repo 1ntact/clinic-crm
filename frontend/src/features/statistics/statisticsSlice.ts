@@ -6,6 +6,7 @@ import {
  } from "./thunk/patientManagementThunk";
 import { patientDetailsStatisticThunk } from "./thunk/patientDetailsStatisticsThunk";
 import { doctorDetailsStatisticThunk } from "./thunk/doctorDetailsStatisticsThunk";
+import { doctorDashboardStatisticThunk } from "./thunk/doctorDashboardStatisticsThunk";
 
 export type WeeklyRevenueDay = {
   actual: number;
@@ -58,6 +59,13 @@ type DoctorDetailsCards = {
         noShowVisits:StatisticCard,
        
 }
+type DoctorDashboardCards = {
+  dailyAppointments:StatisticCard,
+             noShowVisits:StatisticCard,
+        completedVisits:StatisticCard,
+        dailyRevenue:StatisticCard,
+       
+}
 
 type DashboardStatistics = {
   cards: DashboardCards | null;
@@ -67,6 +75,7 @@ type DashboardStatistics = {
   patientDetailsCard: PatientDetailsCards | null;
   doctorDetailsCard: DoctorDetailsCards | null;
   doctorWeeklyRevenue: WeeklyRevenueData | null;
+  doctorDashboardCard: DoctorDashboardCards | null;
 };
 
 type DashboardState = {
@@ -83,7 +92,8 @@ const initialState: DashboardState = {
     patientsManagmentCard: null,
     patientDetailsCard: null,
     doctorDetailsCard: null,
-    doctorWeeklyRevenue:null,
+    doctorWeeklyRevenue: null,
+    doctorDashboardCard:null,
   },
   isLoading: false,
   error: null,
@@ -147,6 +157,19 @@ const statisticsSlice = createSlice({
         console.log(action.payload)
       })
     .addCase(doctorDetailsStatisticThunk.rejected, (state) => {
+        state.isLoading = false;
+        
+    })
+     .addCase(doctorDashboardStatisticThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(doctorDashboardStatisticThunk.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.statistics.doctorDashboardCard = action.payload.doctorDashboardCard;
+        
+        console.log(action.payload)
+      })
+    .addCase(doctorDashboardStatisticThunk.rejected, (state) => {
         state.isLoading = false;
         
     })

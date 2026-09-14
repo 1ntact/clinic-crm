@@ -136,7 +136,7 @@ useEffect(() => {
    
   };
   return (
-    <div className="flex flex-col gap-2 lg:flex-row">
+  <div className={`flex flex-col gap-2 ${user?.role==='doctor'?"lg:flex-row-reverse":"lg:flex-row"} `}>
         {aside && (
              <AsideMenu
                handleAside={toogleNotesForm}

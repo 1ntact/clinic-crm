@@ -20,13 +20,13 @@ export const formValidation = {
         "The password must consist of at least 8 characters and contain letters, numbers, and special characters.",
     },
   },
-  phoneNumber: {
-    required: "Phone number is required",
-    pattern: {
-      value: /^\+[0-9]{10,15}$/,
-      message: "Enter a valid phone number",
-    },
+ phoneNumber: {
+  required: "Phone number is required",
+  pattern: {
+    value: /^\+380\d{9}$/,
+    message: "Enter a valid phone number +380XXXXXXXXX",
   },
+},
   name: {
     required: "First name is required",
     pattern: {

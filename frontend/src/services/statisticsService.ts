@@ -73,6 +73,14 @@ export const statisticsService = {
     const response = await httpClient.get(`statistics/doctors/${doctorId}/weekly-revenue`)
     return response.data
   },
+       getDoctorAppointments: async (doctorId: number) => {
+    const response = await httpClient.get(`statistics/doctors/${doctorId}/daily-appointments`)
+    return response.data
+  },
+         getDoctorDailyRevenue: async (doctorId: number) => {
+    const response = await httpClient.get(`statistics/doctors/${doctorId}/daily-revenue`)
+    return response.data
+  },
    
    
    
