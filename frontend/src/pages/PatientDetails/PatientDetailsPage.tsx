@@ -99,21 +99,29 @@ console.log("couuuuuuuuunt",user)
         <div className="rounded-xl bg-white p-[16px] shadow-sm mb-[16px]">
           <section className="mb-[16px] flex items-center justify-between">
             <div className="text-sm text-gray-500">
-              <span
-                className="cursor-pointer hover:text-blue-600"
-                onClick={() => navigate("/patients")}
-              >
-                &lt; Patient list
-              </span>
+               <span
+  className={`${
+    isActiveVisit
+      ? "cursor-not-allowed text-gray-400"
+      : "cursor-pointer hover:text-blue-600"
+  }`}
+  onClick={() => {
+    if (!isActiveVisit) {
+      navigate("/patients");
+    }
+  }}
+>
+  &lt; Patient list
+</span>
 
-              <span className="mx-2">/</span>
+<span className="mx-2">/</span>
 
-              <span className="font-medium text-gray-900">
-                {selectedPatient?.firstName} {selectedPatient?.lastName}
-              </span>
+<span className="font-medium text-gray-900">
+  {selectedPatient?.firstName} {selectedPatient?.lastName}
+</span>
             </div>
 
-              {access.canCreatePatient && (
+              {access.canCreatePatient && !isActiveVisit && (
                 <div className="w-[250px] flex gap-4">
                   <ButtonPage
                     className={buttonStyles.removeButton}
