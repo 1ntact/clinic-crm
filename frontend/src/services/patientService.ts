@@ -2,6 +2,9 @@ import { httpClient } from "@/http/httpClient";
 import type { PatientFormData } from "@/types/patientFormData";
 import { accessTokenService } from "./accessTokenService";
 import type { PatientQuery } from "@/features/patients/model/patientsQuery";
+import type { PatientNotesQuery } from "@/features/patients/patientsSlice";
+
+import type { PatientNotesResponse } from "@/features/patients/thunk/getPatientNotesVisits";
 
 export const patientsService = {
   createPatient: async (data: PatientFormData) => {
@@ -60,9 +63,15 @@ export const patientsService = {
     
 
   },
- getPatientNotes: async (patientId: number) => {
-  const response = await httpClient.get(
-    `/patients/${patientId}/clinical-notes/`
+getPatientNotes: async (data: PatientNotesQuery & { patientId: number }) => {
+  const response = await httpClient.get<PatientNotesResponse>(
+    `/patients/${data.patientId}/clinical-notes/`,
+    {
+      params: {
+        page: data.page,
+        page_size: data.pageSize,
+      },
+    },
   );
 
   return response.data;

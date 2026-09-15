@@ -14,5 +14,7 @@ export type Patient = {
   totalVisits: number;
   treatment: string;
   status: string;
+  visitsCount: number;
+  completedAppointmentsCount: number;
  
 }

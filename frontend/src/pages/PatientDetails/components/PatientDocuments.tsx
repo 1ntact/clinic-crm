@@ -1,7 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/app/store/hook";
 import { AsideMenu } from "@/components/asideMenu/AsideMenu";
 import { ButtonPage } from "@/components/button/ButtonsPage";
+import { Pagination } from "@/components/pagination/Pagination";
+
 import { getTreatmentsThunk } from "@/features/appointments/thunk/getTreatments";
+import { setPatientNotesQuery } from "@/features/patients/patientsSlice";
 import { getPatientNotesThunk } from "@/features/patients/thunk/getPatientNotesVisits";
 import { VisitEditForm } from "@/features/visits/visitsEditForm";
 import {
@@ -10,12 +13,11 @@ import {
 } from "@/features/visits/visitsSlice";
 import { buttonStyles } from "@/shared/styles/formButtonStyles";
 import dayjs from "dayjs";
+import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   
   FiChevronDown,
-  FiChevronLeft,
-  FiChevronRight,
   FiChevronUp,
   FiDownload,
   FiEdit2,
@@ -29,28 +31,35 @@ export const PatientDocuments = () => {
   const [aside, setActiveAside] = useState(false)
   const [expandedNotes, setExpandedNotes] = useState<number[]>([]);
   
-  
-  const { currentVisit, isActiveVisit,loading } = useAppSelector(
+  const user = useAppSelector(state=>state.auth.user)
+  const { currentVisit, isActiveVisit } = useAppSelector(
     (state) => state.visit,
   );
-  const { patientNotes } = useAppSelector((state) => state.patient);
+  const { patientNotes ,patientNotesQuery,patientNotesTotal,loading} = useAppSelector((state) => state.patient);
   const { patientId } = useParams();
   const dispatch = useAppDispatch();
 
   
-  useEffect(() => {
-    const getAllVisits = async () => {
-      try {
-        await dispatch(getPatientNotesThunk(Number(patientId)));
-       await dispatch(getTreatmentsThunk(false))
-               
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getAllVisits();
-  }, [dispatch]);
+useEffect(() => {
+  if (!patientId) return;
 
+  dispatch(
+    getPatientNotesThunk({
+      patientId: Number(patientId),
+      page: patientNotesQuery.page,
+      pageSize: patientNotesQuery.pageSize,
+    }),
+  );
+}, [
+  dispatch,
+  patientId,
+  patientNotesQuery.page,
+  patientNotesQuery.pageSize,
+]);
+  useEffect(() => {
+  dispatch(getTreatmentsThunk(false));
+  }, [dispatch]);
+  
   useEffect(() => {
     if (!currentVisit || !isActiveVisit || !patientNotes?.length) return;
 
@@ -127,7 +136,7 @@ export const PatientDocuments = () => {
    
   };
   return (
-    <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1.45fr_1fr]">
+  <div className={`flex flex-col gap-2 ${user?.role==='doctor'?"lg:flex-row-reverse":"lg:flex-row"} `}>
         {aside && (
              <AsideMenu
                handleAside={toogleNotesForm}
@@ -157,7 +166,12 @@ export const PatientDocuments = () => {
            )}
       {/* ===================== CLINICAL NOTES ===================== */}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+    
+      <section className={`rounded-lg border border-gray-200 bg-white p-5 ${
+      user?.role === "admin"
+        ?  "lg:order-1 lg:flex-[1.45]"
+        : "lg:order-2 lg:flex-[1.45]"
+    }`}>
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[12px] font-semibold uppercase text-gray-700">
@@ -191,14 +205,18 @@ export const PatientDocuments = () => {
         </div>
 
         {/* Notes */}
-        <div>
+        {<div className="mb-[24px] relative">
+           {loading && (
+                      <div className="absolute inset-0 z-10">
+                        <Loader />
+                      </div>)}
           {patientNotes?.map((note) => {
             const isExpanded = expandedNotes.includes(note.visitId);
 
             return (
               <article
                 key={note.visitId}
-                className="border-b border-gray-100 py-3.5 last:border-b-0"
+                className="border-b border-gray-100 py-3.5 last:border-b-0 mb-[16px]"
               >
                 {/* Date + edit */}
                 <div className="mb-1 flex items-start justify-between">
@@ -303,54 +321,31 @@ export const PatientDocuments = () => {
                   </ButtonPage>
                 </div>
               </article>
+              
             );
           })}
 
-          
-          {/* Notes Pagination */}
-          <div className="mt-4 flex justify-end">
-            <div className="flex items-center gap-1">
-              {/* Previous */}
-              <button
-                type="button"
-                className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-              >
-                <FiChevronLeft size={14} />
-                Previous
-              </button>
-
-              {/* 1 */}
-              <button
-                type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-xs text-gray-700"
-              >
-                1
-              </button>
-
-              {/* 2 */}
-              <button
-                type="button"
-                className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
-              >
-                2
-              </button>
-
-              {/* Next */}
-              <button
-                type="button"
-                className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-              >
-                Next
-                <FiChevronRight size={14} />
-              </button>
-            </div>
-          </div>
-        </div>
+         
+               
+        
+        </div>}
+        <Pagination
+  page={patientNotesQuery.page}
+  pageSize={patientNotesQuery.pageSize}
+  total={patientNotesTotal}
+  onPageChange={(page) => {
+    dispatch(setPatientNotesQuery({ page }));
+  }}
+/>
       </section>
 
       {/* ===================== FILES ===================== */}
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <section className={`rounded-lg border border-gray-200 bg-white p-5 ${
+      user?.role === "admin"
+        ?"lg:order-2 lg:flex-1"
+        :   "lg:order-1 lg:flex-1"
+    }`}>
         {/* Header */}
         <div className="mb-4">
           <h2 className="text-[12px] font-semibold uppercase text-gray-700">
@@ -374,7 +369,7 @@ export const PatientDocuments = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-hidden">
+        <div className="overflow-hidden mb-[24px]">
           {/* Table Header */}
           <div className="grid grid-cols-[2fr_1.5fr_1.2fr_1fr_55px] items-center bg-gray-100 px-2 py-2.5">
             <span className="text-[10px] font-medium uppercase text-gray-500">
@@ -433,68 +428,14 @@ export const PatientDocuments = () => {
           ))}
         </div>
 
-        {/* Files Pagination */}
-        <div className="mt-4 flex items-center justify-between">
-          <span className="text-[11px] text-gray-500">01 pages of 05</span>
-
-          <div className="flex items-center gap-1">
-            {/* Previous */}
-            <button
-              type="button"
-              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-            >
-              <FiChevronLeft size={14} />
-              Previous
-            </button>
-
-            {/* 1 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-xs text-gray-700"
-            >
-              1
-            </button>
-
-            {/* 2 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
-            >
-              2
-            </button>
-
-            {/* 3 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
-            >
-              3
-            </button>
-
-            {/* ... */}
-            <span className="flex h-8 w-8 items-center justify-center text-xs text-gray-400">
-              ...
-            </span>
-
-            {/* 5 */}
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center text-xs text-gray-700"
-            >
-              5
-            </button>
-
-            {/* Next */}
-            <button
-              type="button"
-              className="flex h-8 items-center gap-1 px-2 text-xs text-gray-700 transition hover:text-blue-600"
-            >
-              Next
-              <FiChevronRight size={14} />
-            </button>
-          </div>
-        </div>
+       <Pagination
+  page={1}
+  pageSize={5}
+  total={10}
+  onPageChange={() => {}}
+/>
       </section>
-    </div>
+      </div>
+    
   );
 };

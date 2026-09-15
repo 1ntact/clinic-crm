@@ -1,5 +1,6 @@
-import {  useMemo } from "react";
+import { useMemo, useState } from "react";
 import dayjs, { type Dayjs } from "dayjs";
+import { GoChevronLeft, GoChevronRight } from "react-icons/go";
 
 import {
   DateCalendar,
@@ -15,36 +16,33 @@ import {
   type PickerDayProps,
 } from "@mui/x-date-pickers/PickerDay";
 
-import {
-  setDate,
-  setQuery,
-} from "@/features/appointments/appointmentsSlice";
-
-import {
-  useAppDispatch,
-  useAppSelector,
-} from "@/app/store/hook";
-
 type CalendarProps = {
-  availableDays: number[];
-  bookedDays: number[];
+  availableDays?: number[];
+  bookedDays?: number[];
+
   selectedDate: string | null;
+
+  displayedMonth?: Dayjs;
+
+  error?: string;
 
   variant?: "calendar" | "picker";
 
+  minDate?: Dayjs;
+
   onDateChange?: (date: string | null) => void;
+
   onMonthChange?: (date: Dayjs) => void;
+
+  
+  onClose?: () => void;
 };
 
-/* =========================================================
-   DAY
-========================================================= */
 
 function createServerDay(
   availableDays: number[],
   bookedDays: number[],
-  backendMonth: number,
-  backendYear: number,
+  displayedMonth: Dayjs,
 ) {
   return function ServerDay({
     day,
@@ -53,16 +51,16 @@ function createServerDay(
   }: PickerDayProps) {
     const dayNumber = day.date();
 
-    const isBackendMonth =
-      day.month() + 1 === backendMonth &&
-      day.year() === backendYear;
+    const isDisplayedMonth =
+      day.month() === displayedMonth.month() &&
+      day.year() === displayedMonth.year();
 
     const isAvailable =
-      isBackendMonth &&
+      isDisplayedMonth &&
       availableDays.includes(dayNumber);
 
     const isBooked =
-      isBackendMonth &&
+      isDisplayedMonth &&
       bookedDays.includes(dayNumber);
 
     const isPast = day.isBefore(dayjs(), "day");
@@ -73,58 +71,51 @@ function createServerDay(
         day={day}
         sx={[
           {
+            fontWeight: 500,
             borderRadius: "8px",
 
-            /* Available */
             ...(isAvailable && {
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
               backgroundColor: "#FFFFFF",
               color: "#1F2937",
             }),
 
-            /* Fully booked */
             ...(isBooked && {
               backgroundColor: "#FEE2E2",
               color: "#9CA3AF",
             }),
 
-            /* Past */
             ...(isPast && {
               backgroundColor: "#FFFFFF",
               color: "#9CA3AF",
             }),
 
-            /* Today */
-            "&.MuiPickersDay-today": {
-              border: "2px solid #2563EB",
-              backgroundColor: "#FFFFFF",
-              color: "#1F2937",
+            "&.MuiPickerDay-today": {
+              backgroundColor: "#2563EB",
+              color: "#FFFFFF",
+              border: "none",
             },
 
-            /* Selected */
             "&.Mui-selected": {
-              backgroundColor:
-                "#1E3A8A !important",
-              color: "#FFFFFF !important",
+              backgroundColor: "#FFFFFF",
+              color: "#2563EB",
+              border: "2px solid #2563EB",
             },
 
             "&.Mui-selected:hover": {
-              backgroundColor:
-                "#1E3A8A !important",
+              backgroundColor: "#FFFFFF",
+              border: "2px solid #2563EB",
             },
           },
 
-          ...(Array.isArray(sx)
-            ? sx
-            : [sx]),
+          ...(Array.isArray(sx) ? sx : [sx]),
         ]}
       />
     );
   };
 }
 
-/* =========================================================
-   HEADER
-========================================================= */
 
 function CustomCalendarHeader(
   props: PickersCalendarHeaderProps,
@@ -141,21 +132,19 @@ function CustomCalendarHeader(
     currentMonth.add(1, "month");
 
   return (
-    <div
-      className=" h-[36px] w-[300px] flex items-center justify-between mb-[8px] "
-    >
+    <div className="mb-[16px] flex h-[36px] w-full items-center justify-between">
       <button
         type="button"
         onClick={() =>
           onMonthChange(previousMonth)
         }
-        className="flex h-8 w-8 items-center justify-center border-none bg-transparent text-[28px] leading-none cursor-pointer"
+        className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center border-none text-[28px] text-[#1F2937]"
         aria-label="Previous month"
       >
-        ‹
+        <GoChevronLeft />
       </button>
 
-      <div className="text-[16px] font-semibold capitalize">
+      <div className="font-medium capitalize text-[16px] text-[#1F2937]">
         {currentMonth.format("MMMM YYYY")}
       </div>
 
@@ -164,43 +153,68 @@ function CustomCalendarHeader(
         onClick={() =>
           onMonthChange(nextMonth)
         }
-        className="flex h-8 w-8 items-center justify-center border-none bg-transparent text-[28px] leading-none cursor-pointer"
+        className="flex h-[24px] w-[24px] cursor-pointer items-center justify-center border-none text-[28px] text-[#1F2937]"
         aria-label="Next month"
       >
-        ›
+        <GoChevronRight />
       </button>
     </div>
   );
 }
 
-/* =========================================================
-   CALENDAR
-========================================================= */
-
 export default function Calendar({
+  error,
   availableDays,
   bookedDays,
   selectedDate,
+  displayedMonth,
   variant = "calendar",
+  minDate,
   onDateChange,
   onMonthChange,
+  onClose,
 }: CalendarProps) {
-  const dispatch = useAppDispatch();
-
-  const {
-    currentMonth,
-    currentYears,
-    query,
-  } = useAppSelector(
-    (state) => state.appointment.calendar,
-  );
+  const isAppointmentMode =
+    availableDays !== undefined;
 
   
+  const [instanceKey, setInstanceKey] = useState(0);
 
-  /* =======================================================
-     SELECTED DATE
-  ======================================================= */
+  const handleClose = () => {
+  
+    setInstanceKey((k) => k + 1);
+    onClose?.();
+  };
 
+  const safeAvailableDays =
+    availableDays ?? [];
+
+  const safeBookedDays =
+    bookedDays ?? [];
+
+ 
+   
+  const currentDisplayedMonth = useMemo(() => {
+    if (displayedMonth) {
+      return displayedMonth.startOf("month");
+    }
+
+    if (selectedDate) {
+      const parsedDate = dayjs(selectedDate);
+
+      if (parsedDate.isValid()) {
+        return parsedDate.startOf("month");
+      }
+    }
+
+    return dayjs().startOf("month");
+  }, [displayedMonth, selectedDate]);
+
+  /**
+   * =========================================================
+   * SELECTED VALUE
+   * =========================================================
+   */
   const value = useMemo(() => {
     if (!selectedDate) {
       return null;
@@ -213,80 +227,35 @@ export default function Calendar({
       : null;
   }, [selectedDate]);
 
-  /* =======================================================
-     SERVER DAY
-  ======================================================= */
+  
+  const ServerDay = useMemo(() => {
+    if (!isAppointmentMode) {
+      return undefined;
+    }
 
-  const ServerDay = useMemo(
-    () =>
-      createServerDay(
-        availableDays,
-        bookedDays,
-        currentMonth,
-        currentYears,
-      ),
-    [
-      availableDays,
-      bookedDays,
-      currentMonth,
-      currentYears,
-    ],
-  );
+    return createServerDay(
+      safeAvailableDays,
+      safeBookedDays,
+      currentDisplayedMonth,
+    );
+  }, [
+    isAppointmentMode,
+    safeAvailableDays,
+    safeBookedDays,
+    currentDisplayedMonth,
+  ]);
 
-  /* =======================================================
-     MONTH CHANGE
-  ======================================================= */
-
+  
   const handleMonthChange = (
     date: Dayjs,
   ) => {
-    const month = date.month() + 1;
-    const year = date.year();
+    const month =
+      date.startOf("month");
 
-    
-
-   
-    if (
-      month === query.month &&
-      year === query.year
-    ) {
-      
-
-      return;
-    }
-
-   
-    if (
-      month === currentMonth &&
-      year === currentYears &&
-      (
-        query.month !== currentMonth ||
-        query.year !== currentYears
-      )
-    ) {
-      
-
-      return;
-    }
-
-   
-
-    
-    dispatch(
-      setQuery({
-        month,
-        year,
-      }),
-    );
-
-   
-    onMonthChange?.(date);
+    onMonthChange?.(month);
   };
 
-  /* =======================================================
-     DATE CHANGE
-  ======================================================= */
-
+ 
   const handleDateChange = (
     date: Dayjs | null,
   ) => {
@@ -294,42 +263,33 @@ export default function Calendar({
       ? date.format("YYYY-MM-DD")
       : null;
 
-    
-
-    
-    dispatch(
-      setDate(formattedDate),
-    );
-
     onDateChange?.(formattedDate);
   };
 
-  /* =======================================================
-     DISABLE DATE
-  ======================================================= */
-
+  
   const shouldDisableDate = (
     day: Dayjs,
   ) => {
-   
-    const isBackendMonth =
-      day.month() + 1 === currentMonth &&
-      day.year() === currentYears;
+    if (!isAppointmentMode) {
+      return false;
+    }
 
-    
-    if (!isBackendMonth) {
+    const isDisplayedMonth =
+      day.month() ===
+        currentDisplayedMonth.month() &&
+      day.year() ===
+        currentDisplayedMonth.year();
+
+    if (!isDisplayedMonth) {
       return true;
     }
 
-    return !availableDays.includes(
+    return !safeAvailableDays.includes(
       day.date(),
     );
   };
 
-  /* =======================================================
-     COMMON PROPS
-  ======================================================= */
-
+ 
   const commonProps = {
     value,
 
@@ -341,15 +301,14 @@ export default function Calendar({
     shouldDisableDate,
 
     slots: {
-      day: ServerDay,
+      ...(ServerDay
+        ? { day: ServerDay }
+        : {}),
+
       calendarHeader:
         CustomCalendarHeader,
     },
   };
-
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <LocalizationProvider
@@ -357,110 +316,183 @@ export default function Calendar({
     >
       {variant === "calendar" ? (
         <div
-          className={` w-[348px] h-[389px] flex rounded-[8px] border bg-white p-[24px] shadow-sm ${
+          className={`flex h-[389px] w-[348px] rounded-[8px] border bg-white p-[20px] shadow-sm ${
             selectedDate
               ? "border-gray-200"
               : "border-red-500"
           }`}
         >
-<DateCalendar
-  {...commonProps}
-  views={["day"]}
-  openTo="day"
+          <DateCalendar
+            {...commonProps}
+            referenceDate={
+              currentDisplayedMonth
+            }
+            views={["day"]}
+            openTo="day"
             showDaysOutsideCurrentMonth
             fixedWeekNumber={6}
-  dayOfWeekFormatter={(date) => date.format("dd")}
-  sx={{
-    "& .MuiDayCalendar-root": {
-      width: "300px",
-      height:"340px",
-      
-      padding: 0,
-      margin: 0,
-      overflow: "hidden",
-    },
+            dayOfWeekFormatter={(date) =>
+              date.format("dd")
+            }
+            sx={{
+              "& .MuiDayCalendar-root": {
+                width: "300px",
+                height: "340px",
+                padding: 0,
+                margin: 0,
+                overflow: "hidden",
+              },
 
-    "& .MuiDayCalendar-header": {
-      width: "300px",
-      height: "36px", 
-      margin: 0,    
-      display:"flex",
-      justifyContent: "space-between",
-      alignItems:"center"
-    },
+              "& .MuiDayCalendar-header": {
+                width: "300px",
+                height: "36px",
+                margin: 0,
+                display: "flex",
+                justifyContent:
+                  "space-between",
+                alignItems: "center",
+                color: "#6B7280",
+              },
 
-    "& .MuiDayCalendar-weekContainer": {
-      width: "300px",
-    
-     
-      marginBottom: "8px",
-       "&:last-child": {
-    marginBottom: 0,
-  },
-      justifyContent: "space-between",
-    },
+              "& .MuiDayCalendar-weekContainer": {
+                width: "300px",
+                fontWeight: 500,
+                marginBottom: "8px",
+                justifyContent:
+                  "space-between",
 
-    "& .MuiDayCalendar-slideTransition": {
-      height:"280px",
-     
-      overflow: "hidden",
-    },
+                "&:last-child": {
+                  marginBottom: 0,
+                },
+              },
 
-    "& .MuiDayCalendar-monthContainer": {
-      height:"280px",
-      overflow: "hidden",
-    },
-    "& .MuiDayCalendar-weekDayLabel": {
-     height:"36px",
-      fontSize: "14px",
-      marginBottom:"8px"
-      
-},
+              "& .MuiDayCalendar-slideTransition": {
+                height: "280px",
+                overflow: "hidden",
+              },
 
-"& .MuiPickersDay-root": {
-  fontSize: "14px",
-},
-  }}
-/>
+              "& .MuiDayCalendar-monthContainer": {
+                height: "280px",
+                overflow: "hidden",
+              },
+
+              "& .MuiDayCalendar-weekDayLabel": {
+                fontFamily:
+                  "Inter, sans-serif",
+                fontWeight: 500,
+                height: "36px",
+                fontSize: "14px",
+                marginBottom: "8px",
+              },
+
+              "& .MuiPickersDay-root": {
+                fontSize: "14px",
+              },
+            }}
+          />
         </div>
       ) : (
-  <div className="w-1/2">
-  <label  className="mb-[10px] block font-[Inter] font-medium text-[14px]">
-    Date *
-  </label>
+        <div className="w-1/2">
+          <label className="mb-[10px] block font-[Inter] font-medium text-[14px]">
+            Date *
+          </label>
 
-  <DatePicker
-              {...commonProps}
-              showDaysOutsideCurrentMonth
-    format="DD.MM.YYYY"
-    slotProps={{
-      textField: {
-        fullWidth: true,
-        sx: {
-          "& .MuiPickersInputBase-root": {
-            height: "44px",
-            borderRadius: "8px",
-            width: "100%",
-            padding: "8px",
-          },
+          <DatePicker
+            key={instanceKey}
+            {...commonProps}
+            onClose={handleClose}
+            referenceDate={
+              currentDisplayedMonth
+            }
+            minDate={minDate}
+            showDaysOutsideCurrentMonth
+            dayOfWeekFormatter={(date) =>
+              date.format("dd")
+            }
+            fixedWeekNumber={6}
+            format="DD.MM.YYYY"
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                error: !!error,
+                helperText: error,
 
-          "& .MuiPickersInputBase-sectionsContainer": {
-            padding: "0",
-            flex: 1,
-          },
+                sx: {
+                  "& .MuiPickersInputBase-root": {
+                    height: "44px",
+                    borderRadius: "8px",
+                    width: "100%",
+                    padding: "12px",
+                  },
 
-          "& .MuiInputAdornment-root": {
-            marginLeft: "0px",
-          },
+                  "& .MuiPickersInputBase-sectionsContainer": {
+                    padding: 0,
+                    flex: 1,
+                  },
 
-          "& .MuiIconButton-root": {
-            padding: "8px",
-          },
-        },
-      },
-    }}
-  />
-</div>
+                  "& .MuiInputAdornment-root": {
+                    marginLeft: "0px",
+                  },
+
+                  "& .MuiIconButton-root": {
+                    padding: "8px",
+                  },
+                },
+              },
+
+              day: {
+                sx: {
+                  "--PickerDay-size": "28px",
+                  fontSize: "14px",
+                },
+              },
+
+              popper: {
+                sx: {
+                  "& .MuiDateCalendar-root": {
+                    width: "270px",
+                    height: "297px",
+                    boxSizing: "border-box",
+                    padding: "16px",
+                    display: "flex",
+                    flexDirection:
+                      "column",
+                    justifyContent:
+                      "flex-start",
+                    alignItems:
+                      "stretch",
+                  },
+
+                  "& .MuiDayCalendar-root": {
+                    width: "100%",
+                  },
+
+                  "& .MuiDayCalendar-header": {
+                    width: "100%",
+                    height: "36px",
+                    margin: 0,
+                    color: "#6B7280",
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                  },
+
+                  "& .MuiDayCalendar-weekContainer": {
+                    width: "100%",
+                    height: "28px",
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    alignItems:
+                      "center",
+                    margin: 0,
+                    marginBottom: "4px",
+                  },
+                },
+              },
+            }}
+          />
+        </div>
       )}
     </LocalizationProvider>
   );

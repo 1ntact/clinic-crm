@@ -52,6 +52,7 @@ class StatisticsRepository:
             self,
             start_date: datetime,
             end_date: datetime,
+            doctor_id: int | None = None,
     ) -> int:
         query = (
             select(func.count(AppointmentModel.id))
@@ -62,6 +63,11 @@ class StatisticsRepository:
             )
         )
 
+        if doctor_id is not None:
+            query = query.where(
+                AppointmentModel.doctor_id == doctor_id,
+            )
+
         result = await self.db.execute(query)
 
         return result.scalar_one()
@@ -70,6 +76,7 @@ class StatisticsRepository:
             self,
             start_date: datetime,
             end_date: datetime,
+            doctor_id: int | None = None,
     ) -> float:
         query = (
             select(
@@ -89,6 +96,11 @@ class StatisticsRepository:
                 TreatmentModel.is_main.is_(True),
             )
         )
+
+        if doctor_id is not None:
+            query = query.where(
+                AppointmentModel.doctor_id == doctor_id,
+            )
 
         result = await self.db.execute(query)
 

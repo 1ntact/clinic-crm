@@ -37,14 +37,15 @@ export const patientManagmentCard: Card[] = [
     
       icon: AiOutlineUserAdd,
       iconClass: "bg-green-100 text-green-600",
-    },
+  },
+    
     {key: 'returningPatients',
       title: "RETURNING PATIENTS",
       value: 0,
       change: 0,
      
       icon: LuCalendarHeart,
-      iconClass: "bg-orange-100 text-orange-600",
+      iconClass: "bg-[#FFEDD5] text-[#9A3412]",
     },
     {key: 'inactivePatients',
       title: " INACTIVE PATIENTS",
@@ -52,6 +53,6 @@ export const patientManagmentCard: Card[] = [
       change: 0,
     
       icon: FiUserX,
-      iconClass: "bg-purple-100 text-purple-600",
+      iconClass: "bg-[#E5E7EB] text-[#1F2937]",
     },
   ];

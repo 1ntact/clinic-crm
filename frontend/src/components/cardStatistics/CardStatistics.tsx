@@ -31,14 +31,14 @@ export const CardStatistics: React.FC<CardStatisticsProps> = ({
         <div
           className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClass}`}
         >
-          <Icon size={16} strokeWidth={1.7} />
+          <Icon size={16} strokeWidth={1} />
         </div>
       </div>
 
      {  change  ? (<p className={`mt-3 text-[11px] font-medium ${change<0? "text-red-600":"text-green-700"}`}>
         {change > 0 ? '↗ +' : '↓'}
        { `${change}% vs last week`}
-      </p>):(<p className='mt-3 text-[11px] font-medium text-green-700'>
+      </p>):(<p className='mt-3 text-[11px] font-medium text-[#6B7280]'>
         
        { `on this week`}
       </p>)}

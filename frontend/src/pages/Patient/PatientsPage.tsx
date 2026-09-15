@@ -25,6 +25,9 @@ import { CardStatistics } from "@/components/cardStatistics/CardStatistics";
 import { EmptyState } from "@/components/emptyState/EmptyState";
 import { getAccess } from "@/premissoons/getAccessPremissions";
 import { hygieneStatus } from "@/features/appointments/model/statusPatientHygiene";
+import { Sort } from "@/components/sorter/Sort";
+import { patientsSortButtons } from "@/features/patients/model/sortPatientType";
+import { capitalizeFirstLetter } from "@/shared/functions/capitalizwFirstLetter";
 
 
 
@@ -40,18 +43,20 @@ export const PatientsPage = () => {
     setOpenAside(prev => !prev)
   
   useEffect(() => {
-    const fetchPatient = async () => {
-      try {
-        
-        await dispatch(getAllPatientThunk(query)).unwrap()
-        await dispatch(patientManagementThunk()).unwrap()
-      } 
-      catch (e) {
-        console.log(e)
-      }
-    }
-    fetchPatient()
-  },[dispatch, query])
+  dispatch(getAllPatientThunk(query))
+}, [dispatch, query])
+
+useEffect(() => {
+  dispatch(patientManagementThunk())
+}, [dispatch])
+  const now = new Date();
+  
+
+  const currentMonth = now.toLocaleDateString("en-US", {
+    day:"numeric",
+    month: "short",
+    year: "numeric",
+  });
 
   return <>
     {aside && (<AsideMenu
@@ -73,7 +78,7 @@ export const PatientsPage = () => {
      
         <PageTitle
           text={`Patient Managment`}
-        description={`${total} die`} />
+        description={`${total} patients · ${currentMonth}`} />
       
        
       
@@ -88,7 +93,7 @@ export const PatientsPage = () => {
            
     </div>
    
-    <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
+ { access.canViewStatistics &&  <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4 mb-[24px]">
        {cards &&
               patientManagmentCard.map((card) => (
                 <CardStatistics         
@@ -100,27 +105,37 @@ export const PatientsPage = () => {
                   change={card.change !== null ? Number(card.change) : null}
                 />
               ))} 
-    </div>
+    </div>}
     
      <div className="flex  justify-between">
             <Filter
-        className="mb-[16px] w-full"
+        className="mb-[16px] w-[600px]"
         search={query.search}
-       
-        
-     
       onSearchChange={(value) =>
       dispatch(setQuery({ search: value, page: 1 }))
-                     }
-                  
-                     
-                   />
-    
+                     } />
+     <Sort
+      userCount={patients.length}
+      sortBy={query.sortBy ?? null}
+      sortOrder={query.sortOrder ?? null}
+      buttons={patientsSortButtons}
+      onChange={(sortBy, sortOrder) =>
+        dispatch(
+          setQuery({
+            sortBy: sortBy ?? undefined,
+            sortOrder: sortOrder ?? undefined,
+            page: 1,
+          }),
+        )
+      }
+    />
           </div>
-   {loading ? (
-          <Loader />
-        ) : (
-          <div className="w-full min-h-[380px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
+   {(
+      <div className="relative w-full min-h-[380px] p-[16px] rounded-[8px] border border-[#E5E7EB] bg-[#FFFFFF] ">
+         {loading && (
+            <div className="absolute inset-0 z-10">
+              <Loader />
+            </div>)}
             <Table>
               <thead>
                 <tr className="h-[40px] bg-[#F3F4F6]">
@@ -137,13 +152,13 @@ export const PatientsPage = () => {
               <tbody>
                 {patients.map((patient) => (
                   <tr
-                    key={patient.userId}
+                    key={`${patient.userId}${patient.id}`}
                     onClick={() => {
                       navigate(`/patients/${patient.id}`);
                     }}
-                    className=" h-[40px] cursor-pointer hover:bg-[#DCFCE7] transition-colors"
+                    className=" h-[40px] cursor-pointer hover:bg-[#F8FAFC] transition-colors"
                   >
-                    <Td>{`#${patient.id}`}</Td>
+                    <Td className="text-[#4B5563]">{`#${patient.id}`}</Td>
   
                     <Td>
                       <UserContacts
@@ -155,16 +170,16 @@ export const PatientsPage = () => {
                     </Td>
   
                     <Td>  {
-                                 patient.lastVisitDate? (<> <div>
+                                 patient.lastVisitDate? (<> <div className="text-[#4B5563] font-normal">
                                                   {dayjs(patient.lastVisitDate).format("YYYY-MM-DD")}
                                                 </div>
                                                 <div className="font-medium text-[#1F2937]">
                                                   {dayjs(patient.lastVisitDate).format("HH:mm")}
-                                                </div></>) : "New Patient"
+                                                </div></>) : "No last visit"
                                               
                                             }</Td>
   
-                    <Td>{patient.treatment? patient.treatment : 'Advice'}</Td>
+                    <Td>{patient.treatment? patient.treatment : 'No treatments'}</Td>
   
                     <Td className="font-medium text-[#1F2937]">{`${patient.totalVisits} visits`}</Td>
   
@@ -172,7 +187,7 @@ export const PatientsPage = () => {
                      <Td>{hygieneStatus.map((status) =>
                           
                                             status.value ===patient.status && (
-                                              <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                                              <span  key={`${status.value}${status.textColor}`} className={`text-[12px] ${status.textColor}  rounded-[16px] px-[17px] py-[6px] ${status.color}`}>{capitalizeFirstLetter(status.label)}</span>
                                             ))}
                     </Td>
                     

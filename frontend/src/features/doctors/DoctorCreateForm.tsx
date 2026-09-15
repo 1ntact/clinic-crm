@@ -11,6 +11,7 @@ import type { DoctorFormData } from "@/types/dotorFormData";
 import { DoctorFormFields } from "@/components/formField/DoctorFormFields";
 import { createDoctorThunk } from "./thunk/createDoctorThunk";
 import { getAllDoctorsThunk } from "./thunk/getAllDoctorsThunk";
+import { UserContacts } from "@/components/userContacts/UserContacts";
 
 type Props = {
   handleAside: () => void;
@@ -96,10 +97,13 @@ if (data.phoneNumber) {
   return (
     <>
       {" "}
-      {doctorsLoading ? (
-        <Loader />
-      ) : (
-          <div className="w-full">
+      
+      <div className=" relative w-full">
+         {doctorsLoading && (
+                    <div className="absolute inset-0 z-10">
+                      <Loader />
+                    </div>
+                  )}
             <section>
 
             </section>
@@ -113,13 +117,16 @@ if (data.phoneNumber) {
               selectedUser={selectedUser}
               onSelect={setSelectedUser}
               getKey={(user) => user.id}
-              getValue={(user) => `${user.firstName} ${user.lastName}`}
+             
               renderItem={(user) => (
                 <>
-                  <div>
-                    {user.firstName} {user.lastName}
-                  </div>
-                  <div>{user.email}</div>
+                    <UserContacts
+                                     
+                                                             avatar={"patient.jpg"}
+                                                             firstName={user.firstName}
+                                                             lastName={user.lastName}
+                                                             phone={user.email}
+                                                           />
                 </>
               )}
             />
@@ -136,7 +143,7 @@ if (data.phoneNumber) {
             </form>
           </FormProvider>
         </div>
-      )}{" "}
+      {" "}
     </>
   );
 };

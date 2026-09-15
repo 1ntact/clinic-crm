@@ -41,7 +41,7 @@ export const DoctorVisits = () => {
   }, [doctorId,appointmentsQuery, dispatch])
 
   const doctorAppointments = useAppSelector(state=>state.appointment.appointments)
-  return(<> <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
+  return(<> <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] border border-[#E5E7EB] bg-[#FFFFFF] ">
     <div className="flex justify-between mb-[16px]">
        
       <span className="text-[14px] font-medium text-[#374151]" >PATIENTS VISITS</span>
@@ -100,9 +100,9 @@ export const DoctorVisits = () => {
                             <tr
                               key={appointment.id}
                               
-                              className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
+                              className=" h-[40px]  hover:bg-[#F8FAFC] transition-colors"
                             >
-                              <Td>{`#${appointment.id}`}</Td>
+                              <Td className="text-[#4B5563]">{`#${appointment.id}`}</Td>
         
                               <Td>
                                 <UserContacts
@@ -123,7 +123,7 @@ export const DoctorVisits = () => {
                                   </>
                                 }
                               </Td>
-                              <Td>
+                              <Td className="text-[#4B5563]">
                                 {
                                   <>
                                    
@@ -134,14 +134,14 @@ export const DoctorVisits = () => {
                                 }
                               </Td>
         
-                              <Td className="font-[Inter]  text-[#1F2937] font-semibold">{`$${appointment.treatmentPrice}`}</Td>
+                              <Td className="font-[Inter]  text-[#1F2937] font-semibold">{`$ ${appointment.treatmentPrice}`}</Td>
         
                               <Td>{`${appointment.treatment}`}</Td>
         
                               <Td>{statusOptions.map((status) =>
               
                                 status.value === appointment.status && (
-                                  <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
+                                  <span  key={`${status.value}${status.color}`} className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}>{status.label}</span>
                                 ))}
                                 </Td>
                             

@@ -38,7 +38,7 @@ export const PatientHistory = () => {
   return (<>   {appointmentsLoading ? (
             <Loader />
           ) : (
-            <div className="w-full min-h-[380px] p-[16px] rounded-[8px] bg-[#FFFFFF] "> <Table>
+            <div className="w-full min-h-[380px] p-[16px] rounded-[8px] bg-[#FFFFFF] border border-[#E5E7EB]"> <Table>
                         <thead>
                           <tr className="h-[40px] bg-[#F3F4F6]">
                             <Th>ID</Th>
@@ -56,9 +56,9 @@ export const PatientHistory = () => {
                             <tr
                               key={appointment.id}
                               
-                              className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
+                              className=" h-[40px]  hover:bg-[#F8FAFC] transition-colors"
                             >
-                              <Td>{`#${appointment.id}`}</Td>
+                              <Td className="text-[#4B5563]">{`#${appointment.id}`}</Td>
         
                               <Td>
                                 <UserContacts
@@ -71,10 +71,10 @@ export const PatientHistory = () => {
         
                               <Td>  {
                                        <>
-                                         <div>
+                                         <div className="text-[#4B5563]">
                                             {dayjs(appointment.dateTime).format("YYYY-MM-DD")}
                                          </div>
-                                          <div>
+                                          <div className="text-[#1F2937]">
                                            {dayjs(appointment.dateTime).format("HH:mm")}
                                           </div>
                                        </>
@@ -92,7 +92,7 @@ export const PatientHistory = () => {
                               <Td>{statusOptions.map((status) =>
               
                                 status.value === appointment.status && (
-                                  <span className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] text-[#1F2937] bg-[#E5E7EB]`}>{status.label}</span>
+                                  <span  key={`${status.value}${status.color}`} className={`text-[12px] ${status.textColor}  rounded-[16px] px-[17px] py-[6px] text-[#1F2937] bg-[#E5E7EB]`}>{status.label}</span>
                                 ))}
                                 </Td>
                             

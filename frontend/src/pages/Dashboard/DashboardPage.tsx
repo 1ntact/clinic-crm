@@ -28,17 +28,22 @@ import { setSelectedAppointment } from "@/features/appointments/appointmentsSlic
 import { createVisitThunk } from "@/features/visits/thunks/createVisitThunk";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { getVisitByAppointmentIdThunk } from "@/features/visits/thunks/getVisitsByAppointmentsId";
+import { doctorDashboardCards } from "@/features/statistics/model/doctorDashboardCardStatistics";
+import { doctorDashboardStatisticThunk } from "@/features/statistics/thunk/doctorDashboardStatisticsThunk";
 
 
 export const DashboardPage = () => {
   
-  const {selectedAppointment}=useAppSelector(state=>state.appointment)
-  const userData = useAppSelector((state) => state.auth.user);
-   const access = getAccess(userData);
+  const {selectedAppointment} = useAppSelector(state=>state.appointment)
+  const{user,loading} = useAppSelector((state) => state.auth);
+   const access = getAccess(user);
   const cards = useAppSelector((state) => state.statistic.statistics?.cards);
+  const doctorCards = useAppSelector((state)=>state.statistic.statistics.doctorDashboardCard)
+  
   const revenue = useAppSelector(
     (state) => state.statistic.statistics?.weeklyRevenue,
   );
+ 
   const roundedDiagram = useAppSelector(
     (state) => state.statistic.statistics?.appointmentOutcomes,
   );
@@ -52,24 +57,33 @@ export const DashboardPage = () => {
   
   const now = new Date();
   const nowTime = now.toLocaleDateString("uk-UA");
-  useEffect(() => {
-    const getStatistic = async () => {
-      dispatch(setSelectedAppointment(null))
+ useEffect(() => {
+  const getStatistic = async () => {
+    dispatch(setSelectedAppointment(null));
+
+    if (user?.role === "doctor" && user.doctorId) {
+      dispatch(doctorDashboardStatisticThunk(user.doctorId));
+    } else {
       dispatch(dashboardStatisticsThunk());
-      dispatch(
-        getAppointmentsThunk({
-          appointmentDate: now.toISOString().split("T")[0],
-          appointmentStatus: "scheduled",
-          pageSize: 8,
-          page: 1,
-          ...(access?.isDoctor && access.doctorId) ? {
-            doctorId:access.doctorId,
-          }:{}
-        }),
-      );
-    };
-    getStatistic();
-  }, []);
+    }
+
+    dispatch(
+      getAppointmentsThunk({
+        appointmentDate: now.toISOString().split("T")[0],
+        appointmentStatus: "scheduled",
+        pageSize: 10,
+        page: 1,
+        ...(access?.isDoctor && access.doctorId
+          ? {
+              doctorId: access.doctorId,
+            }
+          : {}),
+      }),
+    );
+  };
+
+  getStatistic();
+}, []);
 
 
 
@@ -112,12 +126,12 @@ const handleCreateVisit = async () => {
   
   return (
     <>
-      <div className="flex justify-between items-center  mb-[26px] h-[57px]">
+      <div className="flex justify-between items-center  mb-[16px] h-[57px]">
         <PageTitle
       text={
-  userData?.role === "doctor"
-    ? `Hello, Dr. ${userData.firstName}!`
-    : `Hello, ${userData?.firstName}!`
+  user?.role === "doctor"
+    ? `Hello, Dr. ${user.firstName}!`
+    : `Hello, ${user?.firstName}!`
 }
           description={nowTime}
         />
@@ -155,6 +169,7 @@ const handleCreateVisit = async () => {
               <ButtonPage
                 form="user-create"
                 type="submit"
+                disabled={loading}
                 className={buttonStyles.formSubmit}
               >
                 Send an invitation
@@ -178,7 +193,20 @@ const handleCreateVisit = async () => {
             />
           ))}
       </div>}
-        
+        {access.isDoctor && <div className=" grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {doctorCards &&
+          doctorDashboardCards.map((card) => (
+            <CardStatistics
+              prefix={card.prefix}
+              key={card.key}
+              title={card.title}
+              icon={card.icon}
+              iconClass={card.iconClass}
+              value={doctorCards[card.key].total}
+              change={card.change !== null ? Number(card.change) : null}
+            />
+          ))}
+      </div>}
       {access?.canViewStatistics && <div className=" h-[352px] mt-2 grid grid-cols-1 gap-2 lg:grid-cols-[0.8fr_1.25fr]">
         {roundedDiagram && (
           <RoundedDiagram info={roundedDiagram} currentMonth={currentMonth} />
@@ -193,9 +221,9 @@ const handleCreateVisit = async () => {
           />
         )}
       </div>}</>
-      <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] bg-[#FFFFFF] ">
+      <div className="w-full min-h-[380px] mt-[8px] p-[16px] rounded-[8px] bg-[#FFFFFF] border border-[#E5E7EB] ">
         <div className="flex justify-between mb-[16px]">
-          <span className="text-[14px] font-medium text-[#374151]">
+          <span className="text-[14px] font-semibold text-[#374151]">
             APPOINTMENTS TODAY
           </span>
         {access?.canViewAllAppointments &&  <span
@@ -214,7 +242,7 @@ const handleCreateVisit = async () => {
           description={'Starting the visit begins the timer and logs the encounter.'}
           modalClassName="w-[439px] h-[356px]" />
         }
-        <Table>
+        <Table >
           <thead>
             <tr className="h-[40px] bg-[#F3F4F6]">
               <Th>ID</Th>
@@ -230,14 +258,14 @@ const handleCreateVisit = async () => {
             {appointmentsToday.map((appointment) => (
               <tr
                 key={appointment.id}
-                className=" h-[40px]  hover:bg-[#DCFCE7] transition-colors"
+                className=" h-[40px]  hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                 onClick={() => {
                   dispatch(setSelectedAppointment(appointment))
                   
                   
                 }}
               >
-                <Td>{`#${appointment.id}`}</Td>
+                <Td className="text-[#4B5563] text-[12px]">{`#${appointment.id}`}</Td>
 
                 <Td>
                   <UserContacts
@@ -248,7 +276,7 @@ const handleCreateVisit = async () => {
                   />
                 </Td>
 
-                <Td>
+                <Td className="font-medium">
                   {
                     <>
                       <div>{dayjs(appointment.dateTime).format("HH:mm")}</div>
@@ -256,16 +284,16 @@ const handleCreateVisit = async () => {
                   }
                 </Td>
 
-                <Td className="font-[Inter]  text-[#1F2937] font-semibold">{`${appointment.treatment}`}</Td>
+                <Td className="font-[Inter]   font-normal">{`${appointment.treatment}`}</Td>
 
-                <Td>{`Dr. ${appointment.doctorFirstName} ${appointment.doctorLastName}`}</Td>
+                <Td className="font-normal">{`Dr. ${appointment.doctorFirstName} ${appointment.doctorLastName}`}</Td>
 
                 <Td>
                   {statusOptions.map(
                     (status) =>
                       status.value === appointment.status && (
-                        <span
-                          className={`text-[12px] ${status.textColor} rounded-[8px] px-[15px] py-[6px] ${status.color}`}
+                        <span  key={`${status.value}${status.color}`}
+                          className={`text-[12px] ${status.textColor} rounded-[16px] px-[17px] py-[6px] ${status.color}`}
                         >
                           {status.label}
                         </span>

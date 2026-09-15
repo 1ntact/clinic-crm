@@ -48,7 +48,7 @@ export const Sort = <T extends string>({
       <div className="flex items-center gap-1 text-sm text-[#6B7280]">
         <IoSwapVertical size={16} />
 
-        <span>Sort:</span>
+        <span className="text-[12px]">Sort:</span>
       </div>
 
       {buttons.map((button) => {
@@ -73,16 +73,17 @@ export const Sort = <T extends string>({
               rounded-full
               border
               px-3
-              text-sm
+              text-[12px]
+              font-normal
               transition
-
+font-normal
               disabled:cursor-not-allowed
               disabled:opacity-50
 
               ${
                 isActive
                   ? "border-[#BFDBFE] bg-[#DBEAFE] text-[#2563EB]"
-                  : "border-[#E5E7EB] bg-white text-[#6B7280] hover:bg-[#F9FAFB]"
+                  : "border-[#E5E7EB] bg-white text-[#4B5563] hover:bg-[#F9FAFB]"
               }
             `}
           >

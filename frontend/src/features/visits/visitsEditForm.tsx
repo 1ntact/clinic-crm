@@ -17,7 +17,8 @@ type Props = {
 export const VisitEditForm: React.FC<Props> = ({ visit }) => {
    const treatments = useAppSelector(
       (state) => state.visit.treatment2
-    );
+  );
+  const{patientNotesQuery}=useAppSelector(state=>state.patient)
   const methods = useForm<VisitsFormData>({
     defaultValues: {
       mainTreatment: "",
@@ -66,7 +67,11 @@ export const VisitEditForm: React.FC<Props> = ({ visit }) => {
           data,
         })
       ).unwrap();
-      await dispatch(getPatientNotesThunk(Number(patientId)))
+      await dispatch(getPatientNotesThunk({
+      patientId: Number(patientId),
+      page: patientNotesQuery.page,
+      pageSize: patientNotesQuery.pageSize,
+    }))
       
 
       successToast('Note added successfully')

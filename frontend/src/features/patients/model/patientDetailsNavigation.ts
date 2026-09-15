@@ -1,22 +1,24 @@
 
 
-
-
-export const patientDetailsNavigation = [
+export const getPatientDetailsNavigation = (
+  appointmentsCount: number,
+  visitsCount: number
+) => [
   {
     label: "Patient information",
     path: ".",
-    showCount:false,
+    showCount: false,
   },
   {
     label: "Appointment history",
     path: "history",
-    showCount:true
-  
+    showCount: true,
+    count: appointmentsCount,
   },
   {
     label: "Medical records",
     path: "records",
-    showCount:false,
+    showCount: true,
+    count: visitsCount,
   },
 ];
