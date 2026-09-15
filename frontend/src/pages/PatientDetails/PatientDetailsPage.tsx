@@ -88,7 +88,7 @@ export const PatientDetailsPage = () => {
       {aside && (
         <AsideMenu
           handleAside={handleAside}
-          content={<PatientEditForm />}
+          content={<PatientEditForm handleAside={handleAside}/>}
           footer={
             <>
               <ButtonPage

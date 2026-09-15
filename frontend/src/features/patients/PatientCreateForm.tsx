@@ -19,7 +19,7 @@ type Props = {
 };
 
 
-export const PatientCreateForm:React.FC = ({handleAside}) => {
+export const PatientCreateForm:React.FC<Props> = ({handleAside}) => {
   
   const methods = useForm<PatientFormData>();
     const { reset, setValue, handleSubmit } = methods;
