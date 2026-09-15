@@ -16,6 +16,7 @@ import { getFormAppointmentsDashboardThunk } from "@/features/appointments/thunk
 import { getFormAvailableTimeSlotsThunk } from "@/features/appointments/thunk/getFormAvailableTimeSlotsThunk";
 
 import Calendar from "@/pages/Appointments/components/Calendar";
+import { getAllDoctorsThunk } from "@/features/doctors/thunk/getAllDoctorsThunk";
 
 type Props = {
   appointment: Appointment; 
@@ -88,7 +89,8 @@ useEffect(() => {
     if (!doctorId || !appointmentDate) {
       return;
     }
-
+dispatch(getAllDoctorsThunk({page: 1,
+      pageSize: 100,}))
     dispatch(
       getFormAvailableTimeSlotsThunk({
         doctorId: Number(doctorId),
