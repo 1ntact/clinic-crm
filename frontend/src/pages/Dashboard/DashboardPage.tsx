@@ -34,7 +34,7 @@ import { doctorDashboardStatisticThunk } from "@/features/statistics/thunk/docto
 
 export const DashboardPage = () => {
   
-  const {selectedAppointment} = useAppSelector(state=>state.appointment)
+  const {activeAppointmentForVisit} = useAppSelector(state=>state.appointment)
   const{user,loading} = useAppSelector((state) => state.auth);
    const access = getAccess(user);
   const cards = useAppSelector((state) => state.statistic.statistics?.cards);
@@ -98,24 +98,24 @@ export const DashboardPage = () => {
   const handleAside = () => setOpenAside((prev) => !prev);
 
 const handleCreateVisit = async () => {
-  if (!selectedAppointment) return;
+  if (!activeAppointmentForVisit) return;
 
   try {
     await dispatch(
-      createVisitThunk(selectedAppointment.id)
+      createVisitThunk(activeAppointmentForVisit.id)
     ).unwrap();
-   await dispatch(getVisitByAppointmentIdThunk(selectedAppointment.id)).unwrap()
+   await dispatch(getVisitByAppointmentIdThunk(activeAppointmentForVisit.id)).unwrap()
 
     successToast(
       <>
         Visit from
         <br />
-        Mr. {selectedAppointment.patientFirstName}{" "}
-        {selectedAppointment.patientLastName} opened!
+        Mr. {activeAppointmentForVisit.patientFirstName}{" "}
+        {activeAppointmentForVisit.patientLastName} opened!
       </>
     );
 
-    navigate(`/patients/${selectedAppointment.patientId}/records`);
+    navigate(`/patients/${activeAppointmentForVisit.patientId}/records`);
   } catch (e) {
     errorToast(e as string);
   }
@@ -157,7 +157,7 @@ const handleCreateVisit = async () => {
           title={"ADD NEW USER"}
           description={"An invitation will be sent to the specified email"}
           handleAside={handleAside}
-          content={<UserForm />}
+          content={<UserForm handleAside={handleAside} />}
           footer={
             <>
               <ButtonPage
@@ -234,8 +234,8 @@ const handleCreateVisit = async () => {
           </span>}
         </div>
       
-        {selectedAppointment && <ConfirmModal
-          isOpen={selectedAppointment !== null}
+        {activeAppointmentForVisit && <ConfirmModal
+          isOpen={activeAppointmentForVisit !== null}
           title={'Start this patient’s visit?'}
           onCancel={() => (dispatch(setSelectedAppointment(null)))}
           onConfirm={() => {handleCreateVisit()}}
