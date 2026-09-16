@@ -22,6 +22,7 @@ import { getAccess } from "@/premissoons/getAccessPremissions";
 import { LuPencilLine } from "react-icons/lu";
 import { changeStatusAppointmentThunk } from "@/features/appointments/thunk/changeStatusAppointmentThunk";
 import { deleteVisitThunk } from "@/features/visits/thunks/deleteVisitThunk";
+import { setSelectedActiveAppointmentForVisit } from "@/features/appointments/appointmentsSlice";
 
 
 export const PatientDetailsPage = () => {
@@ -55,7 +56,8 @@ export const PatientDetailsPage = () => {
     }),
    ).unwrap();
     dispatch(resetActiveVisits())
-    successToast("visit will be close")
+     dispatch(setSelectedActiveAppointmentForVisit(null))
+    successToast("visit will be completed")
    }
   catch (e) {
     errorToast(e as string)
@@ -67,6 +69,7 @@ export const PatientDetailsPage = () => {
     try {
       await dispatch(deleteVisitThunk(currentVisit.visitId)).unwrap();
       successToast("Visit cancelled!");
+      dispatch(setSelectedActiveAppointmentForVisit(null))
       navigate("/dashboard")
     } catch (e) {
       errorToast(e as string)
