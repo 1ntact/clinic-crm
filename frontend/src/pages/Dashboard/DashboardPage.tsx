@@ -24,7 +24,7 @@ import { getAccess } from "@/premissoons/getAccessPremissions";
 import { EmptyState } from "@/components/emptyState/EmptyState";
 import { ConfirmModal } from "@/components/confirmModal/ConfirmModal";
 
-import { setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
+import { setSelectedActiveAppointmentForVisit, setSelectedAppointment } from "@/features/appointments/appointmentsSlice";
 import { createVisitThunk } from "@/features/visits/thunks/createVisitThunk";
 import { errorToast, successToast } from "@/components/pushAppMessage/PushApp";
 import { getVisitByAppointmentIdThunk } from "@/features/visits/thunks/getVisitsByAppointmentsId";
@@ -237,7 +237,7 @@ const handleCreateVisit = async () => {
         {activeAppointmentForVisit && <ConfirmModal
           isOpen={activeAppointmentForVisit !== null}
           title={'Start this patient’s visit?'}
-          onCancel={() => (dispatch(setSelectedAppointment(null)))}
+          onCancel={() => (dispatch(setSelectedActiveAppointmentForVisit(null)))}
           onConfirm={() => {handleCreateVisit()}}
           description={'Starting the visit begins the timer and logs the encounter.'}
           modalClassName="w-[439px] h-[356px]" />
@@ -260,7 +260,7 @@ const handleCreateVisit = async () => {
                 key={appointment.id}
                 className=" h-[40px]  hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                 onClick={() => {
-                  dispatch(setSelectedAppointment(appointment))
+                  dispatch(setSelectedActiveAppointmentForVisit(appointment))
                   
                   
                 }}
