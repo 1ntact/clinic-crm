@@ -70,6 +70,7 @@ export const PatientDetailsPage = () => {
       await dispatch(deleteVisitThunk(currentVisit.visitId)).unwrap();
       successToast("Visit cancelled!");
       dispatch(setSelectedActiveAppointmentForVisit(null))
+      dispatch(resetActiveVisits())
       navigate("/dashboard")
     } catch (e) {
       errorToast(e as string)
