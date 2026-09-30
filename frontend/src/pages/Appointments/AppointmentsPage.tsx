@@ -215,7 +215,7 @@ export const AppointmentsPage = () => {
             <thead>
               <tr className="h-[40px] bg-[#F3F4F6]">
                 <Th>ID</Th>
-                <Th>PACIENT/DOCTOR</Th>
+                <Th>PATIENT/DOCTOR</Th>
                 <Th>TIME</Th>
                 <Th>PRICE</Th>
                 <Th>TREATMENT</Th>
@@ -268,10 +268,9 @@ export const AppointmentsPage = () => {
                         ),
                     )}
                   </Td>
-                  <Td className="relative  ">
-                   <>
+          <Td className="relative text-center">
   <LuPencilLine
-    className={`h-[16px] w-[16px] ${
+    className={`mx-auto h-[16px] w-[16px] ${
       ["scheduled", "confirmed"].includes(appointment.status)
         ? "cursor-pointer"
         : "cursor-not-allowed opacity-40"
@@ -283,6 +282,9 @@ export const AppointmentsPage = () => {
       setActionModalOpen(true);
     }}
   />
+
+  {/* ActionModal */}
+
 
   {selectedAppointment &&
     actionModalOpen &&
@@ -302,7 +304,7 @@ export const AppointmentsPage = () => {
         onReschedule={() => setOpenEditAside(true)}
       />
     )}
-</>
+
                   </Td>
                 </tr>
               ))}

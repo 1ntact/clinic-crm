@@ -7,6 +7,7 @@ import {
 import { patientDetailsStatisticThunk } from "./thunk/patientDetailsStatisticsThunk";
 import { doctorDetailsStatisticThunk } from "./thunk/doctorDetailsStatisticsThunk";
 import { doctorDashboardStatisticThunk } from "./thunk/doctorDashboardStatisticsThunk";
+import { mockAppointmentOutcomes, mockWeeklyRevenue } from "./statisticMock";
 
 export type WeeklyRevenueDay = {
   actual: number;
@@ -109,15 +110,29 @@ const statisticsSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(dashboardStatisticsThunk.fulfilled, (state, action) => {
-        state.isLoading = false;
-       state.statistics.cards = action.payload.cards;
-        state.statistics.appointmentOutcomes =
-          action.payload.appointmentOutcomes;
-        state.statistics.weeklyRevenue =
-          action.payload.weeklyRevenue;
-        
-      })
+    .addCase(dashboardStatisticsThunk.fulfilled, (state, action) => {
+  state.isLoading = false;
+
+  state.statistics.cards = action.payload.cards;
+
+ const outcomes = action.payload.appointmentOutcomes;
+
+const hasOutcomesData = outcomes?.total > 0;
+
+state.statistics.appointmentOutcomes = hasOutcomesData
+  ? outcomes
+  : mockAppointmentOutcomes;
+
+  const weeklyRevenue = action.payload.weeklyRevenue;
+
+const hasRevenueData = weeklyRevenue?.data?.some(
+  (day:WeeklyRevenueDay) => day.actual > 0 || day.expected > 0 || day.total > 0
+);
+
+state.statistics.weeklyRevenue = hasRevenueData
+  ? weeklyRevenue
+  : mockWeeklyRevenue;
+})
       .addCase(dashboardStatisticsThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;

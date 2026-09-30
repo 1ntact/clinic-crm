@@ -18,14 +18,7 @@ export const CalendarPage = () => {
           Follow us to stay up to date with the latest news and updates.
         </p>
 
-        <a
-          href="https://www.figma.com/design/u9xmRpnPqH9Xo3GqAUcWCN/CRM?node-id=302669-135973&t=emmMASgN786kEaaZ-0"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          View the design
-        </a>
+       
       </div>
     </div>
   );
