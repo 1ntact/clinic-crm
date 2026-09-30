@@ -82,7 +82,7 @@ export const PatientsFormFields: React.FC<Props> = ({ type }) => {
             name="address"
             label="Address *"
             type="string"
-            placeholder="choose a address."
+            placeholder="Choose an address"
             register={register}
             rules={formValidation.address}
             error={errors.address?.message}

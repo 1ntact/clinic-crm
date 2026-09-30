@@ -2,17 +2,33 @@ export type SelectOption = {
   label: string;
   value: string;
 };
-export const specializations:SelectOption[] = [
+export const specializations: SelectOption[] = [
+  {
+    label: "General Dentist",
+    value: "General Dentist",
+  },
   {
     label: "Orthodontist",
-    value: "orthodontist",
+    value: "Orthodontist",
   },
   {
-    label: "Therapist",
-    value: "therapist",
+    label: "Periodontist",
+    value: "Periodontist",
   },
   {
-    label: "Surgeon",
-    value: "surgeon",
+    label: "Prosthodontist",
+    value: "Prosthodontist",
+  },
+  {
+    label: "Endodontist",
+    value: "Endodontist",
+  },
+  {
+    label: "Oral Surgeon",
+    value: "Oral Surgeon",
+  },
+  {
+    label: "Pediatric Dentist",
+    value: "Pediatric Dentist",
   },
 ];

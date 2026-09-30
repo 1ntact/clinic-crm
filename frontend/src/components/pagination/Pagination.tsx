@@ -91,7 +91,7 @@ const getPages = (): (number | "...")[] => {
 
   return pages;
 };
-  return (total !==0 &&( <div className="flex items-center justify-between">
+  return (total !==0 &&( <div className="flex items-center justify-between ">
       <p className="text-[14px] font-medium text-gray-500">
         Showing {(page - 1) * pageSize + 1}-
         {Math.min(page * pageSize, total)} of {total}
@@ -104,7 +104,7 @@ const getPages = (): (number | "...")[] => {
           onClick={() => onPageChange(page - 1)}
           className="flex items-center text-[14px] font-medium rounded-[8px] text-[#1F2937] cursor-pointer disabled:opacity-50"
         >
-          {<GoChevronLeft className="mr-[8px]" size={16}/> }Previos
+          {<GoChevronLeft className="mr-[8px]" size={16}/> }Previous
         </button>
 
         {getPages().map((item, index) =>
