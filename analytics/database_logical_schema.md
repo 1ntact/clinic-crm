@@ -70,13 +70,13 @@ Table doctors {
   id int [pk, increment] // Auto-generated unique doctor ID
   user_id int [unique, not null, ref: - users.id] // One-to-one user profile extension
   specialization varchar(100) [not null]
-  // General Dentistry
-  // Restorative Dentistry
-  // Periodontics
-  // Cosmetic Dentistry
-  // Orthodontics
-  // Pediatric Dentistry
-  // Oral Surgery
+  // General Dentist
+  // Prosthodontist
+  // Periodontist
+  // Endodontist
+  // Orthodontist
+  // Pediatric Dentist
+  // Oral Surgeon
   years_experience int // Full years of professional experience
   employment_type varchar(10) // full-time, part-time
 }
