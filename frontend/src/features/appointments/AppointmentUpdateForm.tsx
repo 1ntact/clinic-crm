@@ -142,7 +142,7 @@ await dispatch(
                 <Search
                   searchLabel="Search patients"
                   items={patients}
-                  placeholder="Find an pacient"
+                  placeholder="Find an patient"
                   loading={loading}
                   onSearch={(value) =>
                     dispatch(
