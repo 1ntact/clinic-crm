@@ -23,7 +23,7 @@ export const NavBar: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-[260px] px-[16px] py-[24px] h-full bottom-0 bg-[#fff]">
+    <div className="flex flex-col w-[260px] px-[16px] py-[24px] h-full  bg-[#FFFFFF]">
     
 
       <nav className="flex flex-col">
